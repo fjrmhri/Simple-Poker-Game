@@ -21,47 +21,54 @@ export default function App() {
     { name: "Carl", isBot: true, level: "hard" },
   ]);
 
-  const playDeal = useSound("/sounds/card.mp3");
-  const playFx = useSound("/sounds/minecraft_level_up.mp3");
-  const playWin = useSound("/sounds/win.mp3");
+  // Menggunakan suara yang sama untuk semua aksi
+  const playActionSound = useSound("/public/sounds/minecraft_level_up.mp3");
 
   const prevCommunity = useRef(state.community.length);
   const prevPot = useRef(pot);
 
+  // Menggunakan suara saat Preflop
   useEffect(() => {
     if (state.round === "Preflop" && state.community.length === 0) {
-      playDeal();
+      playActionSound();
     }
-  }, [state.round, state.community.length, playDeal]);
+  }, [state.round, state.community.length, playActionSound]);
 
+  // Menggunakan suara saat Showdown
   useEffect(() => {
     if (status === "showdown") {
-      playWin();
+      playActionSound();
     }
-  }, [status, playWin]);
+  }, [status, playActionSound]);
 
+  // Menggunakan suara saat ada perubahan kartu komunitas
   useEffect(() => {
-    if (prevCommunity.current < state.community.length && state.community.length > 0) {
-      playFx();
+    if (
+      prevCommunity.current < state.community.length &&
+      state.community.length > 0
+    ) {
+      playActionSound();
     }
     prevCommunity.current = state.community.length;
-  }, [state.community.length, playFx]);
+  }, [state.community.length, playActionSound]);
 
+  // Menggunakan suara saat pot berubah
   useEffect(() => {
     if (prevPot.current !== pot) {
-      playFx();
+      playActionSound();
       prevPot.current = pot;
     }
-  }, [pot, playFx]);
+  }, [pot, playActionSound]);
 
+  // Menambahkan suara untuk tindakan (bet, raise, call)
   const handleAction = useCallback(
     (action, amount) => {
       if (["bet", "raise", "call"].includes(action)) {
-        playFx();
+        playActionSound();
       }
       rawHandleAction(action, amount);
     },
-    [rawHandleAction, playFx]
+    [rawHandleAction, playActionSound]
   );
 
   return (

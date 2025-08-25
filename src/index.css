@@ -5,8 +5,8 @@
 
 @font-face {
   font-family: "Monocraft";
-  src: url("/fonts/Monocraft.ttf") format("truetype"),
-    url("/fonts/Monocraft.otf") format("opentype");
+  src: url("/public/fonts/Monocraft.ttf") format("truetype"),
+    url("/public/fonts/Monocraft.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
 }
@@ -15,8 +15,7 @@ body {
   @apply text-white;
   font-family: "Monocraft", monospace;
 
-
-  background-image: url("/assets/background.jpg");
+  background-image: url("/public/assets/background.jpg");
 
   background-size: cover;
   background-position: center;
