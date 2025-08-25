@@ -1,8 +1,10 @@
 // src/App.js
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import usePokerEngine from "./hooks/usePokerEngine";
 import PokerTable from "./components/PokerTable";
 import ActionBar from "./components/ActionBar";
+import WinnerModal from "./components/WinnerModal";
+import useSound from "./hooks/useSound";
 
 export default function App() {
   const {
@@ -11,13 +13,37 @@ export default function App() {
     status,
     winners,
     availableActions,
-    handleAction,
+    handleAction: rawHandleAction,
     startNewHand,
   } = usePokerEngine([
     { name: "You", isBot: false },
-    { name: "Lucy", isBot: true },
-    { name: "Carl", isBot: true },
+    { name: "Lucy", isBot: true, level: "normal" },
+    { name: "Carl", isBot: true, level: "hard" },
   ]);
+
+  const playDeal = useSound("/sounds/card.mp3");
+  const playAction = useSound("/sounds/action.mp3");
+  const playWin = useSound("/sounds/win.mp3");
+
+  useEffect(() => {
+    if (state.round === "Preflop" && state.community.length === 0) {
+      playDeal();
+    }
+  }, [state.round, state.community.length, playDeal]);
+
+  useEffect(() => {
+    if (status === "showdown") {
+      playWin();
+    }
+  }, [status, playWin]);
+
+  const handleAction = useCallback(
+    (action, amount) => {
+      playAction();
+      rawHandleAction(action, amount);
+    },
+    [rawHandleAction, playAction]
+  );
 
   return (
     <div style={{ minHeight: "100vh", background: "#1c0f14" }}>
@@ -37,12 +63,11 @@ export default function App() {
           )}
 
         {/* Tombol New Hand saat showdown/ended */}
-        {status !== "playing" && (
-          <div style={{ marginTop: 12 }}>
-            <button className="btn" onClick={startNewHand}>
-              New Hand
-            </button>
-          </div>
+        {status !== "playing" && winners.length > 0 && (
+          <WinnerModal
+            winners={winners.map((i) => state.players[i].name)}
+            onRestart={startNewHand}
+          />
         )}
       </div>
 

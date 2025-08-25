@@ -1,5 +1,6 @@
 // src/components/PokerTable.jsx
 import React from "react";
+import { motion } from "framer-motion";
 import CardImg from "./CardImg";
 import PlayerSeat from "./PlayerSeat";
 
@@ -9,46 +10,26 @@ export default function PokerTable({ state, pot, winners }) {
   const revealEveryone = round === "Showdown";
 
   return (
-    <div style={{ padding: 16, color: "white" }}>
-      <div
-        style={{
-          background: "#3b0d1d",
-          borderRadius: 20,
-          padding: 16,
-          boxShadow: "inset 0 0 40px rgba(0,0,0,0.4)",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
+    <div className="p-4 text-white">
+      <div className="relative mx-auto max-w-4xl bg-green-800 rounded-full p-8 shadow-inner">
+        <div className="flex justify-between">
           <div>
             Round: <b>{round}</b>
           </div>
-          <div style={{ fontSize: 18 }}>
+          <motion.div key={pot} initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="text-lg">
             Pot: <b>{pot}</b>
-          </div>
+          </motion.div>
         </div>
 
         {/* Community cards */}
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            justifyContent: "center",
-            margin: "18px 0",
-          }}
-        >
+        <div className="flex gap-2 justify-center my-4">
           {[0, 1, 2, 3, 4].map((i) => (
             <CardImg key={i} card={community[i]} w={88} />
           ))}
         </div>
 
         {/* Players grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-            gap: 12,
-          }}
-        >
+        <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px,1fr))" }}>
           {players.map((p, i) => (
             <PlayerSeat
               key={i}
@@ -62,7 +43,7 @@ export default function PokerTable({ state, pot, winners }) {
 
         {/* Winners */}
         {winners?.length ? (
-          <div style={{ marginTop: 12, textAlign: "center", fontWeight: 700 }}>
+          <div className="mt-3 text-center font-bold">
             Winner: {winners.map((i) => players[i].name).join(", ")}
           </div>
         ) : null}

@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export default function WinnerModal({ winners }) {
+export default function WinnerModal({ winners, onRestart }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
       <div className="bg-white text-black rounded-lg p-6 shadow-xl w-96 text-center">
@@ -15,7 +15,7 @@ export default function WinnerModal({ winners }) {
           ))}
         </ul>
         <button
-          onClick={() => window.location.reload()}
+          onClick={onRestart}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Main Lagi

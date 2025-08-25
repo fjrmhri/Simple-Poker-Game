@@ -30,7 +30,7 @@ export default function usePokerEngine(initialPlayers) {
       push: ({ action, amount }) => {
         setState((prev) => game.applyAction(prev, action, amount));
       },
-    });
+    }, current.level || "easy");
 
     const t = setTimeout(() => bot.run(), 700);
     return () => clearTimeout(t);
@@ -44,7 +44,7 @@ export default function usePokerEngine(initialPlayers) {
   );
 
   const startNewHand = useCallback(() => {
-    setState(game.start());
+    setState((prev) => game.start(prev));
   }, [game]);
 
   return {
