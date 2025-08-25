@@ -4,6 +4,7 @@ import usePokerEngine from "./hooks/usePokerEngine";
 import PokerTable from "./components/PokerTable";
 import ActionBar from "./components/ActionBar";
 import WinnerModal from "./components/WinnerModal";
+import OutOfChipsModal from "./components/OutOfChipsModal";
 import useSound from "./hooks/useSound";
 
 export default function App() {
@@ -15,10 +16,11 @@ export default function App() {
     availableActions,
     handleAction: rawHandleAction,
     startNewHand,
+    resetGame,
   } = usePokerEngine([
     { name: "You", isBot: false },
     { name: "Lucy", isBot: true, level: "normal" },
-    { name: "Carl", isBot: true, level: "hard" },
+        { name: "Carl", isBot: true, level: "hard" },
   ]);
 
   // Menggunakan suara yang sama untuk semua aksi
@@ -91,6 +93,13 @@ export default function App() {
           <WinnerModal
             winners={winners.map((i) => state.players[i].name)}
             onRestart={startNewHand}
+          />
+        )}
+
+        {state.players[0].chips <= 0 && (
+          <OutOfChipsModal
+            onRestart={resetGame}
+            onExit={() => (window.location.href = "/")}
           />
         )}
       </div>
