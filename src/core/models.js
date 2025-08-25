@@ -62,6 +62,20 @@ function countActive(players) {
   return players.filter((p) => !p.folded).length;
 }
 
+// Bagi pot ke pemenang secara merata.
+function distributePot(state) {
+  if (!state.winners || state.winners.length === 0) return;
+  const share = Math.floor(state.pot / state.winners.length);
+  const remainder = state.pot % state.winners.length;
+  state.winners.forEach((idx) => {
+    state.players[idx].chips += share;
+  });
+  if (remainder > 0) {
+    state.players[state.winners[0]].chips += remainder;
+  }
+  state.pot = 0;
+}
+
 // Super simpel evaluator: high card dari 7 kartu (placeholder, cukup untuk demo UI)
 
 export default class Game {
@@ -207,6 +221,7 @@ export default class Game {
       s.players.forEach((pl) => (pl.bet = 0));
       s.round = "Showdown";
       s.winners = this.checkWinners(s);
+      distributePot(s);
       s.endgame = true;
       return s;
     }
@@ -230,6 +245,7 @@ export default class Game {
       } else if (s.round === "River") {
         s.round = "Showdown";
         s.winners = this.checkWinners(s);
+        distributePot(s);
         s.endgame = true;
       }
     }
