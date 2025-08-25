@@ -30,7 +30,7 @@ export default function ActionPanel({
                 />
                 <button
                   onClick={() => handleAction(act, betAmount, range)}
-                  className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 shadow transition transform hover:scale-105"
                 >
                   Bet/Raise
                 </button>
@@ -42,7 +42,7 @@ export default function ActionPanel({
             <button
               key={idx}
               onClick={() => handleAction(action)}
-              className={`px-4 py-2 rounded-lg ${
+              className={`px-4 py-2 rounded-lg shadow transition transform hover:scale-105 ${
                 action === Action.Fold
                   ? "bg-red-600 hover:bg-red-700"
                   : "bg-green-600 hover:bg-green-700"

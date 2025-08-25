@@ -12,21 +12,28 @@ export default function ActionBar({ actions, onAction }) {
   const fold = actions.find((a) => a.type === "fold");
 
   return (
-    <div
-      style={{ marginTop: 16, display: "flex", gap: 8, alignItems: "center" }}
-    >
+    <div className="mt-4 flex gap-2 items-center">
       {fold && (
-        <button onClick={() => onAction("fold")} className="btn">
+        <button
+          onClick={() => onAction("fold")}
+          className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg shadow transition transform hover:scale-105"
+        >
           Fold
         </button>
       )}
       {check && (
-        <button onClick={() => onAction("check")} className="btn">
+        <button
+          onClick={() => onAction("check")}
+          className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg shadow transition transform hover:scale-105"
+        >
           Check
         </button>
       )}
       {call && (
-        <button onClick={() => onAction("call")} className="btn">
+        <button
+          onClick={() => onAction("call")}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition transform hover:scale-105"
+        >
           Call {call.amount}
         </button>
       )}
@@ -38,24 +45,16 @@ export default function ActionBar({ actions, onAction }) {
             min={hasBet.min ?? 1}
             max={hasBet.max ?? 9999}
             onChange={(e) => setAmount(parseInt(e.target.value || "0", 10))}
-            style={{ width: 90, padding: 6 }}
+            className="w-24 p-1 rounded text-black"
           />
-          <button onClick={() => onAction("bet", amount)} className="btn">
+          <button
+            onClick={() => onAction("bet", amount)}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg shadow transition transform hover:scale-105"
+          >
             {check ? "Bet" : "Raise"}
           </button>
         </>
       )}
-      <style>{`
-        .btn {
-          padding: 8px 12px;
-          border-radius: 8px;
-          border: none;
-          background: #8f1d2c;
-          color: white;
-          cursor: pointer;
-        }
-        .btn:hover { filter: brightness(1.1); }
-      `}</style>
     </div>
   );
 }
