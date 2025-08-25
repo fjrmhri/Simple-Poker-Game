@@ -54,6 +54,10 @@ export default function usePokerEngine(initialPlayers) {
     setState((prev) => game.start(prev));
   }, [game]);
 
+  const resetGame = useCallback(() => {
+    setState(() => game.start());
+  }, [game]);
+
   return {
     state,
     pot,
@@ -62,5 +66,6 @@ export default function usePokerEngine(initialPlayers) {
     availableActions,
     handleAction,
     startNewHand,
+    resetGame,
   };
 }
