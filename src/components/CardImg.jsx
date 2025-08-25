@@ -17,7 +17,12 @@ export default function CardImg({ card, w = 72 }) {
       transition={{ duration: 0.3 }}
       src={imgSrc(card)}
       alt={card?.back ? "Back" : `${card?.rank ?? "?"}${card?.suit ?? ""}`}
-      style={{ width: w, height: "auto", borderRadius: 8 }}
+      style={{
+        width: w,
+        height: "auto",
+        borderRadius: 8,
+        border: "2px solid white",
+      }}
     />
   );
 }
