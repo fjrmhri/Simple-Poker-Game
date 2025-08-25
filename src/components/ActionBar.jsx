@@ -3,8 +3,15 @@ import React, { useState } from "react";
 
 export default function ActionBar({ actions, onAction }) {
   const [amount, setAmount] = useState(10);
-  const baseBtn =
-    "px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 border border-white backdrop-blur-sm transition";
+
+  const renderImgBtn = (src, alt, handler) => (
+    <button
+      onClick={handler}
+      className="transition-transform hover:scale-105 focus:outline-none"
+    >
+      <img src={src} alt={alt} className="h-12 w-auto" />
+    </button>
+  );
 
   if (!actions || !actions.length) return null;
 
@@ -14,22 +21,28 @@ export default function ActionBar({ actions, onAction }) {
   const fold = actions.find((a) => a.type === "fold");
 
   return (
-    <div className="mt-4 flex gap-2 items-center">
-      {fold && (
-        <button onClick={() => onAction("fold")} className={baseBtn}>
-          Fold
-        </button>
-      )}
-      {check && (
-        <button onClick={() => onAction("check")} className={baseBtn}>
-          Check
-        </button>
-      )}
+    <div className="mt-4 flex gap-3 items-center">
+      {fold &&
+        renderImgBtn("/assets/buttons/fold.png", "Fold", () => onAction("fold"))}
+
+      {check &&
+        renderImgBtn(
+          "/assets/buttons/check.png",
+          "Check",
+          () => onAction("check")
+        )}
+
       {call && (
-        <button onClick={() => onAction("call")} className={baseBtn}>
-          Call {call.amount}
-        </button>
+        <div className="flex flex-col items-center">
+          {renderImgBtn(
+            "/assets/buttons/call.png",
+            "Call",
+            () => onAction("call")
+          )}
+          <span className="text-xs mt-1">Call {call.amount}</span>
+        </div>
       )}
+
       {hasBet && (
         <>
           <input
@@ -40,9 +53,11 @@ export default function ActionBar({ actions, onAction }) {
             onChange={(e) => setAmount(parseInt(e.target.value || "0", 10))}
             className="w-24 p-1 rounded text-black"
           />
-          <button onClick={() => onAction("bet", amount)} className={baseBtn}>
-            {check ? "Bet" : "Raise"}
-          </button>
+          {renderImgBtn(
+            check ? "/assets/buttons/bet.png" : "/assets/buttons/raise.png",
+            check ? "Bet" : "Raise",
+            () => onAction("bet", amount)
+          )}
         </>
       )}
     </div>
