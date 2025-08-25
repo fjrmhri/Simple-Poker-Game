@@ -1,4 +1,5 @@
 // src/core/models.js
+import { getWinners as evaluateWinners } from "./handEvaluator";
 
 // Util
 const RANKS = [
@@ -33,10 +34,6 @@ function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function rankValue(r) {
-  const i = RANKS.indexOf(r);
-  return i < 0 ? 0 : i + 2; // 2..14
-}
 
 function visibleCardBack() {
   return { back: true };
@@ -66,39 +63,62 @@ function countActive(players) {
 }
 
 // Super simpel evaluator: high card dari 7 kartu (placeholder, cukup untuk demo UI)
-function bestHighCardOf(player, community) {
-  const cards = [...player.hand, ...community].filter(Boolean);
-  let m = 0;
-  for (const c of cards) m = Math.max(m, rankValue(c.rank));
-  return m;
-}
 
 export default class Game {
   constructor(players = []) {
-    // players input: [{ name, isBot? }]
+    // players input: [{ name, isBot?, level? }]
     this.templatePlayers = players.map((p) => ({
       name: p.name,
       isBot: !!p.isBot,
+      level: p.level || "easy",
     }));
+    this.dealerIndex = 0;
   }
 
-  start() {
+  start(prevState = null) {
     const deck = makeDeck();
-    const players = this.templatePlayers.map((p) => ({
-      name: p.name,
-      isBot: p.isBot,
-      chips: 1000,
-      bet: 0,
-      folded: false,
-      hand: [deck.pop(), deck.pop()],
-    }));
+    let players;
+    let dealerIndex = this.dealerIndex;
+
+    if (!prevState) {
+      players = this.templatePlayers.map((p) => ({
+        name: p.name,
+        isBot: p.isBot,
+        level: p.level,
+        chips: 1000,
+        bet: 0,
+        folded: false,
+        hand: [deck.pop(), deck.pop()],
+      }));
+      dealerIndex = 0;
+    } else {
+      players = prevState.players.map((p) => ({
+        ...p,
+        bet: 0,
+        folded: false,
+        hand: [deck.pop(), deck.pop()],
+      }));
+      dealerIndex = (prevState.dealerIndex + 1) % players.length;
+    }
+
+    const smallBlind = 10;
+    const bigBlind = 20;
+    const sbIdx = (dealerIndex + 1) % players.length;
+    const bbIdx = (dealerIndex + 2) % players.length;
+    players[sbIdx].bet = Math.min(smallBlind, players[sbIdx].chips);
+    players[sbIdx].chips -= players[sbIdx].bet;
+    players[bbIdx].bet = Math.min(bigBlind, players[bbIdx].chips);
+    players[bbIdx].chips -= players[bbIdx].bet;
+
+    this.dealerIndex = dealerIndex;
+
     return {
       players,
       pot: 0,
       deck,
       community: [],
-      dealerIndex: 0,
-      currentPlayer: 0,
+      dealerIndex,
+      currentPlayer: (bbIdx + 1) % players.length,
       round: "Preflop", // Preflop -> Flop -> Turn -> River -> Showdown
       winners: [],
       endgame: false,
@@ -147,25 +167,13 @@ export default class Game {
 
   checkWinners(state) {
     if (state.round !== "Showdown") return [];
-    // 1) jika hanya 1 pemain aktif -> dia pemenang
     const alive = state.players
       .map((p, i) => ({ ...p, i }))
       .filter((p) => !p.folded);
     if (alive.length === 1) return [alive[0].i];
 
-    // 2) high-card sederhana
-    let best = -1;
-    let winners = [];
-    for (const pl of alive) {
-      const hv = bestHighCardOf(pl, state.community);
-      if (hv > best) {
-        best = hv;
-        winners = [pl.i];
-      } else if (hv === best) {
-        winners.push(pl.i);
-      }
-    }
-    return winners;
+    const winners = evaluateWinners(alive, state.community);
+    return winners.map((w) => w.i);
   }
 
   // Apply action immutably
