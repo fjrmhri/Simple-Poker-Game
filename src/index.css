@@ -3,6 +3,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Monocraft";
+  src: url("/fonts/Monocraft.ttf") format("truetype"),
+    url("/fonts/Monocraft.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
-  @apply bg-green-900 text-white font-sans;
+  @apply text-white;
+  font-family: "Monocraft", monospace;
+  background-image: url("/assets/background.jpg");
+  background-size: cover;
+  background-position: center;
 }

@@ -113,6 +113,30 @@ export function evaluateHandPublic(cards) {
   return handRank(cards.map(toInternal));
 }
 
+const handNames = [
+  "High Card",
+  "One Pair",
+  "Two Pair",
+  "Three of a Kind",
+  "Straight",
+  "Flush",
+  "Full House",
+  "Four of a Kind",
+  "Straight Flush",
+];
+
+export function getHandName(hand, community) {
+  const all = [...hand, ...community];
+  if (all.length < 5) return "";
+  const combos = combinations(all, 5);
+  let best = null;
+  for (const combo of combos) {
+    const rank = handRank(combo.map(toInternal));
+    if (!best || compareHands(rank, best) > 0) best = rank;
+  }
+  return handNames[best.rankValue];
+}
+
 export function getWinners(players, community) {
   const communityCards = community.map(toInternal);
   let bestRank = null;
