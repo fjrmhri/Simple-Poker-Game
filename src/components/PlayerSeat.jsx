@@ -1,5 +1,6 @@
 // src/components/PlayerSeat.jsx
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import CardImg from "./CardImg";
 import { getHandName } from "../core/handEvaluator";
 
@@ -12,19 +13,20 @@ export default function PlayerSeat({
 }) {
   const showFace = isYou || reveal;
   const [c1, c2] = player.hand || [];
-  const [timeLeft, setTimeLeft] = useState(30);
+  const MAX_TIME = 30;
+  const [timeLeft, setTimeLeft] = useState(MAX_TIME);
 
   useEffect(() => {
     if (!isTurn) {
-      setTimeLeft(30);
+      setTimeLeft(MAX_TIME);
       return;
     }
-    setTimeLeft(30);
+    setTimeLeft(MAX_TIME);
     const id = setInterval(() => {
       setTimeLeft((t) => (t > 0 ? t - 1 : 0));
     }, 1000);
     return () => clearInterval(id);
-  }, [isTurn]);
+  }, [isTurn, MAX_TIME]);
 
   const comboName = showFace
     ? getHandName(player.hand || [], community || [])
@@ -51,9 +53,29 @@ export default function PlayerSeat({
         <CardImg card={showFace ? c2 : { back: true }} />
       </div>
       {showFace && (
-        <div style={{ marginTop: 4, fontSize: 12 }}>{comboName}</div>
+        <div style={{ marginTop: 4, fontSize: 12, textAlign: "center" }}>
+          {comboName}
+        </div>
       )}
-      <div style={{ marginTop: 4, fontSize: 12 }}>Time left: {timeLeft}s</div>
+      <div style={{ marginTop: 8 }}>
+        <div
+          style={{
+            height: 8,
+            background: "#ffffff44",
+            borderRadius: 4,
+            overflow: "hidden",
+          }}
+        >
+          <motion.div
+            animate={{ width: `${(timeLeft / MAX_TIME) * 100}%` }}
+            transition={{ ease: "linear", duration: 1 }}
+            style={{ height: "100%", background: "#ffd54f" }}
+          />
+        </div>
+        <div style={{ marginTop: 4, fontSize: 12, textAlign: "center" }}>
+          {timeLeft}s
+        </div>
+      </div>
     </div>
   );
 }
