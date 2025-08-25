@@ -11,7 +11,7 @@ export default function PokerTable({ state, pot, winners }) {
 
   return (
     <div className="p-4 text-white">
-      <div className="relative mx-auto max-w-4xl bg-green-800 rounded-full p-8 shadow-inner">
+      <div className="relative mx-auto max-w-4xl border-2 border-white rounded-lg p-8 bg-white/10">
         <div className="flex justify-between">
           <div>
             Round: <b>{round}</b>
@@ -29,11 +29,15 @@ export default function PokerTable({ state, pot, winners }) {
         </div>
 
         {/* Players grid */}
-        <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px,1fr))" }}>
+        <div
+          className="grid gap-3"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px,1fr))" }}
+        >
           {players.map((p, i) => (
             <PlayerSeat
               key={i}
               player={p}
+              community={community}
               isYou={i === 0}
               isTurn={i === currentPlayer && round !== "Showdown" && !p.folded}
               reveal={revealEveryone}
