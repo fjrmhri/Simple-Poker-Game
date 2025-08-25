@@ -11,18 +11,23 @@ export default function PokerTable({ state, pot, winners }) {
 
   return (
     <div className="p-4 text-white">
-      <div className="relative mx-auto max-w-4xl border-2 border-white rounded-lg p-8 bg-black/40 backdrop-blur-sm">
-        <div className="flex justify-between">
+      <div className="relative mx-auto max-w-4xl border border-gray-600 rounded-xl p-8 bg-gray-900/70 backdrop-blur-sm shadow-lg">
+        <div className="flex justify-between text-sm md:text-base">
           <div>
             Round: <b>{round}</b>
           </div>
-          <motion.div key={pot} initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="text-lg">
+          <motion.div
+            key={pot}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="text-lg font-semibold"
+          >
             Pot: <b>{pot}</b>
           </motion.div>
         </div>
 
         {/* Community cards */}
-        <div className="flex gap-2 justify-center my-4">
+        <div className="flex gap-2 justify-center my-6">
           {[0, 1, 2, 3, 4].map((i) => (
             <CardImg key={i} card={community[i]} w={88} />
           ))}

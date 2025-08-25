@@ -26,13 +26,20 @@ export default function usePokerEngine(initialPlayers) {
     const current = state.players[state.currentPlayer];
     if (!current?.isBot) return;
 
-    const bot = new AIBot(game, state, {
-      push: ({ action, amount }) => {
-        setState((prev) => game.applyAction(prev, action, amount));
+    const bot = new AIBot(
+      game,
+      state,
+      {
+        push: ({ action, amount }) => {
+          setState((prev) => game.applyAction(prev, action, amount));
+        },
       },
-    }, current.level || "easy");
+      current.level || "easy"
+    );
 
-    const t = setTimeout(() => bot.run(), 700);
+    const delayMap = { easy: 1200, normal: 2000, hard: 3000 };
+    const thinkTime = delayMap[current.level] || 1500;
+    const t = setTimeout(() => bot.run(), thinkTime);
     return () => clearTimeout(t);
   }, [state, status, game]);
 

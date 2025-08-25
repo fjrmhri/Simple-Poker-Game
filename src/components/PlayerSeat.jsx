@@ -33,48 +33,32 @@ export default function PlayerSeat({
     : "";
   return (
     <div
-      style={{
-        padding: 12,
-        minWidth: 220,
-        borderRadius: 12,
-        background: isTurn ? "#ffffff22" : "#222a",
-        color: "white",
-        boxShadow: isTurn ? "0 0 0 2px #ffd54f inset" : "none",
-      }}
+      className={`p-3 min-w-[220px] rounded-xl text-white ${
+        isTurn ? "bg-white/10 ring-2 ring-amber-300" : "bg-black/40"
+      }`}
     >
-      <div style={{ fontWeight: 700 }}>
+      <div className="font-bold">
         {player.name} {player.folded ? "(Fold)" : ""}
       </div>
-      <div style={{ fontSize: 12, opacity: 0.85 }}>
+      <div className="text-xs opacity-80">
         Chips: {player.chips} &nbsp; • &nbsp; Bet: {player.bet}
       </div>
-      <div style={{ marginTop: 6, display: "flex", gap: 6 }}>
+      <div className="mt-2 flex gap-2">
         <CardImg card={showFace ? c1 : { back: true }} />
         <CardImg card={showFace ? c2 : { back: true }} />
       </div>
       {showFace && (
-        <div style={{ marginTop: 4, fontSize: 12, textAlign: "center" }}>
-          {comboName}
-        </div>
+        <div className="mt-1 text-xs text-center">{comboName}</div>
       )}
-      <div style={{ marginTop: 8 }}>
-        <div
-          style={{
-            height: 8,
-            background: "#ffffff44",
-            borderRadius: 4,
-            overflow: "hidden",
-          }}
-        >
+      <div className="mt-3">
+        <div className="h-2 bg-white/30 rounded overflow-hidden">
           <motion.div
             animate={{ width: `${(timeLeft / MAX_TIME) * 100}%` }}
             transition={{ ease: "linear", duration: 1 }}
-            style={{ height: "100%", background: "#ffd54f" }}
+            className="h-full bg-amber-300"
           />
         </div>
-        <div style={{ marginTop: 4, fontSize: 12, textAlign: "center" }}>
-          {timeLeft}s
-        </div>
+        <div className="mt-1 text-xs text-center">{timeLeft}s</div>
       </div>
     </div>
   );

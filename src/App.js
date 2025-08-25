@@ -22,7 +22,7 @@ export default function App() {
   ]);
 
   // Menggunakan suara yang sama untuk semua aksi
-  const playActionSound = useSound("/public/sounds/minecraft_level_up.mp3");
+  const playSound = useSound("/public/sounds/minecraft_level_up.mp3");
 
   const prevCommunity = useRef(state.community.length);
   const prevPot = useRef(pot);
@@ -30,16 +30,16 @@ export default function App() {
   // Menggunakan suara saat Preflop
   useEffect(() => {
     if (state.round === "Preflop" && state.community.length === 0) {
-      playActionSound();
+      playSound();
     }
-  }, [state.round, state.community.length, playActionSound]);
+  }, [state.round, state.community.length, playSound]);
 
   // Menggunakan suara saat Showdown
   useEffect(() => {
     if (status === "showdown") {
-      playActionSound();
+      playSound();
     }
-  }, [status, playActionSound]);
+  }, [status, playSound]);
 
   // Menggunakan suara saat ada perubahan kartu komunitas
   useEffect(() => {
@@ -47,28 +47,28 @@ export default function App() {
       prevCommunity.current < state.community.length &&
       state.community.length > 0
     ) {
-      playActionSound();
+      playSound();
     }
     prevCommunity.current = state.community.length;
-  }, [state.community.length, playActionSound]);
+  }, [state.community.length, playSound]);
 
   // Menggunakan suara saat pot berubah
   useEffect(() => {
     if (prevPot.current !== pot) {
-      playActionSound();
+      playSound();
       prevPot.current = pot;
     }
-  }, [pot, playActionSound]);
+  }, [pot, playSound]);
 
-  // Menambahkan suara untuk tindakan (bet, raise, call)
+  // Menambahkan suara untuk tindakan (bet, raise, call, fold, check)
   const handleAction = useCallback(
     (action, amount) => {
-      if (["bet", "raise", "call"].includes(action)) {
-        playActionSound();
+      if (["bet", "raise", "call", "fold", "check"].includes(action)) {
+        playSound();
       }
       rawHandleAction(action, amount);
     },
-    [rawHandleAction, playActionSound]
+    [rawHandleAction, playSound]
   );
 
   return (
