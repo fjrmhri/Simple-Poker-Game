@@ -11,7 +11,7 @@ export default function PokerTable({ state, pot, winners }) {
 
   return (
     <div className="p-4 text-white">
-      <div className="relative mx-auto max-w-4xl border-2 border-white rounded-lg p-8 bg-white/10">
+      <div className="relative mx-auto max-w-4xl border-2 border-white rounded-lg p-8 bg-black/40 backdrop-blur-sm">
         <div className="flex justify-between">
           <div>
             Round: <b>{round}</b>

@@ -3,6 +3,8 @@ import React, { useState } from "react";
 
 export default function ActionBar({ actions, onAction }) {
   const [amount, setAmount] = useState(10);
+  const baseBtn =
+    "px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 border border-white backdrop-blur-sm transition";
 
   if (!actions || !actions.length) return null;
 
@@ -14,26 +16,17 @@ export default function ActionBar({ actions, onAction }) {
   return (
     <div className="mt-4 flex gap-2 items-center">
       {fold && (
-        <button
-          onClick={() => onAction("fold")}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg shadow transition transform hover:scale-105"
-        >
+        <button onClick={() => onAction("fold")} className={baseBtn}>
           Fold
         </button>
       )}
       {check && (
-        <button
-          onClick={() => onAction("check")}
-          className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg shadow transition transform hover:scale-105"
-        >
+        <button onClick={() => onAction("check")} className={baseBtn}>
           Check
         </button>
       )}
       {call && (
-        <button
-          onClick={() => onAction("call")}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition transform hover:scale-105"
-        >
+        <button onClick={() => onAction("call")} className={baseBtn}>
           Call {call.amount}
         </button>
       )}
@@ -47,10 +40,7 @@ export default function ActionBar({ actions, onAction }) {
             onChange={(e) => setAmount(parseInt(e.target.value || "0", 10))}
             className="w-24 p-1 rounded text-black"
           />
-          <button
-            onClick={() => onAction("bet", amount)}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg shadow transition transform hover:scale-105"
-          >
+          <button onClick={() => onAction("bet", amount)} className={baseBtn}>
             {check ? "Bet" : "Raise"}
           </button>
         </>

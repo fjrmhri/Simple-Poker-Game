@@ -56,9 +56,12 @@ export default function App() {
 
   const handleAction = useCallback(
     (action, amount) => {
+      if (["bet", "raise", "call"].includes(action)) {
+        playFx();
+      }
       rawHandleAction(action, amount);
     },
-    [rawHandleAction]
+    [rawHandleAction, playFx]
   );
 
   return (
