@@ -8,10 +8,10 @@ export default function ActionBar({ actions = [], onAction }) {
     <button
       onClick={handler}
       disabled={disabled}
-      className={`px-5 py-2 border-2 rounded text-lg font-semibold transition-all duration-300 ease-in-out ${
+      className={`px-4 py-2 rounded-xl font-semibold text-white shadow-md transition-colors ${
         disabled
-          ? "bg-gray-500 border-gray-600 text-gray-300 cursor-not-allowed opacity-60"
-          : `${color} text-white hover:brightness-110`
+          ? "opacity-50 cursor-not-allowed"
+          : `${color} hover:brightness-110`
       }`}
     >
       {label}
@@ -30,22 +30,15 @@ export default function ActionBar({ actions = [], onAction }) {
     : { label: "Call/Check", disabled: true };
 
   return (
-    <div className="mt-4 flex flex-wrap gap-4 items-center justify-center">
-      {renderBtn(
-        "Fold",
-        () => onAction("fold"),
-        "bg-red-600 border-red-700 text-[#e5e7eb] shadow-[0_0_0_2px_#fff,0_0_0_4px_#000]",
-        !fold
-      )}
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+      {renderBtn("Fold", () => onAction("fold"), "bg-red-600", !fold)}
 
-      <div className="flex flex-col items-center">
-        {renderBtn(
-          `${call ? `Call ${call.amount}` : callOrCheck.label}`,
-          () => onAction(call ? "call" : "check"),
-          "bg-green-600 border-green-700 text-[#e5e7eb] shadow-[0_0_0_2px_#fff,0_0_0_4px_#000]",
-          callOrCheck.disabled
-        )}
-      </div>
+      {renderBtn(
+        `${call ? `Call ${call.amount}` : callOrCheck.label}`,
+        () => onAction(call ? "call" : "check"),
+        "bg-green-600",
+        callOrCheck.disabled
+      )}
 
       <div className="flex items-center gap-2">
         <input
@@ -55,12 +48,12 @@ export default function ActionBar({ actions = [], onAction }) {
           max={hasBet?.max ?? 9999}
           onChange={(e) => setAmount(parseInt(e.target.value || "0", 10))}
           disabled={!hasBet}
-          className="w-24 p-1 border border-black rounded text-[#e5e7eb] bg-[rgba(0,0,0,0.3)] disabled:bg-gray-200 disabled:text-gray-500 transition-colors duration-300 ease-in-out shadow-[0_0_0_2px_#fff,0_0_0_4px_#000]"
+          className="w-24 p-1 rounded border border-gray-500 bg-gray-800 text-white transition-colors disabled:bg-gray-700 disabled:text-gray-400"
         />
         {renderBtn(
           check ? "Bet" : "Raise",
           () => onAction("bet", amount),
-          "bg-blue-600 border-blue-700 text-[#e5e7eb] shadow-[0_0_0_2px_#fff,0_0_0_4px_#000]",
+          "bg-blue-600",
           !hasBet
         )}
       </div>

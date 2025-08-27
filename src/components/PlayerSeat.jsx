@@ -61,7 +61,7 @@ export default function PlayerSeat({
     : "bg-blue-600";
   return (
     <div
-      className={`p-2 min-w-[180px] rounded-xl transition-all duration-300 ease-in-out border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] text-[#e5e7eb] bg-[rgba(0,0,0,0.3)] ${
+      className={`p-2 min-w-[180px] rounded-xl transition-all duration-300 ease-in-out border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] bg-black/40 text-gray-100 ${
         isTurn ? "ring-2 ring-white" : ""
       } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
     >
@@ -106,11 +106,11 @@ export default function PlayerSeat({
       </div>
       {showFace && <div className="mt-1 text-xs text-center">{comboName}</div>}
       <div className="mt-2">
-        <div className="h-2 bg-white/30 rounded overflow-hidden">
+        <div className="h-2 rounded bg-gray-700 overflow-hidden">
           <motion.div
             animate={{ width: `${(timeLeft / MAX_TIME) * 100}%` }}
             transition={{ ease: "easeInOut", duration: 1 }}
-            className="h-full bg-[rgb(229,231,235)]"
+            className="h-full bg-green-400"
           />
         </div>
         <div className="mt-1 text-xs text-center">{timeLeft}s</div>
