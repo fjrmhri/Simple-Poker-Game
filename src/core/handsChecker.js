@@ -1,6 +1,6 @@
 // src/core/handsChecker.js
 
-import { Rank } from "./models";
+import { Rank } from "./handEvaluator";
 
 // ======================================
 // Utility: Kombinasi dari array

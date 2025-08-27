@@ -1,7 +1,6 @@
 // src/components/ActionPanel.js
 
 import React, { useState } from "react";
-import { Action } from "../core/models";
 
 export default function ActionPanel({
   availableActions,
@@ -16,8 +15,8 @@ export default function ActionPanel({
     <div className="flex flex-col items-center gap-4 mt-6">
       <div className="flex gap-4">
         {availableActions.map((action, idx) => {
-          if (Array.isArray(action)) {
-            const [act, range] = action;
+          if (action.type === "bet") {
+            const range = [action.min, action.max];
             return (
               <div key={idx} className="flex items-center gap-2">
                 <input
@@ -29,7 +28,7 @@ export default function ActionPanel({
                   className="p-1 rounded text-black w-20"
                 />
                 <button
-                  onClick={() => handleAction(act, betAmount, range)}
+                  onClick={() => handleAction("bet", betAmount)}
                   className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 shadow transition transform hover:scale-105"
                 >
                   Bet/Raise
@@ -41,14 +40,16 @@ export default function ActionPanel({
           return (
             <button
               key={idx}
-              onClick={() => handleAction(action)}
+              onClick={() => handleAction(action.type)}
               className={`px-4 py-2 rounded-lg shadow transition transform hover:scale-105 ${
-                action === Action.Fold
+                action.type === "fold"
                   ? "bg-red-600 hover:bg-red-700"
                   : "bg-green-600 hover:bg-green-700"
               }`}
             >
-              {action}
+              {action.type === "call" && action.amount
+                ? `Call ${action.amount}`
+                : action.type}
             </button>
           );
         })}

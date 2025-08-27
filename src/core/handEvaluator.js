@@ -1,6 +1,6 @@
 // src/core/handEvaluator.js
 
-const Rank = {
+export const Rank = {
   R2: 2,
   R3: 3,
   R4: 4,

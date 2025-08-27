@@ -1,117 +1,12 @@
-// src/core/models.js
 import { getWinners as evaluateWinners } from "./handEvaluator";
-
-// Util
-const RANKS = [
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "J",
-  "Q",
-  "K",
-  "A",
-];
-const SUITS = ["C", "D", "H", "S"]; // Clubs, Diamonds, Hearts, Spades
-
-/**
- * Generate a new shuffled deck of cards.
- * @returns {Array} Shuffled deck.
- */
-function makeDeck() {
-  const deck = [];
-  for (const r of RANKS) for (const s of SUITS) deck.push({ rank: r, suit: s });
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
-  }
-  return deck;
-}
-
-/**
- * Deep clone a simple object.
- * @param {object} obj - Object to clone.
- * @returns {object} Cloned object.
- */
-function clone(obj) {
-  if (obj === null || obj === undefined) {
-    throw new Error("clone requires a valid object");
-  }
-  return JSON.parse(JSON.stringify(obj));
-}
-
-/**
- * Get next active player's index.
- * @param {Array} players - List of players.
- * @param {number} from - Start index.
- * @returns {number} Index of next active player.
- */
-function nextAliveIndex(players, from) {
-  if (!Array.isArray(players)) {
-    throw new Error("nextAliveIndex expects players array");
-  }
-  const n = players.length;
-  let idx = (from + 1) % n;
-  while (players[idx].folded || players[idx].chips === 0) {
-    idx = (idx + 1) % n;
-  }
-  return idx;
-}
-
-/**
- * Check if all active players have matched the current bet.
- * @param {Array} players - List of players.
- * @returns {boolean} True if bets are matched.
- */
-function allActiveMatchedBet(players) {
-  if (!Array.isArray(players)) {
-    throw new Error("allActiveMatchedBet expects players array");
-  }
-  let target = null;
-  for (const p of players) {
-    if (p.folded || p.chips === 0) continue;
-    // Semua pemain aktif harus sudah melakukan aksi terlebih dahulu
-    if (p.lastAction === null) return false;
-    if (target === null) target = p.bet;
-    if (p.bet !== target) return false;
-  }
-  return true;
-}
-
-/**
- * Count active (not folded) players.
- * @param {Array} players - List of players.
- * @returns {number} Number of active players.
- */
-function countActive(players) {
-  if (!Array.isArray(players)) {
-    throw new Error("countActive expects players array");
-  }
-  return players.filter((p) => !p.folded).length;
-}
-
-// Bagi pot ke pemenang secara merata.
-function distributePot(state) {
-  if (!state?.winners || state.winners.length === 0) {
-    throw new Error("distributePot requires winners to distribute");
-  }
-  const share = Math.floor(state.pot / state.winners.length);
-  const remainder = state.pot % state.winners.length;
-  state.winners.forEach((idx) => {
-    state.players[idx].chips += share;
-  });
-  if (remainder > 0) {
-    state.players[state.winners[0]].chips += remainder;
-  }
-  state.pot = 0;
-}
-
-// Super simpel evaluator: high card dari 7 kartu (placeholder, cukup untuk demo UI)
+import {
+  makeDeck,
+  clone,
+  nextAliveIndex,
+  allActiveMatchedBet,
+  countActive,
+  distributePot,
+} from "./utils";
 
 export default class Game {
   /**
@@ -139,28 +34,28 @@ export default class Game {
     let dealerIndex = this.dealerIndex;
 
     if (!prevState) {
-        players = this.templatePlayers.map((p) => ({
-          name: p.name,
-          isBot: p.isBot,
-          level: p.level,
-          avatar: p.avatar,
-          chips: 1000,
-          bet: 0,
-          folded: false,
-          hand: [deck.pop(), deck.pop()],
-          lastAction: null,
-          lastActionAmount: 0,
-        }));
+      players = this.templatePlayers.map((p) => ({
+        name: p.name,
+        isBot: p.isBot,
+        level: p.level,
+        avatar: p.avatar,
+        chips: 1000,
+        bet: 0,
+        folded: false,
+        hand: [deck.pop(), deck.pop()],
+        lastAction: null,
+        lastActionAmount: 0,
+      }));
       dealerIndex = 0;
     } else {
-        players = prevState.players.map((p) => ({
-          ...p,
-          bet: 0,
-          folded: false,
-          hand: [deck.pop(), deck.pop()],
-          lastAction: null,
-          lastActionAmount: 0,
-        }));
+      players = prevState.players.map((p) => ({
+        ...p,
+        bet: 0,
+        folded: false,
+        hand: [deck.pop(), deck.pop()],
+        lastAction: null,
+        lastActionAmount: 0,
+      }));
       dealerIndex = (prevState.dealerIndex + 1) % players.length;
     }
 

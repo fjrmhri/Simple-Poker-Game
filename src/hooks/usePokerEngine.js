@@ -1,6 +1,6 @@
 // src/hooks/usePokerEngine.js
 import { useState, useEffect, useCallback, useMemo } from "react";
-import Game from "../core/models";
+import Game from "../core/gameEngine";
 import { AIBot } from "../core/ai";
 
 /**
