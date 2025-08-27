@@ -20,6 +20,7 @@ export default function PokerTable({ state, pot, winners }) {
             key={pot}
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
+            transition={{ ease: "easeInOut", duration: 0.3 }}
             className="text-lg font-semibold bg-black/40 px-3 py-1 rounded shadow-[0_0_10px_rgba(251,191,36,0.5)]"
           >
             Pot: <b>{pot}</b>
@@ -33,22 +34,61 @@ export default function PokerTable({ state, pot, winners }) {
           ))}
         </div>
 
-        {/* Players grid */}
-        <div
-          className="grid gap-6"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px,1fr))" }}
-        >
-          {players.map((p, i) => (
+        {/* Players layout */}
+        <div className="relative mt-6 h-[260px]">
+          {/* Player (you) at bottom center */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
             <PlayerSeat
-              key={i}
-              player={p}
+              player={players[0]}
               community={community}
-              isYou={i === 0}
-              isTurn={i === currentPlayer && round !== "Showdown" && !p.folded}
+              isYou
+              isTurn={
+                0 === currentPlayer && round !== "Showdown" && !players[0].folded
+              }
               round={round}
               reveal={revealEveryone}
             />
-          ))}
+          </div>
+
+          {/* Bots on the sides */}
+          <div className="absolute top-0 left-0 flex flex-col gap-4">
+            {players.slice(1, 1 + Math.ceil((players.length - 1) / 2)).map(
+              (p, idx) => (
+                <PlayerSeat
+                  key={idx + 1}
+                  player={p}
+                  community={community}
+                  isTurn={
+                    idx + 1 === currentPlayer &&
+                    round !== "Showdown" &&
+                    !p.folded
+                  }
+                  round={round}
+                  reveal={revealEveryone}
+                />
+              )
+            )}
+          </div>
+
+          <div className="absolute top-0 right-0 flex flex-col gap-4 items-end">
+            {players
+              .slice(1 + Math.ceil((players.length - 1) / 2))
+              .map((p, idx) => (
+                <PlayerSeat
+                  key={idx + 1 + Math.ceil((players.length - 1) / 2)}
+                  player={p}
+                  community={community}
+                  isTurn={
+                    idx + 1 + Math.ceil((players.length - 1) / 2) ===
+                      currentPlayer &&
+                    round !== "Showdown" &&
+                    !p.folded
+                  }
+                  round={round}
+                  reveal={revealEveryone}
+                />
+              ))}
+          </div>
         </div>
 
         {/* Winners */}

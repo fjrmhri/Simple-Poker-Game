@@ -14,7 +14,7 @@ export default function CardImg({ card, w = 72 }) {
     <motion.img
       initial={{ rotateY: 90, opacity: 0 }}
       animate={{ rotateY: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
       src={imgSrc(card)}
       alt={card?.back ? "Back" : `${card?.rank ?? "?"}${card?.suit ?? ""}`}
       style={{
