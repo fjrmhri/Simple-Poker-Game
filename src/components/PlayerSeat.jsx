@@ -54,7 +54,7 @@ export default function PlayerSeat({
     : "bg-blue-600";
   return (
     <div
-      className={`p-3 min-w-[220px] rounded-xl text-white transition-all duration-300 ease-in-out ${
+      className={`p-2 min-w-[180px] rounded-xl text-white transition-all duration-300 ease-in-out ${
         isTurn ? "bg-white/10 ring-2 ring-amber-300" : "bg-black/40"
       } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
     >
@@ -91,14 +91,19 @@ export default function PlayerSeat({
         <span className="text-lg font-bold">{player.chips}</span>
         <span className="text-xs">Bet: {player.bet}</span>
       </div>
-      <div className="mt-2 flex gap-3">
-        <CardImg card={showFace ? c1 : { back: true }} />
-        <CardImg card={showFace ? c2 : { back: true }} />
+      {player.lastAction && (
+        <div className="mt-1 text-xs italic opacity-80">
+          Last: {player.lastAction}
+        </div>
+      )}
+      <div className="mt-2 flex gap-2">
+        <CardImg card={showFace ? c1 : { back: true }} w={60} />
+        <CardImg card={showFace ? c2 : { back: true }} w={60} />
       </div>
       {showFace && (
         <div className="mt-1 text-xs text-center">{comboName}</div>
       )}
-      <div className="mt-3">
+      <div className="mt-2">
         <div className="h-2 bg-white/30 rounded overflow-hidden">
           <motion.div
             animate={{ width: `${(timeLeft / MAX_TIME) * 100}%` }}
