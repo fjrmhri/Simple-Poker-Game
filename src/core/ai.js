@@ -8,6 +8,10 @@ function shuffle(arr) {
   }
 }
 
+function calculatePotOdds(potSize, amountToCall) {
+  return amountToCall / (potSize + amountToCall);
+}
+
 function estimateWinRate(state, playerIndex, simulations = 200) {
   const hero = state.players[playerIndex];
   const opponents = state.players.filter(
@@ -64,23 +68,34 @@ export class AIBot {
       this.state.currentPlayer,
       this.level === "hard" ? 400 : 200
     );
+    const potSize = this.game.calculatePot(this.state);
+    const toCallAmount = this.game.toCallOf(this.state, this.state.currentPlayer);
+    const potOdds = toCallAmount > 0 ? calculatePotOdds(potSize, toCallAmount) : 0;
 
     if (this.level === "normal") {
-      if (bet && (winRate > 0.6 || (Math.random() < 0.1 && winRate > 0.3))) {
+      if (
+        bet &&
+        winRate > Math.max(0.6, potOdds + 0.1) &&
+        (winRate > 0.6 || (Math.random() < 0.1 && winRate > potOdds))
+      ) {
         const amount = Math.min(bet.max, bet.min + Math.floor(bet.max * winRate));
         return this.queue.push({ action: "bet", amount });
       }
-      if (call && winRate > 0.4) return this.queue.push({ action: "call" });
+      if (call && winRate > potOdds) return this.queue.push({ action: "call" });
       if (check) return this.queue.push({ action: "check" });
       return this.queue.push({ action: "fold" });
     }
 
     if (this.level === "hard") {
-      if (bet && (winRate > 0.7 || (Math.random() < 0.15 && winRate > 0.4))) {
+      if (
+        bet &&
+        winRate > Math.max(0.7, potOdds + 0.1) &&
+        (winRate > 0.7 || (Math.random() < 0.15 && winRate > potOdds))
+      ) {
         const amount = bet.max;
         return this.queue.push({ action: "bet", amount });
       }
-      if (call && winRate > 0.5) return this.queue.push({ action: "call" });
+      if (call && winRate > potOdds) return this.queue.push({ action: "call" });
       if (check) return this.queue.push({ action: "check" });
       return this.queue.push({ action: "fold" });
     }
