@@ -11,7 +11,7 @@ export default function PokerTable({ state, pot, winners }) {
 
   return (
     <div className="p-4 text-white">
-      <div className="relative mx-auto max-w-4xl border border-gray-600 rounded-xl p-8 bg-gray-900/70 backdrop-blur-sm shadow-lg">
+      <div className="relative mx-auto max-w-4xl p-8 rounded-[50px] shadow-2xl bg-gradient-to-b from-green-700 via-green-800 to-green-900">
         <div className="flex justify-between text-sm md:text-base">
           <div>
             Round: <b>{round}</b>
@@ -20,14 +20,14 @@ export default function PokerTable({ state, pot, winners }) {
             key={pot}
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            className="text-lg font-semibold"
+            className="text-lg font-semibold bg-black/40 px-3 py-1 rounded shadow-[0_0_10px_rgba(251,191,36,0.5)]"
           >
             Pot: <b>{pot}</b>
           </motion.div>
         </div>
 
         {/* Community cards */}
-        <div className="flex gap-2 justify-center my-6">
+        <div className="flex gap-3 justify-center my-6">
           {[0, 1, 2, 3, 4].map((i) => (
             <CardImg key={i} card={community[i]} w={88} />
           ))}
@@ -35,7 +35,7 @@ export default function PokerTable({ state, pot, winners }) {
 
         {/* Players grid */}
         <div
-          className="grid gap-3"
+          className="grid gap-6"
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px,1fr))" }}
         >
           {players.map((p, i) => (
@@ -45,6 +45,7 @@ export default function PokerTable({ state, pot, winners }) {
               community={community}
               isYou={i === 0}
               isTurn={i === currentPlayer && round !== "Showdown" && !p.folded}
+              round={round}
               reveal={revealEveryone}
             />
           ))}
