@@ -1,7 +1,7 @@
 // src/core/game.js
 
 import { Players, Deck, Community, Round, blindsTable, Action } from "./models";
-import { getWinners } from "./handsChecker";
+import { getWinners } from "./handEvaluator";
 
 // ===============================
 // CLASS STATE
@@ -233,7 +233,11 @@ export class Game {
       const endingPlayers = players.filter(
         (p) => state.totalBets[p.name] > 0 && !state.foldedPlayers.has(p)
       );
-      winners = getWinners(endingPlayers, state.hands, state.community);
+      const playersWithHands = endingPlayers.map((p) => ({
+        ...p,
+        hand: state.hands[p.name] || [],
+      }));
+      winners = getWinners(playersWithHands, state.community);
 
       const bets = players
         .map((p) => state.totalBets[p.name])

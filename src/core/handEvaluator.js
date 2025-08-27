@@ -1,5 +1,10 @@
 // src/core/handEvaluator.js
 
+/**
+ * Poker hand evaluation utilities.
+ * Converts card representations, evaluates hand strength,
+ * derives human-readable hand names, and determines winners.
+ */
 const Rank = {
   R2: 2,
   R3: 3,
