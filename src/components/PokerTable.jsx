@@ -11,8 +11,9 @@ export default function PokerTable({ state, pot, winners }) {
 
   return (
     <div className="p-2 text-white">
-      <div className="relative mx-auto max-w-4xl p-4 rounded-[30px] shadow-xl bg-transparent">
-        <div className="flex justify-between text-sm md:text-base">
+      <div className="relative mx-auto max-w-5xl p-4 rounded-[50px] border-2 border-white shadow-[0_0_0_2px_#000,0_0_0_4px_#fff] bg-[rgba(0,0,0,0.3)] text-[#111827] font-mono box-border">
+        {" "}
+        <div className="text-[#e5e7eb]">
           <div>
             Round: <b>{round}</b>
           </div>
@@ -21,19 +22,17 @@ export default function PokerTable({ state, pot, winners }) {
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ ease: "easeInOut", duration: 0.3 }}
-            className="text-lg font-semibold bg-black/40 px-3 py-1 rounded shadow-[0_0_10px_rgba(251,191,36,0.5)]"
+            className="text-[#e5e7eb]"
           >
             Pot: <b>{pot}</b>
           </motion.div>
         </div>
-
         {/* Community cards */}
         <div className="flex gap-2 justify-center my-4">
           {[0, 1, 2, 3, 4].map((i) => (
             <CardImg key={i} card={community[i]} w={72} />
           ))}
         </div>
-
         {/* Players layout */}
         <div className="relative mt-4 h-[220px]">
           {/* Player (you) at bottom center */}
@@ -43,7 +42,9 @@ export default function PokerTable({ state, pot, winners }) {
               community={community}
               isYou
               isTurn={
-                0 === currentPlayer && round !== "Showdown" && !players[0].folded
+                0 === currentPlayer &&
+                round !== "Showdown" &&
+                !players[0].folded
               }
               round={round}
               reveal={revealEveryone}
@@ -52,8 +53,9 @@ export default function PokerTable({ state, pot, winners }) {
 
           {/* Bots on the sides */}
           <div className="absolute top-0 left-0 flex flex-col gap-4">
-            {players.slice(1, 1 + Math.ceil((players.length - 1) / 2)).map(
-              (p, idx) => (
+            {players
+              .slice(1, 1 + Math.ceil((players.length - 1) / 2))
+              .map((p, idx) => (
                 <PlayerSeat
                   key={idx + 1}
                   player={p}
@@ -66,8 +68,7 @@ export default function PokerTable({ state, pot, winners }) {
                   round={round}
                   reveal={revealEveryone}
                 />
-              )
-            )}
+              ))}
           </div>
 
           <div className="absolute top-0 right-0 flex flex-col gap-4 items-end">
@@ -90,7 +91,6 @@ export default function PokerTable({ state, pot, winners }) {
               ))}
           </div>
         </div>
-
         {/* Winners */}
         {winners?.length ? (
           <div className="mt-3 text-center font-bold">

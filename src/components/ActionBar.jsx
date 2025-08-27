@@ -31,17 +31,19 @@ export default function ActionBar({ actions = [], onAction }) {
 
   return (
     <div className="mt-4 flex flex-wrap gap-4 items-center justify-center">
-      {renderBtn("Fold", () => onAction("fold"), "bg-red-600 border-red-700", !fold)}
+      {renderBtn(
+        "Fold",
+        () => onAction("fold"),
+        "bg-red-600 border-red-700 text-[#e5e7eb] shadow-[0_0_0_2px_#fff,0_0_0_4px_#000]",
+        !fold
+      )}
 
       <div className="flex flex-col items-center">
         {renderBtn(
-          callOrCheck.label,
+          `${call ? `Call ${call.amount}` : callOrCheck.label}`,
           () => onAction(call ? "call" : "check"),
-          "bg-green-600 border-green-700",
+          "bg-green-600 border-green-700 text-[#e5e7eb] shadow-[0_0_0_2px_#fff,0_0_0_4px_#000]",
           callOrCheck.disabled
-        )}
-        {call && (
-          <span className="text-xs mt-1">Call {call.amount}</span>
         )}
       </div>
 
@@ -53,12 +55,12 @@ export default function ActionBar({ actions = [], onAction }) {
           max={hasBet?.max ?? 9999}
           onChange={(e) => setAmount(parseInt(e.target.value || "0", 10))}
           disabled={!hasBet}
-          className="w-24 p-1 border rounded text-black disabled:bg-gray-200 disabled:text-gray-500 transition-colors duration-300 ease-in-out"
+          className="w-24 p-1 border border-black rounded text-[#e5e7eb] bg-[rgba(0,0,0,0.3)] disabled:bg-gray-200 disabled:text-gray-500 transition-colors duration-300 ease-in-out shadow-[0_0_0_2px_#fff,0_0_0_4px_#000]"
         />
         {renderBtn(
           check ? "Bet" : "Raise",
           () => onAction("bet", amount),
-          "bg-blue-600 border-blue-700",
+          "bg-blue-600 border-blue-700 text-[#e5e7eb] shadow-[0_0_0_2px_#fff,0_0_0_4px_#000]",
           !hasBet
         )}
       </div>

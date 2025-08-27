@@ -42,11 +42,7 @@ export default function PlayerSeat({
   const comboName = showFace
     ? getHandName(player.hand || [], community || [])
     : "";
-  const statusText = player.folded
-    ? "Folded"
-    : isTurn
-    ? "Betting"
-    : "Waiting";
+  const statusText = player.folded ? "Folded" : isTurn ? "Betting" : "Waiting";
   const statusColor = player.folded
     ? "bg-gray-600"
     : isTurn
@@ -55,7 +51,7 @@ export default function PlayerSeat({
   return (
     <div
       className={`p-2 min-w-[180px] rounded-xl text-white transition-all duration-300 ease-in-out ${
-        isTurn ? "bg-white/10 ring-2 ring-amber-300" : "bg-black/40"
+        isTurn ? "bg-white/10 ring-2 ring-white" : "bg-black/40"
       } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
     >
       <div className="flex items-center gap-2">
@@ -73,9 +69,7 @@ export default function PlayerSeat({
             />
           )}
         </label>
-        <div className="font-bold flex-1">
-          {player.name} {player.folded ? "(Fold)" : ""}
-        </div>
+        <div className="font-bold flex-1">{player.name}</div>
         <span
           className={`text-xs font-bold px-2 py-0.5 rounded ${statusColor}`}
         >
@@ -100,15 +94,13 @@ export default function PlayerSeat({
         <CardImg card={showFace ? c1 : { back: true }} w={60} />
         <CardImg card={showFace ? c2 : { back: true }} w={60} />
       </div>
-      {showFace && (
-        <div className="mt-1 text-xs text-center">{comboName}</div>
-      )}
+      {showFace && <div className="mt-1 text-xs text-center">{comboName}</div>}
       <div className="mt-2">
         <div className="h-2 bg-white/30 rounded overflow-hidden">
           <motion.div
             animate={{ width: `${(timeLeft / MAX_TIME) * 100}%` }}
             transition={{ ease: "easeInOut", duration: 1 }}
-            className="h-full bg-amber-300"
+            className="h-full bg-[rgb(229,231,235)]"
           />
         </div>
         <div className="mt-1 text-xs text-center">{timeLeft}s</div>
