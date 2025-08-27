@@ -81,6 +81,23 @@ export function deepClone(obj) {
   return clone(obj);
 }
 
+// Build a fresh player state from a template or previous player object
+function buildPlayer(base, deck) {
+  return {
+    name: base.name,
+    isBot: !!base.isBot,
+    level: base.level || "easy",
+    avatar: base.avatar || "/assets/others/dealer.png",
+    chips: base.chips ?? 1000,
+    bet: 0,
+    totalBet: 0,
+    folded: false,
+    hand: [deck.pop(), deck.pop()],
+    lastAction: null,
+    lastActionAmount: 0,
+  };
+}
+
 /**
  * Get next active player's index.
  * @param {Array} players - List of players.
@@ -209,31 +226,11 @@ export default class Game {
     let dealerIndex = this.dealerIndex;
 
     if (!prevState) {
-        players = this.templatePlayers.map((p) => ({
-          name: p.name,
-          isBot: p.isBot,
-          level: p.level,
-          avatar: p.avatar,
-          chips: 1000,
-          bet: 0,
-          totalBet: 0,
-          folded: false,
-          hand: [deck.pop(), deck.pop()],
-          lastAction: null,
-          lastActionAmount: 0,
-        }));
-      dealerIndex = 0;
+        players = this.templatePlayers.map((p) => buildPlayer(p, deck));
+        dealerIndex = 0;
     } else {
-        players = prevState.players.map((p) => ({
-          ...p,
-          bet: 0,
-          totalBet: 0,
-          folded: false,
-          hand: [deck.pop(), deck.pop()],
-          lastAction: null,
-          lastActionAmount: 0,
-        }));
-      dealerIndex = (prevState.dealerIndex + 1) % players.length;
+        players = prevState.players.map((p) => buildPlayer(p, deck));
+        dealerIndex = (prevState.dealerIndex + 1) % players.length;
     }
 
     const smallBlind = 10;
