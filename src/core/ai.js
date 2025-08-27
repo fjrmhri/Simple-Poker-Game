@@ -29,6 +29,20 @@ function calculatePotOdds(potSize, amountToCall) {
 }
 
 /**
+ * Determine bet sizing based on win rate and pot size.
+ * @param {object} bet - Bet action object from game.actions.
+ * @param {number} potSize - Current pot size.
+ * @param {number} winRate - Estimated win probability (0-1).
+ * @returns {number} Calculated bet amount within allowed range.
+ */
+function chooseBetAmount(bet, potSize, winRate) {
+  if (!bet) return 0;
+  const desired = potSize * (0.5 + winRate / 2);
+  const clamped = Math.max(bet.min, Math.min(bet.max, Math.floor(desired)));
+  return clamped;
+}
+
+/**
  * Estimate the win rate of the current hand via Monte Carlo simulation.
  * @param {object} state - Current game state.
  * @param {number} playerIndex - Index of hero player in state.players.
@@ -114,19 +128,15 @@ export class AIBot {
     const winRate = estimateWinRate(
       this.state,
       this.state.currentPlayer,
-      this.level === "hard" ? 400 : 200
+      this.level === "hard" ? 600 : 300
     );
     const potSize = this.game.calculatePot(this.state);
     const toCallAmount = this.game.toCallOf(this.state, this.state.currentPlayer);
     const potOdds = toCallAmount > 0 ? calculatePotOdds(potSize, toCallAmount) : 0;
 
     if (this.level === "normal") {
-      if (
-        bet &&
-        winRate > Math.max(0.6, potOdds + 0.1) &&
-        (winRate > 0.6 || (Math.random() < 0.1 && winRate > potOdds))
-      ) {
-        const amount = Math.min(bet.max, bet.min + Math.floor(bet.max * winRate));
+      if (bet && (winRate > potOdds + 0.15 || Math.random() < 0.05)) {
+        const amount = chooseBetAmount(bet, potSize, winRate);
         return this.queue.push({ action: "bet", amount });
       }
       if (call && winRate > potOdds) return this.queue.push({ action: "call" });
@@ -135,15 +145,11 @@ export class AIBot {
     }
 
     if (this.level === "hard") {
-      if (
-        bet &&
-        winRate > Math.max(0.7, potOdds + 0.1) &&
-        (winRate > 0.7 || (Math.random() < 0.15 && winRate > potOdds))
-      ) {
-        const amount = bet.max;
+      if (bet && (winRate > potOdds + 0.05 || Math.random() < 0.1)) {
+        const amount = chooseBetAmount(bet, potSize, winRate + 0.1);
         return this.queue.push({ action: "bet", amount });
       }
-      if (call && winRate > potOdds) return this.queue.push({ action: "call" });
+      if (call && winRate > potOdds * 0.9) return this.queue.push({ action: "call" });
       if (check) return this.queue.push({ action: "check" });
       return this.queue.push({ action: "fold" });
     }
