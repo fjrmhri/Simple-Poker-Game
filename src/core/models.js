@@ -137,26 +137,28 @@ export default class Game {
     let dealerIndex = this.dealerIndex;
 
     if (!prevState) {
-      players = this.templatePlayers.map((p) => ({
-        name: p.name,
-        isBot: p.isBot,
-        level: p.level,
-        avatar: p.avatar,
-        chips: 1000,
-        bet: 0,
-        folded: false,
-        hand: [deck.pop(), deck.pop()],
-        lastAction: null,
-      }));
+        players = this.templatePlayers.map((p) => ({
+          name: p.name,
+          isBot: p.isBot,
+          level: p.level,
+          avatar: p.avatar,
+          chips: 1000,
+          bet: 0,
+          folded: false,
+          hand: [deck.pop(), deck.pop()],
+          lastAction: null,
+          lastActionAmount: 0,
+        }));
       dealerIndex = 0;
     } else {
-      players = prevState.players.map((p) => ({
-        ...p,
-        bet: 0,
-        folded: false,
-        hand: [deck.pop(), deck.pop()],
-        lastAction: null,
-      }));
+        players = prevState.players.map((p) => ({
+          ...p,
+          bet: 0,
+          folded: false,
+          hand: [deck.pop(), deck.pop()],
+          lastAction: null,
+          lastActionAmount: 0,
+        }));
       dealerIndex = (prevState.dealerIndex + 1) % players.length;
     }
 
@@ -289,20 +291,24 @@ export default class Game {
     if (action === "fold") {
       p.folded = true;
       p.lastAction = "fold";
+      p.lastActionAmount = 0;
     } else if (action === "check") {
       p.lastAction = "check";
+      p.lastActionAmount = 0;
     } else if (action === "call") {
       const need = toCallBefore;
       const pay = Math.min(need, p.chips);
       p.chips -= pay;
       p.bet += pay;
       p.lastAction = "call";
+      p.lastActionAmount = pay;
     } else if (action === "bet") {
       const total = toCallBefore + (amount || 0);
       const pay = Math.min(total, p.chips);
       p.chips -= pay;
       p.bet += pay;
       p.lastAction = toCallBefore > 0 ? "raise" : "bet";
+      p.lastActionAmount = pay;
     }
 
     if (countActive(s.players) === 1) {
@@ -310,6 +316,7 @@ export default class Game {
       s.players.forEach((pl) => {
         pl.bet = 0;
         pl.lastAction = null;
+        pl.lastActionAmount = 0;
       });
       s.round = "Showdown";
       s.winners = this.checkWinners(s);
@@ -323,6 +330,7 @@ export default class Game {
       s.players.forEach((pl) => {
         pl.bet = 0;
         pl.lastAction = null;
+        pl.lastActionAmount = 0;
       });
 
       if (s.round === "Preflop") {
