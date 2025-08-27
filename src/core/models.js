@@ -105,6 +105,7 @@ export default class Game {
         bet: 0,
         folded: false,
         hand: [deck.pop(), deck.pop()],
+        lastAction: null,
       }));
       dealerIndex = 0;
     } else {
@@ -113,6 +114,7 @@ export default class Game {
         bet: 0,
         folded: false,
         hand: [deck.pop(), deck.pop()],
+        lastAction: null,
       }));
       dealerIndex = (prevState.dealerIndex + 1) % players.length;
     }
@@ -197,30 +199,37 @@ export default class Game {
     const s = clone(state);
     const idx = s.currentPlayer;
     const p = s.players[idx];
+    const toCallBefore = this.toCallOf(s, idx);
 
     if (action === "fold") {
       p.folded = true;
+      p.lastAction = "fold";
     } else if (action === "check") {
       // only allowed if toCall = 0 (diasumsikan UI sudah memberi benar)
+      p.lastAction = "check";
     } else if (action === "call") {
-      const need = this.toCallOf(s, idx);
+      const need = toCallBefore;
       const pay = Math.min(need, p.chips);
       p.chips -= pay;
       p.bet += pay;
+      p.lastAction = "call";
     } else if (action === "bet") {
       // Bisa bet (jika toCall=0) atau raise (jika toCall>0)
-      const toCall = this.toCallOf(s, idx);
-      const total = toCall + (amount || 0);
+      const total = toCallBefore + (amount || 0);
       const pay = Math.min(total, p.chips);
       p.chips -= pay;
       p.bet += pay;
+      p.lastAction = toCallBefore > 0 ? "raise" : "bet";
     }
 
     // Jika tinggal 1 aktif -> langsung showdown
     if (countActive(s.players) === 1) {
       // masukkan semua bet ke pot
       s.pot += s.players.reduce((sum, pl) => sum + pl.bet, 0);
-      s.players.forEach((pl) => (pl.bet = 0));
+      s.players.forEach((pl) => {
+        pl.bet = 0;
+        pl.lastAction = null;
+      });
       s.round = "Showdown";
       s.winners = this.checkWinners(s);
       distributePot(s);
@@ -232,7 +241,10 @@ export default class Game {
     if (allActiveMatchedBet(s.players)) {
       // masukkan bet ke pot
       s.pot += s.players.reduce((sum, pl) => sum + pl.bet, 0);
-      s.players.forEach((pl) => (pl.bet = 0));
+      s.players.forEach((pl) => {
+        pl.bet = 0;
+        pl.lastAction = null;
+      });
 
       if (s.round === "Preflop") {
         // flop
