@@ -96,19 +96,51 @@ function countActive(players) {
 }
 
 // Bagi pot ke pemenang secara merata.
-function distributePot(state) {
-  if (!state?.winners || state.winners.length === 0) {
-    throw new Error("distributePot requires winners to distribute");
+// Hitung pot utama dan side pot berdasarkan kontribusi total setiap pemain.
+// Mengembalikan array pot, masing-masing memiliki jumlah dan daftar pemain yang berhak.
+function distributePot(players) {
+  if (!Array.isArray(players)) {
+    throw new Error("distributePot expects players array");
   }
-  const share = Math.floor(state.pot / state.winners.length);
-  const remainder = state.pot % state.winners.length;
-  state.winners.forEach((idx) => {
-    state.players[idx].chips += share;
-  });
-  if (remainder > 0) {
-    state.players[state.winners[0]].chips += remainder;
+  const contribs = players
+    .map((p, i) => ({ i, amount: p.totalBet || 0 }))
+    .filter((c) => c.amount > 0)
+    .sort((a, b) => a.amount - b.amount);
+
+  const pots = [];
+  let prev = 0;
+  for (let i = 0; i < contribs.length; i++) {
+    const { amount } = contribs[i];
+    const active = contribs.slice(i).map((c) => c.i);
+    if (amount > prev) {
+      pots.push({ amount: (amount - prev) * active.length, players: active });
+      prev = amount;
+    }
+  }
+  return pots;
+}
+
+// Distribusikan semua pot kepada pemenang yang memenuhi syarat.
+function awardPots(state) {
+  const pots = distributePot(state.players);
+  const winners = new Set();
+  for (const pot of pots) {
+    const contenders = pot.players.filter((i) => !state.players[i].folded);
+    if (contenders.length === 0) continue;
+    const evalPlayers = contenders.map((i) => ({ ...state.players[i], i }));
+    const potWinners = evaluateWinners(evalPlayers, state.community).map((w) => w.i);
+    potWinners.forEach((w) => winners.add(w));
+    const share = Math.floor(pot.amount / potWinners.length);
+    const remainder = pot.amount % potWinners.length;
+    potWinners.forEach((idx) => {
+      state.players[idx].chips += share;
+    });
+    if (remainder > 0) {
+      state.players[potWinners[0]].chips += remainder;
+    }
   }
   state.pot = 0;
+  state.winners = Array.from(winners);
 }
 
 // Super simpel evaluator: high card dari 7 kartu (placeholder, cukup untuk demo UI)
@@ -146,6 +178,7 @@ export default class Game {
           avatar: p.avatar,
           chips: 1000,
           bet: 0,
+          totalBet: 0,
           folded: false,
           hand: [deck.pop(), deck.pop()],
           lastAction: null,
@@ -156,6 +189,7 @@ export default class Game {
         players = prevState.players.map((p) => ({
           ...p,
           bet: 0,
+          totalBet: 0,
           folded: false,
           hand: [deck.pop(), deck.pop()],
           lastAction: null,
@@ -170,8 +204,10 @@ export default class Game {
     const bbIdx = (dealerIndex + 2) % players.length;
     players[sbIdx].bet = Math.min(smallBlind, players[sbIdx].chips);
     players[sbIdx].chips -= players[sbIdx].bet;
+    players[sbIdx].totalBet += players[sbIdx].bet;
     players[bbIdx].bet = Math.min(bigBlind, players[bbIdx].chips);
     players[bbIdx].chips -= players[bbIdx].bet;
+    players[bbIdx].totalBet += players[bbIdx].bet;
 
     this.dealerIndex = dealerIndex;
 
@@ -302,6 +338,7 @@ export default class Game {
       const pay = Math.min(need, p.chips);
       p.chips -= pay;
       p.bet += pay;
+      p.totalBet += pay;
       p.lastAction = "call";
       p.lastActionAmount = pay;
     } else if (action === "bet") {
@@ -309,6 +346,7 @@ export default class Game {
       const pay = Math.min(total, p.chips);
       p.chips -= pay;
       p.bet += pay;
+       p.totalBet += pay;
       p.lastAction = toCallBefore > 0 ? "raise" : "bet";
       p.lastActionAmount = pay;
     }
@@ -321,8 +359,7 @@ export default class Game {
         pl.lastActionAmount = 0;
       });
       s.round = "Showdown";
-      s.winners = this.checkWinners(s);
-      distributePot(s);
+      awardPots(s);
       s.endgame = true;
       return s;
     }
@@ -346,8 +383,7 @@ export default class Game {
         s.round = "River";
       } else if (s.round === "River") {
         s.round = "Showdown";
-        s.winners = this.checkWinners(s);
-        distributePot(s);
+        awardPots(s);
         s.endgame = true;
       }
     }
@@ -360,8 +396,7 @@ export default class Game {
         s.community.push(s.deck.pop());
       }
       s.round = "Showdown";
-      s.winners = this.checkWinners(s);
-      distributePot(s);
+      awardPots(s);
       s.endgame = true;
     }
 
@@ -372,3 +407,5 @@ export default class Game {
     return s;
   }
 }
+
+export { distributePot, awardPots };
