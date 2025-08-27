@@ -42,18 +42,18 @@ export default function PlayerSeat({
   const comboName = showFace
     ? getHandName(player.hand || [], community || [])
     : "";
-  const actionStatusMap = {
-    check: "Checking",
-    call: "Calling",
-    raise: "Raising",
-    bet: "Betting",
-    fold: "Folded",
+  const getStatusText = () => {
+    if (player.folded) return "Fold";
+    if (player.lastAction === "bet" || player.lastAction === "raise") {
+      return `${player.lastAction === "bet" ? "Bet" : "Raise"} ${
+        player.lastActionAmount ?? 0
+      }`;
+    }
+    if (player.lastAction === "call") return "Call";
+    if (player.lastAction === "check") return "Check";
+    return "";
   };
-  const statusText = player.folded
-    ? "Folded"
-    : isTurn
-    ? "Betting"
-    : actionStatusMap[player.lastAction] || "Waiting";
+  const statusText = getStatusText();
   const statusColor = player.folded
     ? "bg-gray-600"
     : isTurn
@@ -81,11 +81,13 @@ export default function PlayerSeat({
           )}
         </label>
         <div className="font-bold flex-1">{player.name}</div>
-        <span
-          className={`text-xs font-bold px-2 py-0.5 rounded ${statusColor}`}
-        >
-          {statusText}
-        </span>
+        {statusText && (
+          <span
+            className={`text-xs font-bold px-2 py-0.5 rounded ${statusColor}`}
+          >
+            {statusText}
+          </span>
+        )}
       </div>
       <div className="mt-1 flex items-center gap-2 text-sm opacity-90">
         <img
