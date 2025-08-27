@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+# Simple Poker Game
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Simple Poker Game adalah implementasi ringkas gim poker Texas Hold'em berbasis React. Proyek ini menampilkan antarmuka meja, avatar pemain, serta lawan bot dengan beberapa tingkat kesulitan.
 
-## Available Scripts
+## Fitur
 
-In the project directory, you can run:
+- Permainan Texas Hold'em melawan bot AI
+- Tiga level kesulitan bot: **easy**, **normal**, dan **hard**
+- Avatar pemain dapat diganti langsung dari antarmuka
+- Animasi menggunakan Framer Motion dan styling Tailwind CSS
+- Peringatan ketika chip habis dan tampilan pemenang
 
-### `npm start`
+## Dependensi Utama
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- React 19
+- React Router DOM 7
+- Tailwind CSS 3
+- Styled Components 6
+- Framer Motion 12
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Instal semua dependensi dengan:
 
-### `npm test`
+```bash
+npm install
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Menjalankan dalam Mode Pengembangan
 
-### `npm run build`
+```bash
+npm start
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Buka [http://localhost:3000](http://localhost:3000) di peramban untuk melihat aplikasi. Halaman akan otomatis dimuat ulang ketika ada perubahan kode.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Membangun untuk Produksi
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm run build
+```
 
-### `npm run eject`
+Berhasil build akan menghasilkan berkas statis di folder `build` yang siap dideploy.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Pengujian
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm test
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Menjalankan pengujian unit menggunakan skrip bawaan Create React App.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Detail Permainan
 
-## Learn More
+- Setiap pemain mulai dengan **1000 chip**
+- Small blind: **10**, big blind: **20**
+- Alur ronde: Preflop → Flop → Turn → River → Showdown
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Level AI
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Easy**: cenderung check/call dan bertaruh kecil
+- **Normal**: menghitung probabilitas kemenangan secara moderat lalu memutuskan aksi
+- **Hard**: simulasi lebih banyak dan strategi lebih agresif
 
-### Code Splitting
+## Mengganti Avatar
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Klik gambar avatar pemain Anda lalu pilih berkas gambar baru. Avatar hanya berubah untuk pengguna lokal dan tidak disimpan ke server.
 
-### Analyzing the Bundle Size
+## Lisensi
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Proyek ini dirilis di bawah lisensi **MIT**.
 
-### Making a Progressive Web App
+## Kredit Aset
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Gambar kartu dan avatar di direktori `public/assets` digunakan hanya untuk keperluan demo
+- Efek suara `minecraft_level_up.mp3` di `public/sounds` berasal dari gim Minecraft dan merupakan hak cipta Mojang Studios
+- Latar belakang dan ikon lain adalah milik masing-masing pembuatnya
 
-### Advanced Configuration
+Gunakan aset-aset tersebut secara bertanggung jawab dan pastikan Anda memiliki hak untuk mendistribusikannya kembali.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
