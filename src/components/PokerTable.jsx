@@ -10,8 +10,8 @@ export default function PokerTable({ state, pot, winners }) {
   const revealEveryone = round === "Showdown";
 
   return (
-    <div className="p-4 text-white">
-      <div className="relative mx-auto max-w-4xl p-8 rounded-[50px] shadow-2xl bg-gradient-to-b from-green-700 via-green-800 to-green-900">
+    <div className="p-2 text-white">
+      <div className="relative mx-auto max-w-4xl p-4 rounded-[30px] shadow-xl bg-transparent">
         <div className="flex justify-between text-sm md:text-base">
           <div>
             Round: <b>{round}</b>
@@ -28,14 +28,14 @@ export default function PokerTable({ state, pot, winners }) {
         </div>
 
         {/* Community cards */}
-        <div className="flex gap-3 justify-center my-6">
+        <div className="flex gap-2 justify-center my-4">
           {[0, 1, 2, 3, 4].map((i) => (
-            <CardImg key={i} card={community[i]} w={88} />
+            <CardImg key={i} card={community[i]} w={72} />
           ))}
         </div>
 
         {/* Players layout */}
-        <div className="relative mt-6 h-[260px]">
+        <div className="relative mt-4 h-[220px]">
           {/* Player (you) at bottom center */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
             <PlayerSeat
