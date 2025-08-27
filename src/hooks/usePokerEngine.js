@@ -49,7 +49,9 @@ export default function usePokerEngine(initialPlayers) {
     );
 
     const delayMap = { easy: 1200, normal: 2000, hard: 3000 };
-    const thinkTime = delayMap[current.level] || 1500;
+    const baseDelay = delayMap[current.level] || 1500;
+    const jitter = Math.random() * baseDelay;
+    const thinkTime = baseDelay + jitter;
     const t = setTimeout(() => bot.run(), thinkTime);
     return () => clearTimeout(t);
   }, [state, status, game]);
