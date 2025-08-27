@@ -24,7 +24,7 @@ export default function App() {
   ]);
 
   // Menggunakan suara yang sama untuk semua aksi
-  const playSound = useSound("/public/sounds/minecraft_level_up.mp3");
+  const playSound = useSound("/sounds/minecraft_level_up.mp3");
 
   const prevCommunity = useRef(state.community.length);
   const prevPot = useRef(pot);
