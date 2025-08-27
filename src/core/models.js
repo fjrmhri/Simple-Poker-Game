@@ -34,15 +34,50 @@ function makeDeck() {
 }
 
 /**
- * Deep clone a simple object.
+ * Deep clone an object using structuredClone when available.
+ * Falls back to a minimal polyfill otherwise.
  * @param {object} obj - Object to clone.
  * @returns {object} Cloned object.
  */
-function clone(obj) {
+export function deepClone(obj) {
   if (obj === null || obj === undefined) {
-    throw new Error("clone requires a valid object");
+    throw new Error("deepClone requires a valid object");
   }
-  return JSON.parse(JSON.stringify(obj));
+  if (typeof globalThis.structuredClone === "function") {
+    return globalThis.structuredClone(obj);
+  }
+  const seen = new WeakMap();
+  const clone = (value) => {
+    if (value === null || typeof value !== "object") return value;
+    if (seen.has(value)) return seen.get(value);
+
+    let result;
+    if (value instanceof Date) {
+      result = new Date(value);
+    } else if (value instanceof Map) {
+      result = new Map();
+      seen.set(value, result);
+      value.forEach((v, k) => result.set(clone(k), clone(v)));
+    } else if (value instanceof Set) {
+      result = new Set();
+      seen.set(value, result);
+      value.forEach((v) => result.add(clone(v)));
+    } else if (Array.isArray(value)) {
+      result = [];
+      seen.set(value, result);
+      value.forEach((v, i) => {
+        result[i] = clone(v);
+      });
+    } else {
+      result = {};
+      seen.set(value, result);
+      Object.keys(value).forEach((k) => {
+        result[k] = clone(value[k]);
+      });
+    }
+    return result;
+  };
+  return clone(obj);
 }
 
 /**
@@ -285,7 +320,7 @@ export default class Game {
     if (!["fold", "check", "call", "bet"].includes(action)) {
       throw new Error(`Unknown action: ${action}`);
     }
-    const s = clone(state);
+    const s = deepClone(state);
     const idx = s.currentPlayer;
     const p = s.players[idx];
     const toCallBefore = this.toCallOf(s, idx);
