@@ -102,11 +102,16 @@ export default function App() {
 
         <PokerTable state={state} pot={pot} winners={winners} />
 
-        {state.currentPlayer === 0 &&
-          status === "playing" &&
-          !state.players[0].folded && (
-            <ActionBar actions={availableActions} onAction={handleAction} />
-          )}
+          <ActionBar
+            actions={
+              state.currentPlayer === 0 &&
+              status === "playing" &&
+              !state.players[0].folded
+                ? availableActions
+                : []
+            }
+            onAction={handleAction}
+          />
 
         {status !== "playing" && winners.length > 0 && (
           <WinnerModal

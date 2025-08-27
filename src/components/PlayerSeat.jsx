@@ -54,7 +54,7 @@ export default function PlayerSeat({
     : "bg-blue-600";
   return (
     <div
-      className={`p-3 min-w-[220px] rounded-xl text-white ${
+      className={`p-3 min-w-[220px] rounded-xl text-white transition-all duration-300 ease-in-out ${
         isTurn ? "bg-white/10 ring-2 ring-amber-300" : "bg-black/40"
       } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
     >
@@ -102,7 +102,7 @@ export default function PlayerSeat({
         <div className="h-2 bg-white/30 rounded overflow-hidden">
           <motion.div
             animate={{ width: `${(timeLeft / MAX_TIME) * 100}%` }}
-            transition={{ ease: "linear", duration: 1 }}
+            transition={{ ease: "easeInOut", duration: 1 }}
             className="h-full bg-amber-300"
           />
         </div>
