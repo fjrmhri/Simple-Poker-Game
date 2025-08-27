@@ -1,4 +1,5 @@
 // src/core/models.js
+/* global globalThis */
 import { getWinners as evaluateWinners } from "./handEvaluator";
 
 // Util
