@@ -8,7 +8,8 @@ export default function ActionPanel({
   handleAction,
   status,
 }) {
-  const [betAmount, setBetAmount] = useState(0);
+  // store raw input to validate
+  const [betAmount, setBetAmount] = useState("");
 
   if (status !== "CHOICE") return null;
 
@@ -18,22 +19,39 @@ export default function ActionPanel({
         {availableActions.map((action, idx) => {
           if (Array.isArray(action)) {
             const [act, range] = action;
+            const min = range[0];
+            const max = range[1];
+            const numericBet = parseInt(betAmount, 10);
+            const isValid = !isNaN(numericBet) && numericBet >= min;
             return (
-              <div key={idx} className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={range[0]}
-                  max={range[1]}
-                  value={betAmount}
-                  onChange={(e) => setBetAmount(Number(e.target.value))}
-                  className="p-1 rounded text-black w-20"
-                />
-                <button
-                  onClick={() => handleAction(act, betAmount, range)}
-                  className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 shadow transition transform hover:scale-105"
-                >
-                  Bet/Raise
-                </button>
+              <div key={idx} className="flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={min}
+                    max={max}
+                    value={betAmount}
+                    onChange={(e) => setBetAmount(e.target.value)}
+                    className="p-1 rounded text-black w-20"
+                  />
+                  <button
+                    onClick={() => {
+                      const clamped = Math.min(Math.max(numericBet, min), max);
+                      handleAction(act, clamped, range);
+                    }}
+                    disabled={!isValid}
+                    className={`px-4 py-2 rounded-lg shadow transition transform hover:scale-105 ${
+                      isValid
+                        ? "bg-blue-600 hover:bg-blue-700"
+                        : "bg-blue-400 cursor-not-allowed opacity-50"
+                    }`}
+                  >
+                    Bet/Raise
+                  </button>
+                </div>
+                {!isValid && (
+                  <p className="text-red-500 text-sm">Enter a valid amount ≥ {min}</p>
+                )}
               </div>
             );
           }
