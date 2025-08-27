@@ -55,6 +55,8 @@ function nextAliveIndex(players, from) {
   if (!Array.isArray(players)) {
     throw new Error("nextAliveIndex expects players array");
   }
+  const active = players.filter((p) => !p.folded && p.chips > 0);
+  if (active.length === 0) return -1;
   const n = players.length;
   let idx = (from + 1) % n;
   while (players[idx].folded || players[idx].chips === 0) {
@@ -366,7 +368,8 @@ export default class Game {
     }
 
     if (!s.endgame && s.round !== "Showdown") {
-      s.currentPlayer = nextAliveIndex(s.players, s.currentPlayer);
+      const nextIdx = nextAliveIndex(s.players, s.currentPlayer);
+      s.currentPlayer = nextIdx !== -1 ? nextIdx : -1;
     }
 
     return s;
