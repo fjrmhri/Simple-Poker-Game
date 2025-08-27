@@ -20,7 +20,7 @@ export default function App() {
   } = usePokerEngine([
     { name: "You", isBot: false },
     { name: "Lucy", isBot: true, level: "normal" },
-        { name: "Carl", isBot: true, level: "hard" },
+    { name: "Carl", isBot: true, level: "hard" },
   ]);
 
   // Menggunakan suara yang sama untuk semua aksi
@@ -76,7 +76,7 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto p-4">
-        <h1 className="text-white mb-2">Pyker (React)</h1>
+        <h1 className="text-white mb-2">PokeReact</h1>
         <div className="text-gray-200 mb-2">
           Status: <b>{status}</b>
         </div>
