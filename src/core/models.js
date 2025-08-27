@@ -19,10 +19,13 @@ const RANKS = [
 ];
 const SUITS = ["C", "D", "H", "S"]; // Clubs, Diamonds, Hearts, Spades
 
+/**
+ * Generate a new shuffled deck of cards.
+ * @returns {Array} Shuffled deck.
+ */
 function makeDeck() {
   const deck = [];
   for (const r of RANKS) for (const s of SUITS) deck.push({ rank: r, suit: s });
-  // shuffle
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -30,16 +33,28 @@ function makeDeck() {
   return deck;
 }
 
+/**
+ * Deep clone a simple object.
+ * @param {object} obj - Object to clone.
+ * @returns {object} Cloned object.
+ */
 function clone(obj) {
+  if (obj === null || obj === undefined) {
+    throw new Error("clone requires a valid object");
+  }
   return JSON.parse(JSON.stringify(obj));
 }
 
-
-function visibleCardBack() {
-  return { back: true };
-}
-
+/**
+ * Get next active player's index.
+ * @param {Array} players - List of players.
+ * @param {number} from - Start index.
+ * @returns {number} Index of next active player.
+ */
 function nextAliveIndex(players, from) {
+  if (!Array.isArray(players)) {
+    throw new Error("nextAliveIndex expects players array");
+  }
   const n = players.length;
   let idx = (from + 1) % n;
   while (players[idx].folded) {
@@ -48,7 +63,15 @@ function nextAliveIndex(players, from) {
   return idx;
 }
 
+/**
+ * Check if all active players have matched the current bet.
+ * @param {Array} players - List of players.
+ * @returns {boolean} True if bets are matched.
+ */
 function allActiveMatchedBet(players) {
+  if (!Array.isArray(players)) {
+    throw new Error("allActiveMatchedBet expects players array");
+  }
   let target = null;
   for (const p of players) {
     if (p.folded) continue;
@@ -58,13 +81,23 @@ function allActiveMatchedBet(players) {
   return true;
 }
 
+/**
+ * Count active (not folded) players.
+ * @param {Array} players - List of players.
+ * @returns {number} Number of active players.
+ */
 function countActive(players) {
+  if (!Array.isArray(players)) {
+    throw new Error("countActive expects players array");
+  }
   return players.filter((p) => !p.folded).length;
 }
 
 // Bagi pot ke pemenang secara merata.
 function distributePot(state) {
-  if (!state.winners || state.winners.length === 0) return;
+  if (!state?.winners || state.winners.length === 0) {
+    throw new Error("distributePot requires winners to distribute");
+  }
   const share = Math.floor(state.pot / state.winners.length);
   const remainder = state.pot % state.winners.length;
   state.winners.forEach((idx) => {
@@ -79,8 +112,11 @@ function distributePot(state) {
 // Super simpel evaluator: high card dari 7 kartu (placeholder, cukup untuk demo UI)
 
 export default class Game {
+  /**
+   * Initialize poker game instance.
+   * @param {Array} players - Initial players list.
+   */
   constructor(players = []) {
-    // players input: [{ name, isBot?, level?, avatar? }]
     this.templatePlayers = players.map((p) => ({
       name: p.name,
       isBot: !!p.isBot,
@@ -90,6 +126,11 @@ export default class Game {
     this.dealerIndex = 0;
   }
 
+  /**
+   * Start a new hand or game.
+   * @param {object|null} prevState - Previous game state if continuing.
+   * @returns {object} New game state.
+   */
   start(prevState = null) {
     const deck = makeDeck();
     let players;
@@ -144,16 +185,34 @@ export default class Game {
   }
 
   // Derivations
+  /**
+   * Get the current highest bet on table.
+   */
   currentBet(state) {
+    if (!state?.players) {
+      throw new Error("currentBet requires valid state");
+    }
     return Math.max(...state.players.map((p) => p.bet));
   }
 
+  /**
+   * Amount needed for player to call current bet.
+   */
   toCallOf(state, idx) {
+    if (!state?.players || !state.players[idx]) {
+      throw new Error("toCallOf requires valid player index");
+    }
     const p = state.players[idx];
     return Math.max(0, this.currentBet(state) - p.bet);
   }
 
+  /**
+   * Determine available actions for current player.
+   */
   actions(state) {
+    if (!state?.players) {
+      throw new Error("actions requires valid state");
+    }
     const p = state.players[state.currentPlayer];
     if (state.endgame || state.round === "Showdown") return [];
     if (p.folded) return [];
@@ -173,17 +232,35 @@ export default class Game {
     return acts;
   }
 
+  /**
+   * Calculate total pot value including current bets.
+   */
   calculatePot(state) {
+    if (!state?.players) {
+      throw new Error("calculatePot requires valid state");
+    }
     return state.pot + state.players.reduce((s, p) => s + p.bet, 0);
   }
 
+  /**
+   * Determine overall game status.
+   */
   checkGameStatus(state) {
+    if (!state) {
+      throw new Error("checkGameStatus requires state");
+    }
     if (state.endgame) return "ended";
     if (state.round === "Showdown") return "showdown";
     return "playing";
   }
 
+  /**
+   * Determine winner indices when in showdown.
+   */
   checkWinners(state) {
+    if (!state?.players) {
+      throw new Error("checkWinners requires valid state");
+    }
     if (state.round !== "Showdown") return [];
     const alive = state.players
       .map((p, i) => ({ ...p, i }))
@@ -194,8 +271,16 @@ export default class Game {
     return winners.map((w) => w.i);
   }
 
-  // Apply action immutably
+  /**
+   * Apply player action immutably and return new state.
+   */
   applyAction(state, action, amount = 0) {
+    if (!state?.players) {
+      throw new Error("applyAction requires valid state");
+    }
+    if (!["fold", "check", "call", "bet"].includes(action)) {
+      throw new Error(`Unknown action: ${action}`);
+    }
     const s = clone(state);
     const idx = s.currentPlayer;
     const p = s.players[idx];
@@ -205,7 +290,6 @@ export default class Game {
       p.folded = true;
       p.lastAction = "fold";
     } else if (action === "check") {
-      // only allowed if toCall = 0 (diasumsikan UI sudah memberi benar)
       p.lastAction = "check";
     } else if (action === "call") {
       const need = toCallBefore;
@@ -214,7 +298,6 @@ export default class Game {
       p.bet += pay;
       p.lastAction = "call";
     } else if (action === "bet") {
-      // Bisa bet (jika toCall=0) atau raise (jika toCall>0)
       const total = toCallBefore + (amount || 0);
       const pay = Math.min(total, p.chips);
       p.chips -= pay;
@@ -222,9 +305,7 @@ export default class Game {
       p.lastAction = toCallBefore > 0 ? "raise" : "bet";
     }
 
-    // Jika tinggal 1 aktif -> langsung showdown
     if (countActive(s.players) === 1) {
-      // masukkan semua bet ke pot
       s.pot += s.players.reduce((sum, pl) => sum + pl.bet, 0);
       s.players.forEach((pl) => {
         pl.bet = 0;
@@ -237,9 +318,7 @@ export default class Game {
       return s;
     }
 
-    // Jika semua aktif sudah menyamakan bet -> advance round
     if (allActiveMatchedBet(s.players)) {
-      // masukkan bet ke pot
       s.pot += s.players.reduce((sum, pl) => sum + pl.bet, 0);
       s.players.forEach((pl) => {
         pl.bet = 0;
@@ -247,7 +326,6 @@ export default class Game {
       });
 
       if (s.round === "Preflop") {
-        // flop
         s.community.push(s.deck.pop(), s.deck.pop(), s.deck.pop());
         s.round = "Flop";
       } else if (s.round === "Flop") {
@@ -264,7 +342,6 @@ export default class Game {
       }
     }
 
-    // Pindah giliran ke pemain berikutnya yang belum fold (kecuali sudah showdown)
     if (!s.endgame && s.round !== "Showdown") {
       s.currentPlayer = nextAliveIndex(s.players, s.currentPlayer);
     }

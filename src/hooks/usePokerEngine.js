@@ -3,7 +3,14 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Game from "../core/models";
 import { AIBot } from "../core/ai";
 
+/**
+ * React hook that manages poker game state and actions.
+ * @param {Array} initialPlayers - Initial players configuration.
+ */
 export default function usePokerEngine(initialPlayers) {
+  if (!Array.isArray(initialPlayers)) {
+    throw new Error("usePokerEngine requires an array of players");
+  }
   const [game] = useState(() => new Game(initialPlayers));
 
   // state game
@@ -31,7 +38,11 @@ export default function usePokerEngine(initialPlayers) {
       state,
       {
         push: ({ action, amount }) => {
-          setState((prev) => game.applyAction(prev, action, amount));
+          try {
+            setState((prev) => game.applyAction(prev, action, amount));
+          } catch (err) {
+            console.error("Bot action failed", err);
+          }
         },
       },
       current.level || "easy"
@@ -43,19 +54,34 @@ export default function usePokerEngine(initialPlayers) {
     return () => clearTimeout(t);
   }, [state, status, game]);
 
+  // handle player action
   const handleAction = useCallback(
     (action, amount = 0) => {
-      setState((prev) => game.applyAction(prev, action, amount));
+      try {
+        setState((prev) => game.applyAction(prev, action, amount));
+      } catch (err) {
+        console.error("Invalid player action", err);
+      }
     },
     [game]
   );
 
+  // start a new hand
   const startNewHand = useCallback(() => {
-    setState((prev) => game.start(prev));
+    try {
+      setState((prev) => game.start(prev));
+    } catch (err) {
+      console.error("Failed to start new hand", err);
+    }
   }, [game]);
 
+  // reset entire game
   const resetGame = useCallback(() => {
-    setState(() => game.start());
+    try {
+      setState(() => game.start());
+    } catch (err) {
+      console.error("Failed to reset game", err);
+    }
   }, [game]);
 
   return {
