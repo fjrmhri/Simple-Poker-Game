@@ -44,6 +44,7 @@ export default function PlayerSeat({
     : "";
   const getStatusText = () => {
     if (player.folded) return "Fold";
+    if (player.allIn) return "All In";
     if (player.lastAction === "bet" || player.lastAction === "raise") {
       return `${player.lastAction === "bet" ? "Bet" : "Raise"} ${
         player.lastActionAmount ?? 0
@@ -56,6 +57,8 @@ export default function PlayerSeat({
   const statusText = getStatusText();
   const statusColor = player.folded
     ? "bg-gray-600"
+    : player.allIn
+    ? "bg-purple-600"
     : isTurn
     ? "bg-green-600"
     : "bg-blue-600";
@@ -99,10 +102,13 @@ export default function PlayerSeat({
         {player.bet > 0 && (
           <span className="text-xs">Bet: {player.bet}</span>
         )}
+        {player.taruhanSaatIni > 0 && (
+          <span className="text-xs">Bet: {player.taruhanSaatIni}</span>
+        )}
       </div>
-      <div className="mt-2 flex gap-2">
-        <CardImg card={showFace ? c1 : { back: true }} w={60} />
-        <CardImg card={showFace ? c2 : { back: true }} w={60} />
+      <div className="mt-2 flex gap-3 justify-center">
+        <CardImg card={showFace ? c1 : { back: true }} w={75} />
+        <CardImg card={showFace ? c2 : { back: true }} w={75} />
       </div>
       {showFace && <div className="mt-1 text-xs text-center">{comboName}</div>}
       <div className="mt-2">
