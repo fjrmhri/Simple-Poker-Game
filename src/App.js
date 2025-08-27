@@ -18,9 +18,19 @@ export default function App() {
     startNewHand,
     resetGame,
   } = usePokerEngine([
-    { name: "You", isBot: false },
-    { name: "Lucy", isBot: true, level: "normal" },
-    { name: "Carl", isBot: true, level: "hard" },
+    { name: "You", isBot: false, avatar: "/assets/others/dealer.png" },
+    {
+      name: "Lucy",
+      isBot: true,
+      level: "normal",
+      avatar: "/assets/others/github_icon.png",
+    },
+    {
+      name: "Carl",
+      isBot: true,
+      level: "hard",
+      avatar: "/assets/others/instagram_icon.png",
+    },
   ]);
 
   // Menggunakan suara yang sama untuk semua aksi
@@ -28,6 +38,15 @@ export default function App() {
 
   const prevCommunity = useRef(state.community.length);
   const prevPot = useRef(pot);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "test") return;
+    const bg = new Audio("/sounds/minecraft_level_up.mp3");
+    bg.loop = true;
+    bg.volume = 0.2;
+    bg.play().catch(() => {});
+    return () => bg.pause();
+  }, []);
 
   // Menggunakan suara saat Preflop
   useEffect(() => {

@@ -10,11 +10,22 @@ export default function PlayerSeat({
   isYou = false,
   isTurn = false,
   reveal = false,
+  round,
 }) {
   const showFace = isYou || reveal;
   const [c1, c2] = player.hand || [];
   const MAX_TIME = 30;
   const [timeLeft, setTimeLeft] = useState(MAX_TIME);
+  const [avatar, setAvatar] = useState(
+    player.avatar || "/assets/others/dealer.png"
+  );
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatar(URL.createObjectURL(file));
+    }
+  };
 
   useEffect(() => {
     if (!isTurn) {
@@ -31,19 +42,56 @@ export default function PlayerSeat({
   const comboName = showFace
     ? getHandName(player.hand || [], community || [])
     : "";
+  const statusText = player.folded
+    ? "Folded"
+    : isTurn
+    ? "Betting"
+    : "Waiting";
+  const statusColor = player.folded
+    ? "bg-gray-600"
+    : isTurn
+    ? "bg-green-600"
+    : "bg-blue-600";
   return (
     <div
       className={`p-3 min-w-[220px] rounded-xl text-white ${
         isTurn ? "bg-white/10 ring-2 ring-amber-300" : "bg-black/40"
-      }`}
+      } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
     >
-      <div className="font-bold">
-        {player.name} {player.folded ? "(Fold)" : ""}
+      <div className="flex items-center gap-2">
+        <label className="relative cursor-pointer">
+          <img
+            src={avatar}
+            alt={player.name}
+            className="w-10 h-10 rounded-full border-2 border-white object-cover"
+          />
+          {isYou && (
+            <input
+              type="file"
+              onChange={handleAvatarChange}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          )}
+        </label>
+        <div className="font-bold flex-1">
+          {player.name} {player.folded ? "(Fold)" : ""}
+        </div>
+        <span
+          className={`text-xs font-bold px-2 py-0.5 rounded ${statusColor}`}
+        >
+          {statusText}
+        </span>
       </div>
-      <div className="text-xs opacity-80">
-        Chips: {player.chips} &nbsp; • &nbsp; Bet: {player.bet}
+      <div className="mt-1 flex items-center gap-2 text-sm opacity-90">
+        <img
+          src="/assets/others/bet.png"
+          alt="chips"
+          className="w-4 h-4 drop-shadow"
+        />
+        <span className="text-lg font-bold">{player.chips}</span>
+        <span className="text-xs">Bet: {player.bet}</span>
       </div>
-      <div className="mt-2 flex gap-2">
+      <div className="mt-2 flex gap-3">
         <CardImg card={showFace ? c1 : { back: true }} />
         <CardImg card={showFace ? c2 : { back: true }} />
       </div>

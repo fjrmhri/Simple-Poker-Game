@@ -12,16 +12,17 @@ function imgSrc(card) {
 export default function CardImg({ card, w = 72 }) {
   return (
     <motion.img
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      initial={{ rotateY: 90, opacity: 0 }}
+      animate={{ rotateY: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
       src={imgSrc(card)}
       alt={card?.back ? "Back" : `${card?.rank ?? "?"}${card?.suit ?? ""}`}
       style={{
         width: w,
         height: "auto",
-        borderRadius: 8,
+        borderRadius: 12,
         border: "2px solid white",
+        boxShadow: "0 4px 8px rgba(0,0,0,0.5)",
       }}
     />
   );

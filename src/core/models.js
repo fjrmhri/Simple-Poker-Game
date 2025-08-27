@@ -80,11 +80,12 @@ function distributePot(state) {
 
 export default class Game {
   constructor(players = []) {
-    // players input: [{ name, isBot?, level? }]
+    // players input: [{ name, isBot?, level?, avatar? }]
     this.templatePlayers = players.map((p) => ({
       name: p.name,
       isBot: !!p.isBot,
       level: p.level || "easy",
+      avatar: p.avatar || "/assets/others/dealer.png",
     }));
     this.dealerIndex = 0;
   }
@@ -99,6 +100,7 @@ export default class Game {
         name: p.name,
         isBot: p.isBot,
         level: p.level,
+        avatar: p.avatar,
         chips: 1000,
         bet: 0,
         folded: false,
