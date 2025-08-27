@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 
 export default function ActionBar({ actions = [], onAction }) {
-  const [amount, setAmount] = useState(10);
+  // keep raw input value to allow validation and user editing
+  const [amount, setAmount] = useState("10");
 
   const renderBtn = (label, handler, color, disabled) => (
     <button
@@ -22,6 +23,11 @@ export default function ActionBar({ actions = [], onAction }) {
   const call = actions.find((a) => a.type === "call");
   const check = actions.find((a) => a.type === "check");
   const fold = actions.find((a) => a.type === "fold");
+
+  const min = hasBet?.min ?? 1;
+  const max = hasBet?.max ?? 9999;
+  const numericAmount = parseInt(amount, 10);
+  const isValidAmount = !isNaN(numericAmount) && numericAmount >= min;
 
   const callOrCheck = call
     ? { label: "Call", disabled: false }
@@ -44,19 +50,25 @@ export default function ActionBar({ actions = [], onAction }) {
         <input
           type="number"
           value={amount}
-          min={hasBet?.min ?? 1}
-          max={hasBet?.max ?? 9999}
-          onChange={(e) => setAmount(parseInt(e.target.value || "0", 10))}
+          min={min}
+          max={max}
+          onChange={(e) => setAmount(e.target.value)}
           disabled={!hasBet}
           className="w-24 p-1 rounded border border-gray-500 bg-gray-800 text-white transition-colors disabled:bg-gray-700 disabled:text-gray-400"
         />
         {renderBtn(
           check ? "Bet" : "Raise",
-          () => onAction("bet", amount),
+          () => {
+            const clamped = Math.min(Math.max(numericAmount, min), max);
+            onAction("bet", clamped);
+          },
           "bg-blue-600",
-          !hasBet
+          !hasBet || !isValidAmount
         )}
       </div>
+      {!isValidAmount && hasBet && (
+        <p className="text-red-500 text-sm w-full text-center">Enter a valid amount ≥ {min}</p>
+      )}
     </div>
   );
 }
