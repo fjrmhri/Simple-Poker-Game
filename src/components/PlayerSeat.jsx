@@ -50,8 +50,8 @@ export default function PlayerSeat({
     : "bg-blue-600";
   return (
     <div
-      className={`p-2 min-w-[180px] rounded-xl text-white transition-all duration-300 ease-in-out ${
-        isTurn ? "bg-white/10 ring-2 ring-white" : "bg-black/40"
+      className={`p-2 min-w-[180px] rounded-xl transition-all duration-300 ease-in-out border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] text-[#e5e7eb] bg-[rgba(0,0,0,0.3)] ${
+        isTurn ? "ring-2 ring-white" : ""
       } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
     >
       <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ export default function PlayerSeat({
           <img
             src={avatar}
             alt={player.name}
-            className="w-10 h-10 rounded-full border-2 border-white object-cover"
+            className="w-10 h-10 rounded-full border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] object-cover"
           />
           {isYou && (
             <input
@@ -83,7 +83,9 @@ export default function PlayerSeat({
           className="w-4 h-4 drop-shadow"
         />
         <span className="text-lg font-bold">{player.chips}</span>
-        <span className="text-xs">Bet: {player.bet}</span>
+        {player.bet > 0 && (
+          <span className="text-xs">Bet: {player.bet}</span>
+        )}
       </div>
       {player.lastAction && (
         <div className="mt-1 text-xs italic opacity-80">
