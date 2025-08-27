@@ -71,7 +71,7 @@ export default function App() {
           />
         )}
 
-        {state.players[0].chips <= 0 && (
+        {status !== "playing" && state.players[0].chips <= 0 && (
           <OutOfChipsModal
             onRestart={resetGame}
             onExit={() => (window.location.href = "/")}

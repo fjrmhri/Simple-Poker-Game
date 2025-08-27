@@ -57,7 +57,7 @@ function nextAliveIndex(players, from) {
   }
   const n = players.length;
   let idx = (from + 1) % n;
-  while (players[idx].folded) {
+  while (players[idx].folded || players[idx].chips === 0) {
     idx = (idx + 1) % n;
   }
   return idx;
@@ -74,7 +74,7 @@ function allActiveMatchedBet(players) {
   }
   let target = null;
   for (const p of players) {
-    if (p.folded) continue;
+    if (p.folded || p.chips === 0) continue;
     // Semua pemain aktif harus sudah melakukan aksi terlebih dahulu
     if (p.lastAction === null) return false;
     if (target === null) target = p.bet;
@@ -219,7 +219,7 @@ export default class Game {
     }
     const p = state.players[state.currentPlayer];
     if (state.endgame || state.round === "Showdown") return [];
-    if (p.folded) return [];
+    if (p.folded || p.chips === 0) return [];
 
     const toCall = this.toCallOf(state, state.currentPlayer);
     const acts = [];
@@ -350,6 +350,19 @@ export default class Game {
         distributePot(s);
         s.endgame = true;
       }
+    }
+    const activeWithChips = s.players.filter(
+      (pl) => !pl.folded && pl.chips > 0
+    );
+
+    if (!s.endgame && s.round !== "Showdown" && activeWithChips.length <= 1) {
+      while (s.community.length < 5) {
+        s.community.push(s.deck.pop());
+      }
+      s.round = "Showdown";
+      s.winners = this.checkWinners(s);
+      distributePot(s);
+      s.endgame = true;
     }
 
     if (!s.endgame && s.round !== "Showdown") {
