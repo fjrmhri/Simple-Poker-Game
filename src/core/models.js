@@ -1,4 +1,5 @@
 // src/core/models.js
+/* global structuredClone */
 import { getWinners as evaluateWinners } from "./handEvaluator";
 
 // Util
@@ -43,8 +44,8 @@ export function deepClone(obj) {
   if (obj === null || obj === undefined) {
     throw new Error("deepClone requires a valid object");
   }
-  if (typeof globalThis.structuredClone === "function") {
-    return globalThis.structuredClone(obj);
+  if (typeof structuredClone === "function") {
+    return structuredClone(obj);
   }
   const seen = new WeakMap();
   const clone = (value) => {
