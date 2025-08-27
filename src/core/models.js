@@ -75,6 +75,8 @@ function allActiveMatchedBet(players) {
   let target = null;
   for (const p of players) {
     if (p.folded) continue;
+    // Semua pemain aktif harus sudah melakukan aksi terlebih dahulu
+    if (p.lastAction === null) return false;
     if (target === null) target = p.bet;
     if (p.bet !== target) return false;
   }
