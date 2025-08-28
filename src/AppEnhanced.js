@@ -92,7 +92,7 @@ export default function AppEnhanced() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen flex flex-col overflow-y-auto bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Header */}
       <header className="bg-black/50 backdrop-blur-sm border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -120,7 +120,7 @@ export default function AppEnhanced() {
       </header>
 
       {/* Main game area */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1">
         <PokerTableEnhanced 
           state={state} 
           pot={pot} 

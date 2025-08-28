@@ -11,7 +11,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
 
   return (
     <div className="p-4">
-      <div className="relative mx-auto max-w-6xl p-6 rounded-[60px] border-4 border-yellow-600 shadow-[0_0_0_6px_#000,0_0_0_12px_#fff,0_0_30px_rgba(255,215,0,0.3)] bg-gradient-to-br from-green-800 via-green-700 to-green-900 text-white font-mono">
+      <div className="relative mx-auto max-w-4xl p-4 rounded-[60px] border-4 border-yellow-600 shadow-[0_0_0_6px_#000,0_0_0_12px_#fff,0_0_30px_rgba(255,215,0,0.3)] bg-gradient-to-br from-green-800 via-green-700 to-green-900 text-white font-mono">
         
         {/* Header info */}
         <div className="flex justify-between items-center mb-6">
@@ -43,7 +43,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
         </div>
 
         {/* Community cards dengan animasi */}
-        <div className="flex justify-center gap-4 my-6 min-h-[120px]">
+        <div className="flex justify-center gap-3 my-4 min-h-[120px]">
           {[0, 1, 2, 3, 4].map((i) => (
             <motion.div
               key={i}
@@ -84,7 +84,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
         </div>
 
         {/* Players layout */}
-        <div className="relative mt-8 min-h-[320px]">
+        <div className="relative mt-4 min-h-[260px]">
           {/* Player (you) at bottom center */}
           <motion.div
             initial={{ y: 50, opacity: 0 }}
@@ -107,7 +107,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
           </motion.div>
 
           {/* Bots on the left side */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-6">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-4">
             {players
               .slice(1, 1 + Math.ceil((players.length - 1) / 2))
               .map((p, idx) => (
@@ -133,7 +133,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
           </div>
 
           {/* Bots on the right side */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-6 items-end">
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 items-end">
             {players
               .slice(1 + Math.ceil((players.length - 1) / 2))
               .map((p, idx) => (
