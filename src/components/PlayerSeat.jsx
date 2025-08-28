@@ -45,6 +45,7 @@ export default function PlayerSeat({
     : "";
   const getStatusText = () => {
     if (player.folded) return "Fold";
+    if (player.allIn) return "All In";
     if (player.lastAction === "bet" || player.lastAction === "raise") {
       return `${player.lastAction === "bet" ? "Bet" : "Raise"} ${
         player.lastActionAmount ?? 0
@@ -57,10 +58,13 @@ export default function PlayerSeat({
   const statusText = getStatusText();
   const statusColor = player.folded
     ? "bg-gray-600"
+    : player.allIn
+    ? "bg-purple-600"
     : isTurn
     ? "bg-green-600"
     : "bg-blue-600";
   return (
+
     <div
       className={`relative p-2 min-w-[180px] rounded-xl transition-all duration-300 ease-in-out border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] bg-black/40 text-gray-100 ${
         isTurn ? "ring-2 ring-white" : ""
@@ -69,6 +73,13 @@ export default function PlayerSeat({
       {isDealer && (
         <div className="absolute -top-3 -left-3 w-6 h-6 flex items-center justify-center rounded-full bg-yellow-400 text-black text-xs font-bold shadow">D</div>
       )}
+
+      <div
+        className={`p-2 min-w-[200px] rounded-xl transition-all duration-300 ease-in-out border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] bg-black/40 text-gray-100 ${
+          isTurn ? "ring-2 ring-white" : ""
+        } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
+      >
+
       <div className="flex items-center gap-2">
         <label className="relative cursor-pointer">
           <img
@@ -103,11 +114,21 @@ export default function PlayerSeat({
         {player.bet > 0 && (
           <span className="text-xs">Bet: {player.bet}</span>
         )}
+        {player.taruhanSaatIni > 0 && (
+          <span className="text-xs">Bet: {player.taruhanSaatIni}</span>
+        )}
       </div>
+
       <div className="mt-2 flex gap-2">
         <CardImg card={showFace ? c1 : { back: true }} w={72} />
         <CardImg card={showFace ? c2 : { back: true }} w={72} />
       </div>
+
+        <div className="mt-2 flex gap-3 justify-center">
+          <CardImg card={showFace ? c1 : { back: true }} w={90} />
+          <CardImg card={showFace ? c2 : { back: true }} w={90} />
+        </div>
+
       {showFace && <div className="mt-1 text-xs text-center">{comboName}</div>}
       <div className="mt-2">
         <div className="h-2 rounded bg-gray-700 overflow-hidden">

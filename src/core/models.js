@@ -1,5 +1,13 @@
 // src/core/models.js
+
 /* global structuredClone */
+
+
+/* global globalThis */
+
+/* global structuredClone */
+
+
 import { getWinners as evaluateWinners } from "./handEvaluator";
 
 // Util
