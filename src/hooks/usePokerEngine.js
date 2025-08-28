@@ -11,11 +11,20 @@ export default function usePokerEngine(initialPlayers) {
   if (!Array.isArray(initialPlayers)) {
     throw new Error("usePokerEngine requires an array of players");
   }
-  const [game] = useState(() => new Game(initialPlayers));
+
+  // allow game to be recreated when initialPlayers changes (e.g. custom name/avatar)
+  const [game, setGame] = useState(() => new Game(initialPlayers));
 
   // state game
   const [state, setState] = useState(() => game.start());
   const [availableActions, setAvailableActions] = useState([]);
+
+  // reinitialize game and state when player configuration changes
+  useEffect(() => {
+    const newGame = new Game(initialPlayers);
+    setGame(newGame);
+    setState(newGame.start());
+  }, [initialPlayers]);
 
   // derived
   const pot = useMemo(() => game.calculatePot(state), [state, game]);
