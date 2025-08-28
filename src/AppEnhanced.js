@@ -37,21 +37,26 @@ export default function AppEnhanced() {
     sedangBerjalan,
     pemainUtamaHabisChip,
     pemainUtamaMenang,
-  } = usePokerEngineEnhanced([
-    playerConfig || { nama: "You", adalahBot: false, avatar: "/assets/others/avatar2.jpg" },
-    {
-      nama: "Lucy",
-      adalahBot: true,
-      tingkatKesulitan: "normal",
-      avatar: "/assets/others/avatar1.jpg",
-    },
-    {
-      nama: "Carl",
-      adalahBot: true,
-      tingkatKesulitan: "sulit",
-      avatar: "/assets/others/avatar3.jpg",
-    },
-  ]);
+    } = usePokerEngineEnhanced(
+      React.useMemo(
+        () => [
+          playerConfig || { nama: "You", adalahBot: false, avatar: "/assets/others/avatar2.jpg" },
+          {
+            nama: "Lucy",
+            adalahBot: true,
+            tingkatKesulitan: "normal",
+            avatar: "/assets/others/avatar1.jpg",
+          },
+          {
+            nama: "Carl",
+            adalahBot: true,
+            tingkatKesulitan: "sulit",
+            avatar: "/assets/others/avatar3.jpg",
+          },
+        ],
+        [playerConfig]
+      )
+    );
 
   // Suara untuk pemenang
   const mainkanSuaraMenang = useSound("/sounds/minecraft_level_up.mp3");
@@ -87,7 +92,7 @@ export default function AppEnhanced() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Header */}
       <header className="bg-black/50 backdrop-blur-sm border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -115,7 +120,7 @@ export default function AppEnhanced() {
       </header>
 
       {/* Main game area */}
-      <main className="flex-1">
+      <main className="flex-1 overflow-hidden">
         <PokerTableEnhanced 
           state={state} 
           pot={pot} 

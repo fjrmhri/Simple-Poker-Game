@@ -11,11 +11,18 @@ export default function usePokerEngineEnhanced(pemainAwal) {
   if (!Array.isArray(pemainAwal)) {
     throw new Error("usePokerEngineEnhanced membutuhkan array pemain");
   }
-  
-  const [game] = useState(() => new GamePoker(pemainAwal));
+
+  // recreate game when player config changes so custom name/avatar apply
+  const [game, setGame] = useState(() => new GamePoker(pemainAwal));
   const [state, setState] = useState(() => game.mulai());
   const [aksiTersedia, setAksiTersedia] = useState([]);
   const [sedangBerjalan, setSedangBerjalan] = useState(false);
+
+  useEffect(() => {
+    const newGame = new GamePoker(pemainAwal);
+    setGame(newGame);
+    setState(newGame.mulai());
+  }, [pemainAwal]);
 
   // State turunan
   const pot = useMemo(() => game.hitungPot(state), [state, game]);

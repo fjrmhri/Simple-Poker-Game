@@ -69,7 +69,7 @@ export default function PlayerSeatEnhanced({
     <motion.div
       whileHover={{ scale: adalahGiliran ? 1.02 : 1 }}
       className={`
-        relative p-4 min-w-[200px] rounded-2xl transition-all duration-300 ease-in-out
+        relative p-4 min-w-[220px] rounded-2xl transition-all duration-300 ease-in-out
         border-2 shadow-xl backdrop-blur-sm
         ${adalahGiliran 
           ? "border-yellow-400 shadow-[0_0_20px_rgba(255,215,0,0.5)] bg-gradient-to-br from-yellow-900/30 to-yellow-800/20" 
@@ -188,12 +188,12 @@ export default function PlayerSeatEnhanced({
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          <CardImg 
-            card={tampilkanMuka ? kartu1 : { back: true }} 
-            w={75} 
+          <CardImg
+            card={tampilkanMuka ? kartu1 : { back: true }}
+            w={90}
             className={`transition-all duration-300 transform-gpu ${
-              tampilkanMuka 
-                ? "drop-shadow-2xl hover:drop-shadow-3xl hover:rotate-3" 
+              tampilkanMuka
+                ? "drop-shadow-2xl hover:drop-shadow-3xl hover:rotate-3"
                 : "hover:scale-105"
             }`}
           />
@@ -203,12 +203,12 @@ export default function PlayerSeatEnhanced({
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          <CardImg 
-            card={tampilkanMuka ? kartu2 : { back: true }} 
-            w={75} 
+          <CardImg
+            card={tampilkanMuka ? kartu2 : { back: true }}
+            w={90}
             className={`transition-all duration-300 transform-gpu ${
-              tampilkanMuka 
-                ? "drop-shadow-2xl hover:drop-shadow-3xl hover:-rotate-3" 
+              tampilkanMuka
+                ? "drop-shadow-2xl hover:drop-shadow-3xl hover:-rotate-3"
                 : "hover:scale-105"
             }`}
           />

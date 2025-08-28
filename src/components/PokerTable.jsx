@@ -27,14 +27,14 @@ export default function PokerTable({ state, pot, winners }) {
             Pot: <b>{pot}</b>
           </motion.div>
         </div>
-        {/* Community cards */}
-        <div className="flex gap-2 justify-center my-4">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <CardImg key={i} card={community[i]} w={72} />
-          ))}
-        </div>
-        {/* Players layout */}
-        <div className="relative mt-4 h-[220px]">
+          {/* Community cards */}
+          <div className="flex gap-4 justify-center my-4">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <CardImg key={i} card={community[i]} w={100} />
+            ))}
+          </div>
+          {/* Players layout */}
+          <div className="relative mt-4 h-[260px]">
           {/* Player (you) at bottom center */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
             <PlayerSeat
@@ -51,8 +51,8 @@ export default function PokerTable({ state, pot, winners }) {
             />
           </div>
 
-          {/* Bots on the sides */}
-          <div className="absolute top-0 left-0 flex flex-col gap-4">
+            {/* Bots on the sides */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-4">
             {players
               .slice(1, 1 + Math.ceil((players.length - 1) / 2))
               .map((p, idx) => (
@@ -71,7 +71,7 @@ export default function PokerTable({ state, pot, winners }) {
               ))}
           </div>
 
-          <div className="absolute top-0 right-0 flex flex-col gap-4 items-end">
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 items-end">
             {players
               .slice(1 + Math.ceil((players.length - 1) / 2))
               .map((p, idx) => (

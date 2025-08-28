@@ -43,7 +43,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
         </div>
 
         {/* Community cards dengan animasi */}
-        <div className="flex justify-center gap-3 my-6 min-h-[100px]">
+        <div className="flex justify-center gap-4 my-6 min-h-[120px]">
           {[0, 1, 2, 3, 4].map((i) => (
             <motion.div
               key={i}
@@ -65,26 +65,26 @@ export default function PokerTableCompatible({ state, pot, winners }) {
               }}
               className="relative"
             >
-              <CardImg 
-                card={community[i]} 
-                w={80} 
-                className={`transition-all duration-300 ${
-                  community[i] 
-                    ? "drop-shadow-lg hover:drop-shadow-xl hover:scale-105" 
-                    : "opacity-50"
-                }`}
-              />
-              {!community[i] && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-24 bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg opacity-50"></div>
-                </div>
-              )}
-            </motion.div>
-          ))}
+                <CardImg
+                  card={community[i]}
+                  w={100}
+                  className={`transition-all duration-300 ${
+                    community[i]
+                      ? "drop-shadow-lg hover:drop-shadow-xl hover:scale-105"
+                      : "opacity-50"
+                  }`}
+                />
+                {!community[i] && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-20 h-28 bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg opacity-50"></div>
+                  </div>
+                )}
+              </motion.div>
+            ))}
         </div>
 
         {/* Players layout */}
-        <div className="relative mt-8 min-h-[280px]">
+        <div className="relative mt-8 min-h-[320px]">
           {/* Player (you) at bottom center */}
           <motion.div
             initial={{ y: 50, opacity: 0 }}
@@ -107,7 +107,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
           </motion.div>
 
           {/* Bots on the left side */}
-          <div className="absolute top-0 left-0 flex flex-col gap-6">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-6">
             {players
               .slice(1, 1 + Math.ceil((players.length - 1) / 2))
               .map((p, idx) => (
@@ -133,7 +133,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
           </div>
 
           {/* Bots on the right side */}
-          <div className="absolute top-0 right-0 flex flex-col gap-6 items-end">
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-6 items-end">
             {players
               .slice(1 + Math.ceil((players.length - 1) / 2))
               .map((p, idx) => (
