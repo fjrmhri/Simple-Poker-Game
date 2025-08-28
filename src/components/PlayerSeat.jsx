@@ -64,7 +64,7 @@ export default function PlayerSeat({
     : "bg-blue-600";
   return (
       <div
-        className={`p-2 min-w-[200px] rounded-xl transition-all duration-300 ease-in-out border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] bg-black/40 text-gray-100 ${
+        className={`p-2 min-w-[170px] rounded-xl transition-all duration-300 ease-in-out border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] bg-black/40 text-gray-100 ${
           isTurn ? "ring-2 ring-white" : ""
         } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
       >
@@ -73,7 +73,7 @@ export default function PlayerSeat({
           <img
             src={avatar}
             alt={player.name}
-            className="w-10 h-10 rounded-full border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] object-cover"
+            className="w-8 h-8 rounded-full border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] object-cover"
           />
           {isYou && (
             <input
@@ -107,8 +107,8 @@ export default function PlayerSeat({
         )}
       </div>
         <div className="mt-2 flex gap-3 justify-center">
-          <CardImg card={showFace ? c1 : { back: true }} w={90} />
-          <CardImg card={showFace ? c2 : { back: true }} w={90} />
+          <CardImg card={showFace ? c1 : { back: true }} w={70} />
+          <CardImg card={showFace ? c2 : { back: true }} w={70} />
         </div>
       {showFace && <div className="mt-1 text-xs text-center">{comboName}</div>}
       <div className="mt-2">

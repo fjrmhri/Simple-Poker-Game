@@ -8,6 +8,11 @@ export default function PokerTableCompatible({ state, pot, winners }) {
   const { players, currentPlayer, community, round } = state;
 
   const revealEveryone = round === "Showdown";
+  const dealerButtonPositions = [
+    { top: "85%", left: "50%" },
+    { top: "50%", left: "12%" },
+    { top: "50%", left: "88%" }
+  ];
 
   return (
     <div className="p-4">
@@ -84,7 +89,7 @@ export default function PokerTableCompatible({ state, pot, winners }) {
         </div>
 
         {/* Players layout */}
-        <div className="relative mt-4 min-h-[260px]">
+        <div className="relative mt-2 min-h-[220px]">
           {/* Player (you) at bottom center */}
           <motion.div
             initial={{ y: 50, opacity: 0 }}
@@ -183,16 +188,9 @@ export default function PokerTableCompatible({ state, pot, winners }) {
 
         {/* Dealer button indicator */}
         <motion.div
-          animate={{
-            x: state.dealerIndex === 0 ? "50%" : 
-                state.dealerIndex === 1 ? "-20%" : 
-                state.dealerIndex === 2 ? "120%" : "50%",
-            y: state.dealerIndex === 0 ? "80%" : 
-                state.dealerIndex === 1 ? "20%" : 
-                state.dealerIndex === 2 ? "20%" : "50%"
-          }}
+          animate={dealerButtonPositions[state.dealerIndex] || dealerButtonPositions[0]}
           transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="absolute w-12 h-12 bg-yellow-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-black font-bold text-sm z-10"
+          className="absolute w-10 h-10 bg-yellow-400 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-black font-bold text-xs -translate-x-1/2 -translate-y-1/2 z-10"
         >
           D
         </motion.div>
