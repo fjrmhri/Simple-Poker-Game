@@ -43,7 +43,7 @@ export default function App() {
   }, [winners, status, playWinnerSound]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-y-auto">
       <div className="max-w-4xl mx-auto p-4">
         <h1 className="text-white mb-2 text-center mx-auto mt-2">PokeReact</h1>
 

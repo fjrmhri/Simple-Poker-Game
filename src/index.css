@@ -12,7 +12,7 @@
 }
 
 body {
-  @apply text-white;
+  @apply text-white overflow-auto;
   font-family: "Monocraft", monospace;
 
   background-image: url("/public/assets/background.jpg");

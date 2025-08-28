@@ -5,13 +5,13 @@ import CardImg from "./CardImg";
 import PlayerSeat from "./PlayerSeat";
 
 export default function PokerTable({ state, pot, winners }) {
-  const { players, currentPlayer, community, round } = state;
+  const { players, currentPlayer, community, round, dealerIndex } = state;
 
   const revealEveryone = round === "Showdown";
 
   return (
     <div className="p-2 text-white">
-      <div className="relative mx-auto max-w-5xl p-4 rounded-[50px] border-2 border-white shadow-[0_0_0_2px_#000,0_0_0_4px_#fff] bg-[rgba(0,0,0,0.3)] text-[#111827] font-mono box-border">
+      <div className="relative mx-auto max-w-4xl p-3 rounded-[40px] border-2 border-white shadow-[0_0_0_2px_#000,0_0_0_4px_#fff] bg-[rgba(0,0,0,0.3)] text-[#111827] font-mono box-border">
         {" "}
         <div className="text-[#e5e7eb]">
           <div>
@@ -27,6 +27,16 @@ export default function PokerTable({ state, pot, winners }) {
             Pot: <b>{pot}</b>
           </motion.div>
         </div>
+
+        {/* Community cards */}
+        <div className="flex gap-2 justify-center my-2">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <CardImg key={i} card={community[i]} w={90} />
+          ))}
+        </div>
+        {/* Players layout */}
+        <div className="relative mt-2 h-[250px]">
+
           {/* Community cards */}
           <div className="flex gap-4 justify-center my-4">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -35,8 +45,9 @@ export default function PokerTable({ state, pot, winners }) {
           </div>
           {/* Players layout */}
           <div className="relative mt-4 h-[260px]">
+
           {/* Player (you) at bottom center */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 transform">
             <PlayerSeat
               player={players[0]}
               community={community}
@@ -48,11 +59,17 @@ export default function PokerTable({ state, pot, winners }) {
               }
               round={round}
               reveal={revealEveryone}
+              isDealer={dealerIndex === 0}
             />
           </div>
 
+
+          {/* Bots on the sides */}
+          <div className="absolute top-0 left-0 flex flex-col gap-2">
+
             {/* Bots on the sides */}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-4">
+
             {players
               .slice(1, 1 + Math.ceil((players.length - 1) / 2))
               .map((p, idx) => (
@@ -60,6 +77,7 @@ export default function PokerTable({ state, pot, winners }) {
                   key={idx + 1}
                   player={p}
                   community={community}
+                  isDealer={dealerIndex === idx + 1}
                   isTurn={
                     idx + 1 === currentPlayer &&
                     round !== "Showdown" &&
@@ -71,7 +89,10 @@ export default function PokerTable({ state, pot, winners }) {
               ))}
           </div>
 
+          <div className="absolute top-0 right-0 flex flex-col gap-2 items-end">
+
             <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 items-end">
+
             {players
               .slice(1 + Math.ceil((players.length - 1) / 2))
               .map((p, idx) => (
@@ -79,6 +100,10 @@ export default function PokerTable({ state, pot, winners }) {
                   key={idx + 1 + Math.ceil((players.length - 1) / 2)}
                   player={p}
                   community={community}
+                  isDealer={
+                    dealerIndex ===
+                    idx + 1 + Math.ceil((players.length - 1) / 2)
+                  }
                   isTurn={
                     idx + 1 + Math.ceil((players.length - 1) / 2) ===
                       currentPlayer &&
