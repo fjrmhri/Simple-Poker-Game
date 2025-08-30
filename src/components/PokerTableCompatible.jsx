@@ -11,32 +11,33 @@ export default function PokerTableCompatible({ state, pot, winners }) {
   const dealerButtonPositions = [
     { top: "85%", left: "50%" },
     { top: "50%", left: "12%" },
-    { top: "50%", left: "88%" }
+    { top: "50%", left: "88%" },
   ];
 
   return (
     <div className="p-4">
       <div className="relative mx-auto max-w-4xl p-4 rounded-[60px] border-4 border-yellow-600 shadow-[0_0_0_6px_#000,0_0_0_12px_#fff,0_0_30px_rgba(255,215,0,0.3)] bg-gradient-to-br from-green-800 via-green-700 to-green-900 text-white font-mono">
-        
         {/* Header info */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <div className="text-[#e5e7eb]">
               <div className="flex items-center gap-2">
                 <span className="text-sm opacity-80">Ronde:</span>
-                <span className="text-xl font-bold text-yellow-400">{round}</span>
+                <span className="text-xl font-bold text-yellow-400">
+                  {round}
+                </span>
               </div>
             </div>
           </div>
-          
+
           <motion.div
             key={pot}
             initial={{ scale: 0.8, rotateY: 180 }}
             animate={{ scale: 1, rotateY: 0 }}
-            transition={{ 
-              ease: "easeInOut", 
+            transition={{
+              ease: "easeInOut",
               duration: 0.5,
-              rotateY: { duration: 0.6 }
+              rotateY: { duration: 0.6 },
             }}
             className="text-center"
           >
@@ -52,45 +53,45 @@ export default function PokerTableCompatible({ state, pot, winners }) {
           {[0, 1, 2, 3, 4].map((i) => (
             <motion.div
               key={i}
-              initial={{ 
-                scale: 0, 
+              initial={{
+                scale: 0,
                 rotateY: 180,
-                y: 50 
+                y: 50,
               }}
-              animate={{ 
-                scale: community[i] ? 1 : 0.8, 
+              animate={{
+                scale: community[i] ? 1 : 0.8,
                 rotateY: community[i] ? 0 : 180,
-                y: community[i] ? 0 : 20
+                y: community[i] ? 0 : 20,
               }}
-              transition={{ 
+              transition={{
                 delay: i * 0.1,
                 duration: 0.4,
                 type: "spring",
-                stiffness: 200
+                stiffness: 200,
               }}
               className="relative"
             >
-                <CardImg
-                  card={community[i]}
-                  w={100}
-                  className={`transition-all duration-300 ${
-                    community[i]
-                      ? "drop-shadow-lg hover:drop-shadow-xl hover:scale-105"
-                      : "opacity-50"
-                  }`}
-                />
-                {!community[i] && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-20 h-28 bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg opacity-50"></div>
-                  </div>
-                )}
-              </motion.div>
-            ))}
+              <CardImg
+                card={community[i]}
+                w={100}
+                className={`transition-all duration-300 ${
+                  community[i]
+                    ? "drop-shadow-lg hover:drop-shadow-xl hover:scale-105"
+                    : "opacity-50"
+                }`}
+              />
+              {!community[i] && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-20 h-28 bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg opacity-50"></div>
+                </div>
+              )}
+            </motion.div>
+          ))}
         </div>
 
         {/* Players layout */}
         <div className="relative mt-2 min-h-[220px]">
-          {/* Player (you) at bottom center */}
+          {/* Player (kamu) at bottom center */}
           <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -111,57 +112,60 @@ export default function PokerTableCompatible({ state, pot, winners }) {
             />
           </motion.div>
 
-          {/* Bots on the left side */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-4">
-            {players
-              .slice(1, 1 + Math.ceil((players.length - 1) / 2))
-              .map((p, idx) => (
-                <motion.div
-                  key={idx + 1}
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 + idx * 0.1 }}
-                >
-                  <PlayerSeat
-                    player={p}
-                    community={community}
-                    isTurn={
-                      idx + 1 === currentPlayer &&
-                      round !== "Showdown" &&
-                      !p.folded
-                    }
-                    round={round}
-                    reveal={revealEveryone}
-                  />
-                </motion.div>
-              ))}
-          </div>
+          {/* Bots layout */}
+          <div className="absolute top-1/2 -translate-y-1/2 flex justify-between w-full px-4">
+            {/* Left-side Bots */}
+            <div className="flex flex-col gap-4 items-start w-1/3">
+              {players
+                .slice(1, 1 + Math.ceil((players.length - 1) / 2))
+                .map((p, idx) => (
+                  <motion.div
+                    key={idx + 1}
+                    initial={{ x: -50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 + idx * 0.1 }}
+                  >
+                    <PlayerSeat
+                      player={p}
+                      community={community}
+                      isTurn={
+                        idx + 1 === currentPlayer &&
+                        round !== "Showdown" &&
+                        !p.folded
+                      }
+                      round={round}
+                      reveal={revealEveryone}
+                    />
+                  </motion.div>
+                ))}
+            </div>
 
-          {/* Bots on the right side */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 items-end">
-            {players
-              .slice(1 + Math.ceil((players.length - 1) / 2))
-              .map((p, idx) => (
-                <motion.div
-                  key={idx + 1 + Math.ceil((players.length - 1) / 2)}
-                  initial={{ x: 50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 + idx * 0.1 }}
-                >
-                  <PlayerSeat
-                    player={p}
-                    community={community}
-                    isTurn={
-                      idx + 1 + Math.ceil((players.length - 1) / 2) ===
-                        currentPlayer &&
-                      round !== "Showdown" &&
-                      !p.folded
-                    }
-                    round={round}
-                    reveal={revealEveryone}
-                  />
-                </motion.div>
-              ))}
+            {/* Right-side Bots */}
+            <div className="flex flex-col gap-4 items-end w-1/3">
+              {players
+                .slice(1 + Math.ceil((players.length - 1) / 2))
+                .map((p, idx) => (
+                  <motion.div
+                    key={idx + 1 + Math.ceil((players.length - 1) / 2)}
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 + idx * 0.1 }}
+                  >
+                    <PlayerSeat
+                      player={p}
+                      community={community}
+                      isTurn={
+                        idx + 1 + Math.ceil((players.length - 1) / 2) ===
+                          currentPlayer &&
+                        round !== "Showdown" &&
+                        !p.folded
+                      }
+                      round={round}
+                      reveal={revealEveryone}
+                    />
+                  </motion.div>
+                ))}
+            </div>
           </div>
         </div>
 
@@ -170,10 +174,10 @@ export default function PokerTableCompatible({ state, pot, winners }) {
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ 
+            transition={{
               type: "spring",
               stiffness: 300,
-              damping: 20
+              damping: 20,
             }}
             className="mt-6 text-center"
           >
@@ -188,7 +192,9 @@ export default function PokerTableCompatible({ state, pot, winners }) {
 
         {/* Dealer button indicator */}
         <motion.div
-          animate={dealerButtonPositions[state.dealerIndex] || dealerButtonPositions[0]}
+          animate={
+            dealerButtonPositions[state.dealerIndex] || dealerButtonPositions[0]
+          }
           transition={{ duration: 0.5, ease: "easeInOut" }}
           className="absolute w-10 h-10 bg-yellow-400 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-black font-bold text-xs -translate-x-1/2 -translate-y-1/2 z-10"
         >

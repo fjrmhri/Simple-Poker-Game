@@ -13,9 +13,10 @@ export default function ActionBarCompatible({ actions = [], onAction }) {
       disabled={disabled}
       className={`
         px-6 py-3 font-bold text-white border-2 shadow-lg transition-all duration-200
-        ${disabled 
-          ? "opacity-50 cursor-not-allowed bg-gray-600 border-gray-700" 
-          : `${color} hover:brightness-110 active:scale-95`
+        ${
+          disabled
+            ? "opacity-50 cursor-not-allowed bg-gray-600 border-gray-700"
+            : `${color} hover:brightness-110 active:scale-95`
         }
       `}
     >
@@ -40,8 +41,8 @@ export default function ActionBarCompatible({ actions = [], onAction }) {
     : { label: "Call/Check", disabled: true };
 
   return (
-    <div className="mt-6 p-4 bg-[rgba(0,0,0,0.4)] rounded-xl border border-gray-600 shadow-lg">
-      <div className="flex flex-wrap items-center justify-center gap-4">
+    <div className="min-h-screen">
+      <div className=" mt-4 flex flex-wrap items-center justify-center gap-4">
         {/* Fold Button */}
         {renderButton(
           "Fold",
@@ -60,7 +61,7 @@ export default function ActionBarCompatible({ actions = [], onAction }) {
 
         {/* Input and Bet/Raise Button */}
         {hasBet && (
-          <div className="flex items-center gap-3 bg-gray-800 p-2 rounded-lg border border-gray-600">
+          <div className="flex items-center gap-3">
             <div className="relative">
               <input
                 type="number"
@@ -76,11 +77,8 @@ export default function ActionBarCompatible({ actions = [], onAction }) {
                   ${!hasBet ? "cursor-not-allowed" : "border-gray-500"}
                 `}
               />
-              <div className="absolute -bottom-6 left-0 right-0 text-xs text-gray-400 text-center">
-                Min: {min}
-              </div>
             </div>
-            
+
             {renderButton(
               check ? "Bet" : "Raise",
               () => {
@@ -93,22 +91,12 @@ export default function ActionBarCompatible({ actions = [], onAction }) {
           </div>
         )}
       </div>
-      
-      {!isValidAmount && hasBet && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-3 text-center"
-        >
-          <p className="text-red-400 text-sm font-medium">
-            Masukkan jumlah yang valid (minimal {min})
-          </p>
-        </motion.div>
-      )}
-      
+
       {/* Tips */}
       <div className="mt-4 text-center text-xs text-gray-400">
-        <p>💡 Tips: Perhatikan pola taruhan lawan dan kelola chip dengan bijak</p>
+        <p>
+          💡 Tips: Perhatikan pola taruhan lawan dan kelola chip dengan bijak
+        </p>
       </div>
     </div>
   );

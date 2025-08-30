@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 
 export default function StartScreen({ onStartGame }) {
   const [namaPemain, setNamaPemain] = useState("Pemain");
-  const [avatarTerpilih, setAvatarTerpilih] = useState("/assets/others/avatar2.jpg");
+  const [avatarTerpilih, setAvatarTerpilih] = useState(
+    "/assets/others/avatar2.jpg"
+  );
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const avatarOptions = [
@@ -40,7 +42,9 @@ export default function StartScreen({ onStartGame }) {
           animate={{ scale: 1, opacity: 1 }}
           className="bg-[rgba(0,0,0,0.9)] text-[#e5e7eb] rounded-2xl p-8 w-96 text-center border-2 border-white shadow-[0_0_0_4px_#000,0_0_0_8px_#fff]"
         >
-          <h2 className="text-3xl font-bold mb-4 text-yellow-400">Konfirmasi</h2>
+          <h2 className="text-3xl font-bold mb-4 text-yellow-400">
+            Konfirmasi
+          </h2>
           <div className="mb-6">
             <p className="text-lg mb-2">Apakah Anda siap memulai permainan?</p>
             <div className="flex items-center justify-center gap-3 mt-4">
@@ -87,7 +91,7 @@ export default function StartScreen({ onStartGame }) {
       >
         <h1 className="text-4xl font-bold mb-2 text-yellow-400">PokeReact</h1>
         <p className="text-lg mb-6 text-gray-300">Game Poker Interaktif</p>
-        
+
         <div className="mb-6">
           <label className="block text-sm font-medium mb-2">Nama Pemain</label>
           <input
@@ -140,17 +144,6 @@ export default function StartScreen({ onStartGame }) {
               </motion.button>
             ))}
           </div>
-        </div>
-
-        <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-600">
-          <h3 className="font-semibold mb-2 text-yellow-400">Aturan Permainan</h3>
-          <ul className="text-sm text-left space-y-1 text-gray-300">
-            <li>• Chip awal: 1000</li>
-            <li>• Small Blind: 10</li>
-            <li>• Big Blind: 20</li>
-            <li>• Menang jika semua chip milik Anda</li>
-            <li>• Kalah jika chip habis</li>
-          </ul>
         </div>
 
         <motion.button

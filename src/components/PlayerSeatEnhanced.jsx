@@ -42,7 +42,7 @@ export default function PlayerSeatEnhanced({
   const namaKombinasi = tampilkanMuka
     ? dapatkanNamaTangan(pemain.tangan || [], komunitas || [])
     : "";
-    
+
   const dapatkanTeksStatus = () => {
     if (pemain.fold) return "Fold";
     if (pemain.allIn) return "All In";
@@ -55,7 +55,7 @@ export default function PlayerSeatEnhanced({
     if (pemain.aksiTerakhir === "check") return "Check";
     return "";
   };
-  
+
   const teksStatus = dapatkanTeksStatus();
   const warnaStatus = pemain.fold
     ? "bg-gray-600"
@@ -71,9 +71,10 @@ export default function PlayerSeatEnhanced({
       className={`
         relative p-4 min-w-[220px] rounded-2xl transition-all duration-300 ease-in-out
         border-2 shadow-xl backdrop-blur-sm
-        ${adalahGiliran 
-          ? "border-yellow-400 shadow-[0_0_20px_rgba(255,215,0,0.5)] bg-gradient-to-br from-yellow-900/30 to-yellow-800/20" 
-          : "border-gray-600 bg-gradient-to-br from-gray-800/30 to-gray-700/20"
+        ${
+          adalahGiliran
+            ? "border-yellow-400 shadow-[0_0_20px_rgba(255,215,0,0.5)] bg-gradient-to-br from-yellow-900/30 to-yellow-800/20"
+            : "border-gray-600 bg-gradient-to-br from-gray-800/30 to-gray-700/20"
         }
         ${ronde !== "Showdown" && !adalahGiliran ? "opacity-75" : "opacity-100"}
       `}
@@ -82,14 +83,14 @@ export default function PlayerSeatEnhanced({
       {adalahGiliran && (
         <motion.div
           className="absolute inset-0 rounded-2xl bg-yellow-400 opacity-20 blur-xl"
-          animate={{ 
+          animate={{
             opacity: [0.1, 0.3, 0.1],
-            scale: [1, 1.05, 1]
+            scale: [1, 1.05, 1],
           }}
-          transition={{ 
+          transition={{
             duration: 2,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         />
       )}
@@ -103,9 +104,10 @@ export default function PlayerSeatEnhanced({
             alt={pemain.nama}
             className={`
               w-12 h-12 rounded-full border-2 object-cover transition-all
-              ${adalahGiliran 
-                ? "border-yellow-400 shadow-[0_0_10px_rgba(255,215,0,0.5)]" 
-                : "border-gray-400"
+              ${
+                adalahGiliran
+                  ? "border-yellow-400 shadow-[0_0_10px_rgba(255,215,0,0.5)]"
+                  : "border-gray-400"
               }
             `}
           />
@@ -117,32 +119,52 @@ export default function PlayerSeatEnhanced({
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
               <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
                 </svg>
               </div>
             </>
           )}
         </label>
-        
+
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <div className="font-bold text-lg truncate">
               {pemain.nama}
               {adalahAnda && (
-                <span className="ml-2 text-xs bg-blue-600 px-2 py-1 rounded-full">Anda</span>
+                <span className="ml-2 text-xs bg-blue-600 px-2 py-1 rounded-full">
+                  Anda
+                </span>
               )}
               {pemain.adalahBot && (
                 <span className="ml-2 text-xs bg-red-600 px-2 py-1 rounded-full">
-                  {pemain.tingkatKesulitan === "mudah" ? "🤖" : 
-                   pemain.tingkatKesulitan === "normal" ? "🤖🤖" : "🤖🤖🤖"}
+                  {pemain.tingkatKesulitan === "mudah"
+                    ? "🤖"
+                    : pemain.tingkatKesulitan === "normal"
+                    ? "🤖🤖"
+                    : "🤖🤖🤖"}
                 </span>
               )}
             </div>
           </div>
         </div>
-        
+
         {teksStatus && (
           <motion.span
             initial={{ scale: 0 }}
@@ -168,10 +190,15 @@ export default function PlayerSeatEnhanced({
           />
           <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-ping"></div>
         </motion.div>
-        <span className={`font-bold text-lg ${
-          pemain.chips < 100 ? "text-red-400" : 
-          pemain.chips < 500 ? "text-yellow-400" : "text-green-400"
-        }`}>
+        <span
+          className={`font-bold text-lg ${
+            pemain.chips < 100
+              ? "text-red-400"
+              : pemain.chips < 500
+              ? "text-yellow-400"
+              : "text-green-400"
+          }`}
+        >
           {pemain.chips}
         </span>
         {pemain.taruhanSaatIni > 0 && (
@@ -184,7 +211,10 @@ export default function PlayerSeatEnhanced({
       {/* Cards */}
       <div className="flex gap-3 mb-3 justify-center">
         <motion.div
-          whileHover={{ scale: tampilkanMuka ? 1.1 : 1, rotateY: tampilkanMuka ? 5 : 0 }}
+          whileHover={{
+            scale: tampilkanMuka ? 1.1 : 1,
+            rotateY: tampilkanMuka ? 5 : 0,
+          }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
@@ -199,7 +229,10 @@ export default function PlayerSeatEnhanced({
           />
         </motion.div>
         <motion.div
-          whileHover={{ scale: tampilkanMuka ? 1.1 : 1, rotateY: tampilkanMuka ? -5 : 0 }}
+          whileHover={{
+            scale: tampilkanMuka ? 1.1 : 1,
+            rotateY: tampilkanMuka ? -5 : 0,
+          }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
@@ -231,17 +264,21 @@ export default function PlayerSeatEnhanced({
         <motion.div className="mt-3">
           <div className="h-2 rounded-full bg-gray-700 overflow-hidden">
             <motion.div
-              animate={{ 
+              animate={{
                 width: `${(waktuTersisa / WAKTU_MAKSIMAL) * 100}%`,
-                backgroundColor: waktuTersisa > 10 ? "#10b981" : "#ef4444"
+                backgroundColor: waktuTersisa > 10 ? "#10b981" : "#ef4444",
               }}
               transition={{ ease: "linear", duration: 1 }}
               className="h-full rounded-full"
             />
           </div>
-          <div className={`mt-1 text-xs text-center font-bold ${
-            waktuTersisa > 10 ? "text-green-400" : "text-red-400 animate-pulse"
-          }`}>
+          <div
+            className={`mt-1 text-xs text-center font-bold ${
+              waktuTersisa > 10
+                ? "text-green-400"
+                : "text-red-400 animate-pulse"
+            }`}
+          >
             {waktuTersisa}s
           </div>
         </motion.div>
