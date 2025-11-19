@@ -1,4 +1,3 @@
-// src/components/PlayerSeat.jsx
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import CardImg from "./CardImg";
@@ -11,116 +10,100 @@ export default function PlayerSeat({
   isTurn = false,
   reveal = false,
   round,
+  accentColor = "#facc15",
+  isDealer = false,
+  isWinner = false,
+  position = "center",
 }) {
   const showFace = isYou || reveal;
-  const [c1, c2] = player.hand || [];
-  const MAX_TIME = 30;
-  const [timeLeft, setTimeLeft] = useState(MAX_TIME);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [avatar, setAvatar] = useState(
-    player.avatar || "/assets/others/dealer.png"
+    player?.avatar || "/assets/others/dealer.png"
   );
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
+  useEffect(() => {
+    if (!isTurn) {
+      setTimeLeft(30);
+      return;
+    }
+    setTimeLeft(30);
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isTurn]);
+
+  if (!player) return null;
+
+  const comboName = showFace
+    ? getHandName(player.hand || [], community || [])
+    : "";
+
+  const handleAvatarChange = (event) => {
+    if (!isYou) return;
+    const file = event.target.files?.[0];
     if (file) {
       setAvatar(URL.createObjectURL(file));
     }
   };
 
-  useEffect(() => {
-    if (!isTurn) {
-      setTimeLeft(MAX_TIME);
-      return;
-    }
-    setTimeLeft(MAX_TIME);
-    const id = setInterval(() => {
-      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [isTurn, MAX_TIME]);
+  const seatAlignment = position === "left" ? "items-start" : position === "right" ? "items-end" : "items-center";
 
-  const comboName = showFace
-    ? getHandName(player.hand || [], community || [])
-    : "";
-  const getStatusText = () => {
-    if (player.folded) return "Fold";
-    if (player.allIn) return "All In";
-    if (player.lastAction === "bet" || player.lastAction === "raise") {
-      return `${player.lastAction === "bet" ? "Bet" : "Raise"} ${
-        player.lastActionAmount ?? 0
-      }`;
-    }
-    if (player.lastAction === "call") return "Call";
-    if (player.lastAction === "check") return "Check";
-    return "";
-  };
-  const statusText = getStatusText();
-  const statusColor = player.folded
-    ? "bg-gray-600"
-    : player.allIn
-    ? "bg-purple-600"
-    : isTurn
-    ? "bg-green-600"
-    : "bg-blue-600";
   return (
-      <div
-        className={`p-2 min-w-[170px] rounded-xl transition-all duration-300 ease-in-out border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] bg-black/40 text-gray-100 ${
-          isTurn ? "ring-2 ring-white" : ""
-        } ${round !== "Showdown" && !isTurn ? "opacity-50" : ""}`}
-      >
+    <motion.div
+      className={`flex w-[200px] flex-col gap-2 rounded-3xl border border-white/10 bg-black/50 p-3 text-xs text-white shadow-xl backdrop-blur ${seatAlignment}`}
+      animate={{ scale: isTurn ? 1.05 : 1, opacity: player.folded && !isYou ? 0.5 : 1 }}
+      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+    >
       <div className="flex items-center gap-2">
-        <label className="relative cursor-pointer">
+        <label className="relative">
           <img
             src={avatar}
             alt={player.name}
-            className="w-8 h-8 rounded-full border border-black shadow-[0_0_0_2px_#fff,0_0_0_4px_#000] object-cover"
+            className={`h-10 w-10 rounded-full border-2 object-cover`}
+            style={{ borderColor: accentColor }}
           />
           {isYou && (
             <input
               type="file"
+              className="absolute inset-0 cursor-pointer opacity-0"
               onChange={handleAvatarChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
             />
           )}
+          {isDealer && (
+            <span className="absolute -right-2 -top-2 rounded-full bg-yellow-400 px-1 text-[10px] font-black text-black">D</span>
+          )}
         </label>
-        <div className="font-bold flex-1">{player.name}</div>
-        {statusText && (
-          <span
-            className={`text-xs font-bold px-2 py-0.5 rounded ${statusColor}`}
-          >
-            {statusText}
-          </span>
-        )}
-      </div>
-      <div className="mt-1 flex items-center gap-2 text-sm opacity-90">
-        <img
-          src="/assets/others/bet.png"
-          alt="chips"
-          className="w-4 h-4 drop-shadow"
-        />
-        <span className="text-lg font-bold">{player.chips}</span>
-        {player.bet > 0 && (
-          <span className="text-xs">Bet: {player.bet}</span>
-        )}
-        {player.taruhanSaatIni > 0 && (
-          <span className="text-xs">Bet: {player.taruhanSaatIni}</span>
-        )}
-      </div>
-        <div className="mt-2 flex gap-3 justify-center">
-          <CardImg card={showFace ? c1 : { back: true }} w={70} />
-          <CardImg card={showFace ? c2 : { back: true }} w={70} />
+        <div className="flex-1">
+          <p className="text-sm font-semibold">{player.name}</p>
+          <p className="text-[11px] text-white/60">{player.chips} chips</p>
         </div>
-      {showFace && <div className="mt-1 text-xs text-center">{comboName}</div>}
-      <div className="mt-2">
-        <div className="h-2 rounded bg-gray-700 overflow-hidden">
-          <motion.div
-            animate={{ width: `${(timeLeft / MAX_TIME) * 100}%` }}
-            transition={{ ease: "easeInOut", duration: 1 }}
-            className="h-full bg-green-400"
+        {isWinner && <span className="text-lg">🏆</span>}
+      </div>
+
+      <div className="flex items-center justify-between text-[11px] text-white/70">
+        <span>{player.lastAction ? player.lastAction : round}</span>
+        {player.bet > 0 && <span>Bet {player.bet}</span>}
+      </div>
+
+      <div className="flex justify-center gap-2">
+        <CardImg card={showFace ? player.hand?.[0] : { back: true }} w={64} />
+        <CardImg card={showFace ? player.hand?.[1] : { back: true }} w={64} />
+      </div>
+
+      {comboName && (
+        <p className="text-center text-[11px] text-emerald-200">{comboName}</p>
+      )}
+
+      <div className="flex items-center gap-2 text-[11px] text-white/70">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${(timeLeft / 30) * 100}%`, background: accentColor }}
           />
         </div>
-        <div className="mt-1 text-xs text-center">{timeLeft}s</div>
+        <span>{timeLeft}s</span>
       </div>
-    </div>
+    </motion.div>
   );
 }

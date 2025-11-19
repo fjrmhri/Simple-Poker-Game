@@ -14,9 +14,8 @@
 body {
   @apply text-white;
   font-family: "Monocraft", monospace;
-
-  background-image: url("/public/assets/background.jpg");
-
-  background-size: cover;
-  background-position: center;
+  background: radial-gradient(circle at top, rgba(15,118,110,0.3), transparent 45%),
+    radial-gradient(circle at bottom, rgba(190,24,93,0.15), transparent 55%),
+    #030712;
+  min-height: 100vh;
 }

@@ -1,8 +1,5 @@
 // src/core/models.js
 
-/* global globalThis */
-/* global structuredClone */
-
 import { getWinners as evaluasiPemenang } from "./handEvaluator";
 
 // Utilitas

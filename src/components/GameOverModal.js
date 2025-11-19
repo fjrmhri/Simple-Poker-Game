@@ -1,84 +1,37 @@
-// src/components/GameOverModal.js
 import React from "react";
 import { motion } from "framer-motion";
 
-export default function GameOverModal({ 
-  isWin, 
-  playerChips, 
-  onRestart, 
-  onExit 
-}) {
+export default function GameOverModal({ isWin, playerChips, onRestart, onExit }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/80 p-4">
       <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
+        initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-[rgba(0,0,0,0.95)] text-[#e5e7eb] rounded-2xl p-8 w-96 text-center border-2 border-white shadow-[0_0_0_4px_#000,0_0_0_8px_#fff]"
+        className="w-full max-w-md rounded-[40px] border border-white/10 bg-gradient-to-br from-slate-900 to-black p-8 text-center text-white shadow-2xl"
       >
-        <motion.div
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          className="mb-6"
-        >
-          {isWin ? (
-            <div className="text-6xl mb-4">🏆</div>
-          ) : (
-            <div className="text-6xl mb-4">💸</div>
-          )}
-          <h2 className="text-4xl font-bold mb-2">
-            {isWin ? "SELAMAT!" : "GAME OVER"}
-          </h2>
-          <p className={`text-xl font-semibold ${
-            isWin ? "text-green-400" : "text-red-400"
-          }`}>
-            {isWin ? "Anda Menang!" : "Chip Anda Habis"}
-          </p>
-        </motion.div>
-
-        <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-600">
-          <div className="text-lg font-semibold mb-2">
-            Total Chip: <span className={isWin ? "text-green-400" : "text-red-400"}>
-              {playerChips}
-            </span>
-          </div>
-          <p className="text-sm text-gray-400">
-            {isWin 
-              ? "Anda berhasil mengumpulkan semua chip!" 
-              : "Semua lawan telah mengambil chip Anda."
-            }
-          </p>
+        <div className="text-5xl">{isWin ? "🏆" : "💸"}</div>
+        <h2 className="mt-4 text-3xl font-black">{isWin ? "Champion!" : "Out of chips"}</h2>
+        <p className="mt-2 text-sm text-white/60">
+          {isWin ? "You emptied every stack on the felt." : "All chips are gone, but the felt awaits another run."}
+        </p>
+        <div className="mt-6 rounded-3xl border border-white/10 bg-black/40 p-4">
+          <p className="text-sm uppercase tracking-[0.3em] text-white/50">Final stack</p>
+          <p className="text-3xl font-bold text-yellow-300">{playerChips}</p>
         </div>
-
-        <div className="space-y-3">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="mt-6 space-y-3">
+          <button
             onClick={onRestart}
-            className="w-full px-6 py-3 bg-green-600 text-white font-bold rounded-lg border-2 border-green-700 shadow-lg hover:bg-green-700 transition-colors"
+            className="w-full rounded-2xl bg-emerald-500 py-3 text-lg font-semibold text-black"
           >
-            {isWin ? "Main Lagi" : "Coba Lagi"}
-          </motion.button>
-          
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            {isWin ? "Defend the title" : "Try again"}
+          </button>
+          <button
             onClick={onExit}
-            className="w-full px-6 py-3 bg-gray-600 text-white font-bold rounded-lg border-2 border-gray-700 shadow-lg hover:bg-gray-700 transition-colors"
+            className="w-full rounded-2xl border border-white/20 bg-white/10 py-3 text-sm"
           >
-            Keluar
-          </motion.button>
+            Leave table
+          </button>
         </div>
-
-        {isWin && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-4 text-sm text-gray-400"
-          >
-            🎉 Terima kasih telah bermain!
-          </motion.div>
-        )}
       </motion.div>
     </div>
   );
