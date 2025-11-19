@@ -5,11 +5,12 @@
 ![Framer Motion](https://img.shields.io/badge/Framer%20Motion-12.23.12-0055FF.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-PokeReact adalah implementasi **Texas Hold'em Poker** yang modern dan interaktif, dibangun dengan React dan dilengkapi dengan AI bot cerdas, animasi halus, dan desain UI yang menarik. Game ini menawarkan pengalaman bermain poker yang realistis dengan berbagai fitur canggih.
+PokeReact adalah implementasi **Texas Hold'em Poker** yang modern dan interaktif, dibangun dengan React dan dilengkapi dengan AI bot cerdas, animasi halus, dan desain UI yang menarik.
 
 ## ✨ Fitur Utama
 
 ### 🎮 Gameplay Poker Lengkap
+
 - **Texas Hold'em Rules** - Implementasi aturan poker standar yang akurat
 - **Multi-Round System** - Preflop → Flop → Turn → River → Showdown
 - **Blind System** - Small blind (10) dan Big blind (20) yang proper
@@ -17,6 +18,7 @@ PokeReact adalah implementasi **Texas Hold'em Poker** yang modern dan interaktif
 - **Hand Evaluation** - Deteksi semua kombinasi kartu poker (Royal Flush hingga High Card)
 
 ### 🤖 AI Bot Cerdas
+
 - **3 Tingkat Kesulitan**:
   - **Mudah** 🤖: Strategi sederhana, cocok untuk pemula
   - **Normal** 🤖🤖: Menggunakan algoritma Monte Carlo untuk estimasi win rate
@@ -28,6 +30,7 @@ PokeReact adalah implementasi **Texas Hold'em Poker** yang modern dan interaktif
 - **Dynamic Aggression** - Tingkat agresivitas berdasarkan kekuatan tangan
 
 ### 🎨 UI/UX Modern
+
 - **Responsive Design** - Layout yang adaptif untuk berbagai ukuran layar
 - **Mobile Warning** - Pesan khusus untuk layar kecil (< 768px)
 - **Smooth Animations** - Framer Motion untuk transisi yang halus
@@ -36,6 +39,7 @@ PokeReact adalah implementasi **Texas Hold'em Poker** yang modern dan interaktif
 - **Large Card Design** - Kartu yang lebih besar dan jelas untuk pengalaman visual yang lebih baik
 
 ### 🚀 Fitur Tambahan
+
 - **Start Screen** - Input nama pemain dan pilihan avatar
 - **Avatar Customization** - Upload avatar pribadi atau pilih dari 3 opsi
 - **Timer System** - 30 detik countdown untuk setiap giliran
@@ -47,21 +51,25 @@ PokeReact adalah implementasi **Texas Hold'em Poker** yang modern dan interaktif
 ## 🛠 Teknologi yang Digunakan
 
 ### Frontend Framework
+
 - **React 19.1.1** - Frontend library dengan hooks modern
 - **React Router DOM 7.8.2** - Client-side routing
 - **TypeScript** - Type safety dan better developer experience
 
 ### Styling & Animation
+
 - **Tailwind CSS 3.4.17** - Utility-first CSS framework
 - **Styled Components 6.1.19** - CSS-in-JS library
 - **Framer Motion 12.23.12** - Production-ready motion library
 
 ### Development Tools
+
 - **Create React App 5.0.1** - React development environment
 - **ESLint** - Code linting dan quality control
 - **PostCSS & Autoprefixer** - CSS processing
 
 ### Testing
+
 - **Jest** - Unit testing framework
 - **React Testing Library** - React component testing
 - **Testing Library User Event** - User interaction testing
@@ -69,10 +77,12 @@ PokeReact adalah implementasi **Texas Hold'em Poker** yang modern dan interaktif
 ## 📦 Instalasi & Menjalankan
 
 ### Prasyarat
+
 - Node.js 16.0 atau lebih tinggi
 - npm 8.0 atau lebih tinggi
 
 ### Instalasi Dependensi
+
 ```bash
 # Clone repository
 git clone https://github.com/fjrmhri/Simple-Poker-Game.git
@@ -83,18 +93,23 @@ npm install
 ```
 
 ### Mode Pengembangan
+
 ```bash
 npm start
 ```
+
 Buka [http://localhost:3000](http://localhost:3000) untuk melihat aplikasi. Aplikasi akan otomatis reload saat ada perubahan kode.
 
 ### Build Produksi
+
 ```bash
 npm run build
 ```
+
 Build akan menghasilkan file statis di folder `build` yang siap untuk deployment.
 
 ### Pengujian
+
 ```bash
 # Jalankan semua tests
 npm test
@@ -137,7 +152,9 @@ src/
 ## 🧠 Algoritma AI
 
 ### Monte Carlo Simulation
+
 AI menggunakan simulasi Monte Carlo untuk estimasi win rate:
+
 ```javascript
 function estimasiWinRate(state, indexPemain, simulasi = 300) {
   // Simulasi multiple scenarios
@@ -152,7 +169,9 @@ function estimasiWinRate(state, indexPemain, simulasi = 300) {
 ```
 
 ### Game Theory Strategy
+
 Bot mengimplementasikan strategi berbasis Nash Equilibrium:
+
 - **Pot Odds Calculation** - Menghitung rasio risk vs reward
 - **Position Adjustment** - Strategi berdasarkan posisi (early, middle, late)
 - **Opponent Modeling** - Analisis pola taruhan lawan
@@ -161,23 +180,27 @@ Bot mengimplementasikan strategi berbasis Nash Equilibrium:
 ## 🎮 Cara Bermain
 
 ### Memulai Permainan
+
 1. Buka aplikasi di browser
 2. Masukkan nama Anda di Start Screen
 3. Pilih avatar dari 3 opsi yang tersedia
 4. Klik "Mulai Permainan" setelah konfirmasi
 
 ### Aturan Permainan
+
 - **Chip Awal**: Setiap pemain mulai dengan 1000 chip
 - **Blinds**: Small blind = 10, Big blind = 20
 - **Goal**: Kumpulkan semua chip untuk menang
 - **Elimination**: Anda kalah jika chip habis
 
 ### Kontrol Permainan
+
 - **Fold** - Menyerah dan tidak mengikuti ronde
 - **Check/Call** - Match taruhan saat ini atau check jika tidak ada taruhan
 - **Bet/Raise** - Menambah taruhan (minimal 10 chip)
 
 ### Fitur Khusus
+
 - **Timer**: 30 detik untuk setiap keputusan
 - **Avatar Upload**: Klik avatar untuk mengganti gambar
 - **Hand Display**: Kombinasi kartu ditampilkan saat showdown
@@ -186,6 +209,7 @@ Bot mengimplementasikan strategi berbasis Nash Equilibrium:
 ## 📱 Responsive Design
 
 Aplikasi ini dirancang untuk bekerja optimal di berbagai perangkat:
+
 - **Desktop**: Full experience dengan semua fitur
 - **Tablet**: Layout yang disesuaikan untuk layar medium
 - **Mobile**: Warning khusus untuk layar kecil (< 768px)
@@ -193,12 +217,14 @@ Aplikasi ini dirancang untuk bekerja optimal di berbagai perangkat:
 ## 🔧 Konfigurasi
 
 ### Environment Variables
+
 ```bash
 # Tidak ada environment variables khusus yang diperlukan
 # Semua konfigurasi sudah termasuk dalam kode
 ```
 
 ### Customization
+
 - **Chip Amount**: Ubah nilai awal chip di `modelsEnhanced.js`
 - **Blind Levels**: Modifikasi small/big blind di game logic
 - **AI Difficulty**: Sesuaikan parameter AI di `aiEnhanced.js`
@@ -207,6 +233,7 @@ Aplikasi ini dirancang untuk bekerja optimal di berbagai perangkat:
 ## 🧪 Testing
 
 ### Unit Tests
+
 ```bash
 # Jalankan semua unit tests
 npm test
@@ -219,6 +246,7 @@ npm test -- --coverage --watchAll=false
 ```
 
 ### Test Coverage
+
 - **Game Logic**: Hand evaluation, pot calculation
 - **AI Logic**: Win rate estimation, decision making
 - **Components**: Rendering, user interactions
@@ -227,12 +255,15 @@ npm test -- --coverage --watchAll=false
 ## 🚀 Deployment
 
 ### Build untuk Produksi
+
 ```bash
 npm run build
 ```
 
 ### Static Deployment
+
 Folder `build` berisi file statis yang siap untuk deployment ke:
+
 - Netlify
 - Vercel
 - GitHub Pages
@@ -240,6 +271,7 @@ Folder `build` berisi file statis yang siap untuk deployment ke:
 - Nginx
 
 ### Performance Optimization
+
 - Code splitting otomatis
 - Lazy loading untuk komponen
 - Image optimization
@@ -256,6 +288,7 @@ Kami menyambut kontribusi dari komunitas! Untuk berkontribusi:
 5. **Buka Pull Request**
 
 ### Guidelines Kontribusi
+
 - Ikuti ESLint configuration
 - Tambahkan tests untuk fitur baru
 - Update documentation
@@ -288,15 +321,18 @@ SOFTWARE.
 ## 🙏 Kredit & Aset
 
 ### Aset Visual
+
 - **Card Images** - Kartu poker di `public/assets/cards/`
 - **Avatar Images** - Avatar pemain di `public/assets/others/`
 - **Background Images** - Background textures di `public/assets/`
 - **UI Elements** - Buttons, icons, dan interface elements
 
 ### Audio
+
 - **Sound Effects** - `minecraft_level_up.mp3` dari Minecraft (Mojang Studios)
 
 ### Dependencies
+
 - **React Team** - React dan ekosistemnya
 - **Tailwind CSS Team** - Utility-first CSS framework
 - **Framer Motion Team** - Animation library
@@ -311,6 +347,7 @@ SOFTWARE.
 ## 🗺️ Roadmap
 
 ### Fitur Mendatang
+
 - [ ] Multiplayer Online (WebRTC)
 - [ ] Tournament Mode
 - [ ] Leaderboard System
@@ -321,6 +358,7 @@ SOFTWARE.
 - [ ] Mobile App Version
 
 ### Performance Improvements
+
 - [ ] WebAssembly untuk AI calculations
 - [ ] Progressive Web App (PWA)
 - [ ] Offline Mode
