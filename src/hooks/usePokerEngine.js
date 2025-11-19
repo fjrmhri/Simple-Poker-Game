@@ -1,6 +1,6 @@
 // src/hooks/usePokerEngine.js
 import { useState, useEffect, useCallback, useMemo } from "react";
-import Game from "../core/models";
+import Game, { deepClone } from "../core/models";
 import { AIBot } from "../core/ai";
 
 /**
@@ -95,6 +95,22 @@ export default function usePokerEngine(initialPlayers) {
     }
   }, [game]);
 
+  const awardChips = useCallback(
+    (playerIndex, amount) => {
+      if (!Number.isFinite(amount) || amount === 0) return;
+      setState((prev) => {
+        if (!prev?.players?.[playerIndex]) return prev;
+        const next = deepClone(prev);
+        next.players[playerIndex].chips = Math.max(
+          0,
+          next.players[playerIndex].chips + amount
+        );
+        return next;
+      });
+    },
+    []
+  );
+
   return {
     state,
     pot,
@@ -104,5 +120,6 @@ export default function usePokerEngine(initialPlayers) {
     handleAction,
     startNewHand,
     resetGame,
+    awardChips,
   };
 }
