@@ -1,70 +1,48 @@
+<p align="center">
+  <img src="https://img.shields.io/github/stars/fjrmhri/Simple-Poker-Game?style=for-the-badge&logo=github&color=8b5cf6" alt="Stars"/>
+  <img src="https://img.shields.io/github/license/fjrmhri/Simple-Poker-Game?style=for-the-badge&color=10b981" alt="License"/>
+  <img src="https://img.shields.io/badge/React-19.1.1-61dafb?style=for-the-badge&logo=react&logoColor=61dafb" alt="React"/>
+  <img src="https://img.shields.io/badge/React_Router-7.8.2-ca4245?style=for-the-badge&logo=reactrouter&logoColor=white" alt="React Router"/>
+  <img src="https://img.shields.io/badge/TailwindCSS-3.4.17-38bdf8?style=for-the-badge&logo=tailwind-css" alt="Tailwind"/>
+  <img src="https://img.shields.io/badge/Framer_Motion-12.23.12-ff4088?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion"/>
+</p>
+
 # ♠️ PokeReact – Neon Texas Hold'em
 
-PokeReact is a polished single-table Texas Hold'em experience built with React, Tailwind CSS, and Framer Motion. The latest overhaul focuses on smarter gameplay, a cinematic UI, and engaging progression systems so the table feels alive even when you play solo.
+PokeReact adalah pengalaman Texas Hold'em tunggal yang dibangun dengan React, Tailwind CSS, dan Framer Motion. Fokusnya adalah alur meja yang sinematik, bot yang responsif, serta progresi misi dan leaderboard lokal tanpa mengubah UI/UX yang sudah stabil.
 
-## ✨ Highlights
+## ✨ Fitur Utama
+- **Meja modern** dengan animasi komunitas dan tata letak kursi responsif.
+- **Profil pemain**: pilih avatar, warna aksen, dan tagline sebelum duduk di meja.
+- **HUD dinamis**: statistik, misi, leaderboard, bonus harian, serta obrolan dealer/bot.
+- **Logika game lengkap**: ronde taruhan, side pot, evaluasi pemenang, dan aksi bot.
+- **Audio imersif**: suara kartu, chip, dan fanfare kemenangan yang bisa dimute.
 
-### Modern UI/UX
-- Glassmorphism table with animated community cards and responsive seating layout
-- Start screen with avatar, tagline, and accent color customization
-- Dynamic HUD featuring stats, missions, leaderboard, and in-table chat reactions
-- Framer Motion animations across cards, modals, and overlays for a premium feel
-
-### Improved Game Logic
-- Accurate betting rounds (preflop → showdown) with blinds and side pots handled in `src/core/models.js`
-- Winner detection powered by the full hand evaluator (`src/core/handEvaluator.js`)
-- Smart hint engine in the main app that reacts to hand strength, pot odds, and available actions
-- Cleanup of duplicate engines/components for a single, optimized React flow
-
-### Gameplay Extras
-- Daily bonus chip injection with persistence (`localStorage`)
-- Missions that track wins, flops seen, and big pots
-- Local leaderboard that records your best stacks with avatars
-- Quick emoji reactions and dealer callouts that respond to round outcomes
-- Sound suite: card flips, chip stacks, and victory fanfare (toggleable)
-
-## 🧱 Project Structure
-```
-src/
-├── App.jsx                # Main experience (layout, missions, leaderboard, hints)
-├── components/
-│   ├── ActionBar.jsx      # Slider-based betting console with hints
-│   ├── GameHud.jsx        # Stats, missions, leaderboard, chat, bonus button
-│   ├── GameOverModal.js   # End-of-run modal
-│   ├── MobileWarning.js   # Small-screen fallback
-│   ├── PlayerSeat.jsx     # Avatar, timer, status badges
-│   ├── PokerTable.jsx     # Table scene and community cards
-│   ├── StartScreen.js     # Profile setup and confirmation
-│   ├── WinnerModal.js     # Hand-complete overlay
-│   └── CardImg.jsx        # Animated playing cards
-├── core/                 # Game logic (models, AI, evaluator)
-├── hooks/
-│   ├── usePokerEngine.js  # Engine wrapper used throughout the app
-│   ├── useSound.js        # Audio helper for mp3 assets
-│   └── useTone.js         # Lightweight Web Audio beeps for chips/cards
-└── index.js / index.css   # App bootstrap & global styles
-```
-
-## 🚀 Getting Started
+## 🚀 Cara Instalasi & Menjalankan
 ```bash
 git clone https://github.com/fjrmhri/Simple-Poker-Game.git
 cd Simple-Poker-Game
 npm install
 npm start
 ```
-Visit `http://localhost:3000` to sit at the table.
+Buka `http://localhost:3000` untuk mulai bermain.
+
+## 🔧 Konfigurasi
+- Aset suara berada di `public/sounds/`; ganti file bila ingin efek berbeda.
+- Penyimpanan lokal (`localStorage`) dipakai untuk profil, misi, leaderboard, dan status bonus harian.
+- Tidak ada variabel lingkungan wajib; pastikan port 3000 bebas saat menjalankan aplikasi.
 
 ## 🧪 Testing
 ```bash
 npm test
 ```
-A smoke test ensures the PokeReact heading renders; extend with more coverage for production use.
+Tes bawaan memastikan komponen utama dapat dirender. Tambahkan skenario lain bila dibutuhkan.
 
-## 🛠 Customization Tips
-- **Player defaults**: tweak bot profiles or starting stacks in `src/App.jsx` and `src/core/models.js`.
-- **Missions & bonus rules**: adjust `createMissions()` and the daily bonus logic in `App.jsx`.
-- **Sounds**: replace `/public/sounds/minecraft_level_up.mp3` or edit `useTone.js` frequencies for different effects.
-- **Styling**: Tailwind utility classes are centralized inside each component; adjust colors or spacing there.
+## 🗂️ Struktur Proyek Singkat
+- `src/App.jsx`: alur utama permainan, misi, bonus, dan integrasi HUD.
+- `src/components/`: ActionBar, meja, kursi pemain, HUD, modal, serta layar awal.
+- `src/core/`: logika inti (model permainan, evaluator kartu, dan bot dasar).
+- `src/hooks/`: utilitas React untuk audio, tone, penyimpanan lokal, dan mesin poker.
 
-## 📄 License
-MIT © 2024 PokeReact contributors
+## 📄 Lisensi
+Proyek ini berlisensi MIT. Silakan gunakan dan kembangkan sesuai kebutuhan.

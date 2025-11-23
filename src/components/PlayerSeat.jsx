@@ -18,7 +18,7 @@ export default function PlayerSeat({
   const showFace = isYou || reveal;
   const [timeLeft, setTimeLeft] = useState(30);
   const [avatar, setAvatar] = useState(
-    player?.avatar || "/assets/others/dealer.png"
+    player?.avatar || "/assets/others/dealer.png",
   );
 
   useEffect(() => {
@@ -47,12 +47,20 @@ export default function PlayerSeat({
     }
   };
 
-  const seatAlignment = position === "left" ? "items-start" : position === "right" ? "items-end" : "items-center";
+  const seatAlignment =
+    position === "left"
+      ? "items-start"
+      : position === "right"
+        ? "items-end"
+        : "items-center";
 
   return (
     <motion.div
       className={`flex w-[190px] flex-col items-center gap-2 rounded-3xl border border-white/10 bg-black/50 p-3 text-xs text-white shadow-xl backdrop-blur ${seatAlignment}`}
-      animate={{ scale: isTurn ? 1.05 : 1, opacity: player.folded && !isYou ? 0.5 : 1 }}
+      animate={{
+        scale: isTurn ? 1.05 : 1,
+        opacity: player.folded && !isYou ? 0.5 : 1,
+      }}
       transition={{ type: "spring", stiffness: 200, damping: 20 }}
     >
       <div className="flex flex-col items-center gap-2 text-center">
@@ -71,7 +79,9 @@ export default function PlayerSeat({
             />
           )}
           {isDealer && (
-            <span className="absolute -right-2 -top-2 rounded-full bg-yellow-400 px-1 text-[10px] font-black text-black">D</span>
+            <span className="absolute -right-2 -top-2 rounded-full bg-yellow-400 px-1 text-[10px] font-black text-black">
+              D
+            </span>
           )}
         </label>
         <div>
@@ -82,7 +92,9 @@ export default function PlayerSeat({
         {player.lastAction && (
           <span
             className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] text-white/80"
-            style={{ boxShadow: isTurn ? `0 0 0 1px ${accentColor}` : undefined }}
+            style={{
+              boxShadow: isTurn ? `0 0 0 1px ${accentColor}` : undefined,
+            }}
           >
             {player.lastActionAmount > 0
               ? `${player.lastAction.toUpperCase()} ${player.lastActionAmount}`
@@ -104,7 +116,10 @@ export default function PlayerSeat({
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
           <div
             className="h-full rounded-full"
-            style={{ width: `${(timeLeft / 30) * 100}%`, background: accentColor }}
+            style={{
+              width: `${(timeLeft / 30) * 100}%`,
+              background: accentColor,
+            }}
           />
         </div>
         <span>{timeLeft}s</span>

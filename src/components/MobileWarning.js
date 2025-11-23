@@ -11,37 +11,40 @@ export default function MobileWarning() {
         className="bg-gradient-to-br from-red-900 via-red-800 to-red-900 text-white rounded-2xl p-8 max-w-md w-full text-center border-2 border-red-600 shadow-2xl"
       >
         <motion.div
-          animate={{ 
+          animate={{
             rotate: [0, 10, -10, 0],
-            scale: [1, 1.1, 1]
+            scale: [1, 1.1, 1],
           }}
-          transition={{ 
+          transition={{
             duration: 2,
             repeat: Infinity,
-            repeatType: "reverse"
+            repeatType: "reverse",
           }}
           className="text-6xl mb-4"
         >
           📱
         </motion.div>
-        
+
         <h2 className="text-3xl font-bold mb-4 text-red-100">
           Layar Terlalu Kecil
         </h2>
-        
+
         <p className="text-lg mb-6 text-red-200">
-          Maaf, game poker ini membutuhkan layar yang lebih besar untuk pengalaman bermain yang optimal.
+          Maaf, game poker ini membutuhkan layar yang lebih besar untuk
+          pengalaman bermain yang optimal.
         </p>
-        
+
         <div className="bg-black/30 rounded-lg p-4 mb-6 border border-red-600">
-          <h3 className="font-semibold mb-2 text-red-100">Persyaratan Minimum:</h3>
+          <h3 className="font-semibold mb-2 text-red-100">
+            Persyaratan Minimum:
+          </h3>
           <ul className="text-sm text-left space-y-1 text-red-200">
             <li>• Lebar layar: minimal 768px</li>
             <li>• Tinggi layar: minimal 600px</li>
             <li>• Orientasi: Landscape direkomendasikan</li>
           </ul>
         </div>
-        
+
         <div className="space-y-3">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -51,9 +54,10 @@ export default function MobileWarning() {
           >
             Coba Lagi
           </motion.button>
-          
+
           <div className="text-xs text-red-300">
-            💡 Tips: Rotasi perangkat Anda ke mode landscape atau gunakan layar yang lebih besar
+            💡 Tips: Rotasi perangkat Anda ke mode landscape atau gunakan layar
+            yang lebih besar
           </div>
         </div>
       </motion.div>

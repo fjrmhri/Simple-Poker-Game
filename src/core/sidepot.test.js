@@ -62,4 +62,3 @@ test("handles side pots with multiple all-ins", () => {
   expect(state.pot).toBe(0);
   expect(new Set(state.winners)).toEqual(new Set([0, 1, 2]));
 });
-

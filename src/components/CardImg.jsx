@@ -23,7 +23,8 @@ export default function CardImg({ card, w = 72 }) {
         borderRadius: 18,
         border: "2px solid rgba(255,255,255,0.6)",
         boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
-        background: "radial-gradient(circle, rgba(255,255,255,0.2), transparent)",
+        background:
+          "radial-gradient(circle, rgba(255,255,255,0.2), transparent)",
       }}
     />
   );

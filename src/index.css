@@ -5,7 +5,8 @@
 
 @font-face {
   font-family: "Monocraft";
-  src: url("/public/fonts/Monocraft.ttf") format("truetype"),
+  src:
+    url("/public/fonts/Monocraft.ttf") format("truetype"),
     url("/public/fonts/Monocraft.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
@@ -14,8 +15,9 @@
 body {
   @apply text-white;
   font-family: "Monocraft", monospace;
-  background: radial-gradient(circle at top, rgba(15,118,110,0.3), transparent 45%),
-    radial-gradient(circle at bottom, rgba(190,24,93,0.15), transparent 55%),
+  background:
+    radial-gradient(circle at top, rgba(15, 118, 110, 0.3), transparent 45%),
+    radial-gradient(circle at bottom, rgba(190, 24, 93, 0.15), transparent 55%),
     #030712;
   min-height: 100vh;
 }

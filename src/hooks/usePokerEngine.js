@@ -50,11 +50,12 @@ export default function usePokerEngine(initialPlayers) {
           try {
             setState((prev) => game.applyAction(prev, action, amount));
           } catch (err) {
+            // Catat kesalahan agar debugging keputusan bot lebih mudah
             console.error("Bot action failed", err);
           }
         },
       },
-      current.level || "easy"
+      current.level || "easy",
     );
 
     const delayMap = { easy: 1200, normal: 2000, hard: 3000 };
@@ -71,10 +72,11 @@ export default function usePokerEngine(initialPlayers) {
       try {
         setState((prev) => game.applyAction(prev, action, amount));
       } catch (err) {
+        // Jaga UI tetap responsif ketika aksi pemain tidak valid
         console.error("Invalid player action", err);
       }
     },
-    [game]
+    [game],
   );
 
   // start a new hand
@@ -82,6 +84,7 @@ export default function usePokerEngine(initialPlayers) {
     try {
       setState((prev) => game.start(prev));
     } catch (err) {
+      // Hindari aplikasi crash saat inisiasi tangan baru
       console.error("Failed to start new hand", err);
     }
   }, [game]);
@@ -91,25 +94,23 @@ export default function usePokerEngine(initialPlayers) {
     try {
       setState(() => game.start());
     } catch (err) {
+      // Reset penuh dipantau untuk memudahkan pelacakan state yang bermasalah
       console.error("Failed to reset game", err);
     }
   }, [game]);
 
-  const awardChips = useCallback(
-    (playerIndex, amount) => {
-      if (!Number.isFinite(amount) || amount === 0) return;
-      setState((prev) => {
-        if (!prev?.players?.[playerIndex]) return prev;
-        const next = deepClone(prev);
-        next.players[playerIndex].chips = Math.max(
-          0,
-          next.players[playerIndex].chips + amount
-        );
-        return next;
-      });
-    },
-    []
-  );
+  const awardChips = useCallback((playerIndex, amount) => {
+    if (!Number.isFinite(amount) || amount === 0) return;
+    setState((prev) => {
+      if (!prev?.players?.[playerIndex]) return prev;
+      const next = deepClone(prev);
+      next.players[playerIndex].chips = Math.max(
+        0,
+        next.players[playerIndex].chips + amount,
+      );
+      return next;
+    });
+  }, []);
 
   return {
     state,
