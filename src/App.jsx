@@ -55,7 +55,18 @@ export default function App() {
   const [leaderboard, setLeaderboard] = usePersistentState(LEADERBOARD_KEY, []);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [chatMessages, setChatMessages] = useState(() => [
-    { id: 0, author: "Dealer", message: "Welcome to the Neon Hold'em table!" },
+    {
+      id: 0,
+      author: "Dealer",
+      message: "Welcome to the Neon Hold'em table!",
+      type: "dealer",
+    },
+    {
+      id: 1,
+      author: "Lucy",
+      message: "Bots are warmed up. Let's see your skills!",
+      type: "bot",
+    },
   ]);
   const [handHistory, setHandHistory] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
@@ -185,6 +196,7 @@ export default function App() {
   const leaderboardLabel = profile?.name || "You";
 
   const showdownSignatureRef = useRef("initial");
+  const lastActionsRef = useRef({});
   useEffect(() => {
     if (!winners.length || status === "playing" || !state.players?.length) return;
     const signature = `${state.community?.map((c) => `${c.rank}${c.suit}`).join("")}-${state.players
@@ -242,11 +254,12 @@ export default function App() {
 
     setChatMessages((prev) =>
       [
-        ...prev.slice(-7),
+        ...prev.slice(-8),
         {
           id: signature,
           author: heroWon ? "Dealer" : "Lucy",
           message: heroWon ? "Nice scoop! That pot is yours." : "Ouch, better luck on the next deal.",
+          type: heroWon ? "dealer" : "bot",
         },
       ]
     );
@@ -277,8 +290,8 @@ export default function App() {
     awardChips(0, 250);
     setDailyBonusState({ lastClaimed: new Date().toISOString() });
     setChatMessages((prev) => [
-      ...prev.slice(-7),
-      { id: Date.now(), author: "Dealer", message: "Daily bonus credited!" },
+      ...prev.slice(-8),
+      { id: Date.now(), author: "Dealer", message: "Daily bonus credited!", type: "dealer" },
     ]);
   };
 
@@ -314,10 +327,60 @@ export default function App() {
 
   const sendReaction = (emoji) => {
     setChatMessages((prev) => [
-      ...prev.slice(-7),
-      { id: Date.now(), author: profile?.name || "You", message: emoji },
+      ...prev.slice(-8),
+      { id: Date.now(), author: profile?.name || "You", message: emoji, type: "player" },
     ]);
   };
+
+  useEffect(() => {
+    if (!state.players?.length) return;
+    const updates = [];
+    state.players.forEach((p, idx) => {
+      const signature = p.lastAction ? `${p.lastAction}-${p.lastActionAmount}-${p.folded}` : null;
+      const prevSignature = lastActionsRef.current[idx];
+
+      if (signature && signature !== prevSignature) {
+        lastActionsRef.current[idx] = signature;
+        let actionText = "took an action";
+        if (p.lastAction === "call") actionText = `called ${p.lastActionAmount}`;
+        else if (p.lastAction === "raise") actionText = `raised to ${p.lastActionAmount}`;
+        else if (p.lastAction === "bet") actionText = `bet ${p.lastActionAmount}`;
+        else if (p.lastAction === "check") actionText = "checked";
+        else if (p.lastAction === "fold") actionText = "folded";
+
+        updates.push({
+          id: `${Date.now()}-${idx}`,
+          author: "Dealer",
+          message: `${p.name} ${actionText}.`,
+          type: "dealer",
+        });
+
+        if (idx !== 0 && p.lastAction !== "check") {
+          const botQuips = [
+            "Feeling bold today.",
+            "Can't let you have this one.",
+            "Watch out, big moves coming!",
+            "Playing it cool.",
+          ];
+          const quip = botQuips[Math.floor(Math.random() * botQuips.length)];
+          updates.push({
+            id: `${Date.now()}-${idx}-quip`,
+            author: p.name,
+            message: quip,
+            type: "bot",
+          });
+        }
+      }
+
+      if (!signature) {
+        lastActionsRef.current[idx] = null;
+      }
+    });
+
+    if (updates.length) {
+      setChatMessages((prev) => [...prev.slice(-(10 - updates.length)), ...updates]);
+    }
+  }, [state.players]);
 
   if (isMobile) {
     return <MobileWarning />;
@@ -329,7 +392,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
-      <div className="mx-auto max-w-7xl px-4 py-6 space-y-6">
+      <div className="mx-auto max-w-7xl px-4 py-4 space-y-5">
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-4 shadow-xl">
           <div>
             <p className="text-sm uppercase tracking-widest text-white/60">Neon Hold'em</p>
@@ -358,8 +421,16 @@ export default function App() {
           </div>
         </header>
 
-        <main className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(320px,1fr)]">
-          <section className="space-y-6">
+        <main className="grid items-start gap-4 lg:grid-cols-[280px_minmax(0,1fr)_280px]">
+          <GameHud
+            variant="left"
+            leaderboard={leaderboard}
+            hints={hints}
+            chatMessages={chatMessages}
+            onSendReaction={sendReaction}
+          />
+
+          <section className="space-y-4">
             <PokerTable
               state={state}
               pot={pot}
@@ -367,7 +438,9 @@ export default function App() {
               accentColor={profile?.favoriteColor}
             />
 
-            <ActionBar actions={availableActions} onAction={executeAction} hints={hints} />
+            <div className="sticky top-4 z-10">
+              <ActionBar actions={availableActions} onAction={executeAction} hints={hints} />
+            </div>
 
             {handHistory.length > 0 && (
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl">
@@ -375,7 +448,7 @@ export default function App() {
                   <h3 className="text-lg font-semibold">Recent hands</h3>
                   <span className="text-xs text-white/60">Last {handHistory.length} rounds</span>
                 </div>
-                <div className="mt-4 space-y-3">
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {handHistory.map((hand) => (
                     <div key={hand.id} className="rounded-2xl border border-white/5 bg-black/30 p-3 text-sm">
                       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -397,8 +470,6 @@ export default function App() {
             hints={hints}
             dailyBonus={{ available: bonusAvailable, lastClaimed }}
             onClaimBonus={handleClaimBonus}
-            chatMessages={chatMessages}
-            onSendReaction={sendReaction}
           />
         </main>
       </div>

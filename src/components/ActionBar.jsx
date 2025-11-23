@@ -35,14 +35,14 @@ export default function ActionBar({ actions = [], onAction, hints }) {
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
+    <div className="rounded-3xl border border-white/10 bg-black/40 p-4 shadow-2xl backdrop-blur">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
           <p className="text-xs uppercase tracking-widest text-white/60">Action console</p>
-          <h3 className="text-xl font-semibold">{hints?.recommendation || "Your move"}</h3>
-          <p className="text-xs text-white/50">{hints?.tip}</p>
+          <h3 className="text-xl font-semibold leading-tight">{hints?.recommendation || "Your move"}</h3>
+          <p className="text-xs text-white/60">{hints?.tip}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => foldAction && onAction("fold")}
             disabled={!foldAction}
@@ -66,7 +66,7 @@ export default function ActionBar({ actions = [], onAction, hints }) {
 
       {betAction ? (
         <div className="mt-4 space-y-3">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               type="range"
               min={sliderRange.min}
@@ -106,7 +106,7 @@ export default function ActionBar({ actions = [], onAction, hints }) {
           </button>
         </div>
       ) : (
-        <p className="mt-4 text-sm text-white/60">Waiting for opponent actions…</p>
+        <p className="mt-3 text-sm text-white/60">Waiting for opponent actions…</p>
       )}
     </div>
   );
