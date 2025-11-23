@@ -1,11 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 
 export default function GameHud({
   stats,
   missions,
   leaderboard,
-  hints,
   dailyBonus,
   onClaimBonus,
   chatMessages,
@@ -14,21 +13,11 @@ export default function GameHud({
 }) {
   const safeStats = stats || { handsPlayed: 0, handsWon: 0, biggestPot: 0, bestHand: "--" };
   const safeMissions = missions || [];
-  const [activeTab, setActiveTab] = useState("leaderboard");
   const winRate = safeStats.handsPlayed
     ? Math.round((safeStats.handsWon / safeStats.handsPlayed) * 100)
     : 0;
 
   const reactionEmojis = ["🔥", "😎", "😬", "🤝", "🃏", "🚀"];
-
-  const sideTabs = useMemo(
-    () => [
-      { id: "leaderboard", label: "Leaderboard" },
-      { id: "hint", label: "Smart hint" },
-      { id: "chat", label: "Table chat" },
-    ],
-    []
-  );
 
   if (variant === "left") {
     return (
@@ -36,102 +25,89 @@ export default function GameHud({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl border border-white/10 bg-white/5 p-3 shadow-xl"
+          className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-xl"
         >
-          <div className="flex items-center justify-between text-sm">
-            <p className="uppercase tracking-widest text-white/60">Table tools</p>
-            <div className="flex gap-2">
-              {sideTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                    activeTab === tab.id
-                      ? "bg-yellow-400 text-black"
-                      : "bg-white/10 text-white/60"
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-white/60">Table tools</p>
+              <h3 className="text-xl font-semibold">Table chat</h3>
+            </div>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-white/70">Quick reactions</span>
+          </div>
+
+          <div className="mt-3 space-y-3 text-sm">
+            <div className="h-52 overflow-auto rounded-2xl border border-white/5 bg-black/40 p-3">
+              {chatMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`mb-2 rounded-xl px-3 py-2 ${
+                    msg.type === "dealer"
+                      ? "border border-emerald-400/30 bg-emerald-500/10"
+                      : "border border-white/10 bg-white/5"
                   }`}
                 >
-                  {tab.label}
+                  <p
+                    className={`text-xs font-semibold ${
+                      msg.type === "dealer" ? "text-emerald-200" : "text-white"
+                    }`}
+                  >
+                    {msg.author}
+                  </p>
+                  <p className="text-white/80">{msg.message}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {reactionEmojis.map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => onSendReaction(emoji)}
+                  className="rounded-full border border-white/10 bg-black/50 px-2 py-1 text-lg shadow hover:bg-white/10"
+                >
+                  {emoji}
                 </button>
               ))}
             </div>
           </div>
+        </motion.div>
 
-          {activeTab === "leaderboard" && (
-            <div className="mt-3 space-y-2 text-sm">
-              {leaderboard.length === 0 && (
-                <p className="text-white/50">Play a hand to enter the board.</p>
-              )}
-              {leaderboard.map((entry, index) => (
-                <div
-                  key={entry.name}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 px-3 py-2"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-black text-white/40">#{index + 1}</span>
-                    <img
-                      src={entry.avatar}
-                      alt={entry.name}
-                      className="h-8 w-8 rounded-full border border-white/20 object-cover"
-                    />
-                    <div>
-                      <p className="text-sm font-semibold">{entry.name}</p>
-                      <p className="text-xs text-white/50">{entry.score} chips</p>
-                    </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-xl"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-white/60">Table tools</p>
+              <h3 className="text-xl font-semibold">Leaderboard</h3>
+            </div>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-white/70">Live standings</span>
+          </div>
+          <div className="mt-3 space-y-2 text-sm">
+            {leaderboard.length === 0 && (
+              <p className="text-white/50">Play a hand to enter the board.</p>
+            )}
+            {leaderboard.map((entry, index) => (
+              <div
+                key={entry.name}
+                className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 px-3 py-2"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-black text-white/40">#{index + 1}</span>
+                  <img
+                    src={entry.avatar}
+                    alt={entry.name}
+                    className="h-8 w-8 rounded-full border border-white/20 object-cover"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold">{entry.name}</p>
+                    <p className="text-xs text-white/50">{entry.score} chips</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === "hint" && (
-            <div className="mt-4 space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">{hints.strength}</h3>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                  {hints.recommendation}
-                </span>
               </div>
-              <p className="text-white/70">{hints.tip}</p>
-            </div>
-          )}
-
-          {activeTab === "chat" && (
-            <div className="mt-3 space-y-3 text-sm">
-              <div className="h-48 overflow-auto rounded-2xl border border-white/5 bg-black/40 p-3">
-                {chatMessages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`mb-2 rounded-xl px-3 py-2 ${
-                      msg.type === "dealer"
-                        ? "bg-emerald-500/10 border border-emerald-400/30"
-                        : "bg-white/5 border border-white/10"
-                    }`}
-                  >
-                    <p
-                      className={`text-xs font-semibold ${
-                        msg.type === "dealer" ? "text-emerald-200" : "text-white"
-                      }`}
-                    >
-                      {msg.author}
-                    </p>
-                    <p className="text-white/80">{msg.message}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {reactionEmojis.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => onSendReaction(emoji)}
-                    className="rounded-full border border-white/10 bg-black/50 px-2 py-1 text-lg shadow hover:bg-white/10"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </motion.div>
       </aside>
     );
@@ -198,24 +174,6 @@ export default function GameHud({
             </div>
           ))}
         </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 p-4 shadow-xl"
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-widest text-white/60">Current advice</p>
-            <h3 className="text-xl font-semibold">{hints.strength}</h3>
-          </div>
-          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-            {hints.recommendation}
-          </span>
-        </div>
-        <p className="mt-3 text-sm text-white/70">{hints.tip}</p>
       </motion.div>
     </aside>
   );

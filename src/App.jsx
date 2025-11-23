@@ -425,7 +425,6 @@ export default function App() {
           <GameHud
             variant="left"
             leaderboard={leaderboard}
-            hints={hints}
             chatMessages={chatMessages}
             onSendReaction={sendReaction}
           />
@@ -467,7 +466,6 @@ export default function App() {
             stats={stats}
             missions={missions}
             leaderboard={leaderboard}
-            hints={hints}
             dailyBonus={{ available: bonusAvailable, lastClaimed }}
             onClaimBonus={handleClaimBonus}
           />
