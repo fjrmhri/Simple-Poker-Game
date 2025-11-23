@@ -11,7 +11,12 @@ export default function GameHud({
   onSendReaction,
   variant = "right",
 }) {
-  const safeStats = stats || { handsPlayed: 0, handsWon: 0, biggestPot: 0, bestHand: "--" };
+  const safeStats = stats || {
+    handsPlayed: 0,
+    handsWon: 0,
+    biggestPot: 0,
+    bestHand: "--",
+  };
   const safeMissions = missions || [];
   const winRate = safeStats.handsPlayed
     ? Math.round((safeStats.handsWon / safeStats.handsPlayed) * 100)
@@ -35,10 +40,14 @@ export default function GameHud({
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-widest text-white/60">Table tools</p>
+              <p className="text-xs uppercase tracking-widest text-white/60">
+                Table tools
+              </p>
               <h3 className="text-xl font-semibold">Table chat</h3>
             </div>
-            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-white/70">Quick reactions</span>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-white/70">
+              Quick reactions
+            </span>
           </div>
 
           <div className="mt-3 space-y-3 text-sm">
@@ -88,10 +97,14 @@ export default function GameHud({
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-widest text-white/60">Table tools</p>
+              <p className="text-xs uppercase tracking-widest text-white/60">
+                Table tools
+              </p>
               <h3 className="text-xl font-semibold">Leaderboard</h3>
             </div>
-            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-white/70">Live standings</span>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-white/70">
+              Live standings
+            </span>
           </div>
           <div className="mt-3 space-y-2 text-sm">
             {leaderboard.length === 0 && (
@@ -103,7 +116,9 @@ export default function GameHud({
                 className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 px-3 py-2"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-black text-white/40">#{index + 1}</span>
+                  <span className="text-sm font-black text-white/40">
+                    #{index + 1}
+                  </span>
                   <img
                     src={entry.avatar}
                     alt={entry.name}
@@ -131,14 +146,18 @@ export default function GameHud({
       >
         <div className="flex items-center justify-between gap-2">
           <div>
-            <p className="text-xs uppercase tracking-widest text-white/60">Player intel</p>
+            <p className="text-xs uppercase tracking-widest text-white/60">
+              Player intel
+            </p>
             <h2 className="text-2xl font-bold">Stats</h2>
           </div>
           {onClaimBonus && dailyBonus && (
             <button
               onClick={onClaimBonus}
               className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                dailyBonus.available ? "bg-amber-400 text-black" : "bg-white/10 text-white/50"
+                dailyBonus.available
+                  ? "bg-amber-400 text-black"
+                  : "bg-white/10 text-white/50"
               }`}
               disabled={!dailyBonus.available}
             >
@@ -151,7 +170,11 @@ export default function GameHud({
           <StatTile label="Hands won" value={safeStats.handsWon} />
           <StatTile label="Win rate" value={`${winRate}%`} />
           <StatTile label="Biggest pot" value={safeStats.biggestPot} />
-          <StatTile label="Best hand" value={safeStats.bestHand} className="col-span-2" />
+          <StatTile
+            label="Best hand"
+            value={safeStats.bestHand}
+            className="col-span-2"
+          />
         </div>
       </motion.div>
 
@@ -163,7 +186,9 @@ export default function GameHud({
       >
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-lg font-semibold">Daily missions</h3>
-          <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] text-white/70">Track progress</span>
+          <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] text-white/70">
+            Track progress
+          </span>
         </div>
         <div className="mt-3 space-y-3">
           {safeMissions.map((mission) => (
@@ -177,7 +202,9 @@ export default function GameHud({
               <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/10">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-amber-300 to-yellow-400"
-                  style={{ width: `${(mission.progress / mission.goal) * 100}%` }}
+                  style={{
+                    width: `${(mission.progress / mission.goal) * 100}%`,
+                  }}
                 />
               </div>
             </div>
@@ -190,7 +217,9 @@ export default function GameHud({
 
 function StatTile({ label, value, className = "" }) {
   return (
-    <div className={`rounded-2xl border border-white/10 bg-black/30 p-3 text-xs ${className}`}>
+    <div
+      className={`rounded-2xl border border-white/10 bg-black/30 p-3 text-xs ${className}`}
+    >
       <p className="text-white/60">{label}</p>
       <p className="text-lg font-semibold">{value}</p>
     </div>

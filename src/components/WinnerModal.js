@@ -9,7 +9,9 @@ export default function WinnerModal({ winners, onRestart }) {
         animate={{ scale: 1, opacity: 1 }}
         className="w-full max-w-md rounded-[40px] border border-yellow-400/40 bg-gradient-to-br from-black/80 to-emerald-900/40 p-6 text-center text-white shadow-2xl"
       >
-        <p className="text-sm uppercase tracking-[0.4em] text-white/60">Hand complete</p>
+        <p className="text-sm uppercase tracking-[0.4em] text-white/60">
+          Hand complete
+        </p>
         <h2 className="mt-2 text-3xl font-black text-yellow-300">Winner</h2>
         <ul className="mt-4 space-y-1 text-lg">
           {winners.map((winner) => (

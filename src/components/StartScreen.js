@@ -15,14 +15,28 @@ export default function StartScreen({ onStartGame }) {
   const [color, setColor] = useState(colors[0]);
   const [tagline, setTagline] = useState("Ready to shuffle!");
   const [confirming, setConfirming] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleBegin = () => {
-    if (!name.trim()) return;
+    // Validasi ringan sebelum masuk tahap konfirmasi untuk mencegah state tidak konsisten
+    if (!name.trim()) {
+      setErrorMessage("Nama tidak boleh kosong.");
+      return;
+    }
+    setErrorMessage("");
     setConfirming(true);
   };
 
   const handleConfirm = () => {
-    onStartGame({ name: name.trim(), avatar, color, tagline });
+    try {
+      setErrorMessage("");
+      onStartGame?.({ name: name.trim(), avatar, color, tagline });
+    } catch (error) {
+      // Pesan yang ramah pengguna agar pemain tahu ada masalah saat memulai permainan
+      console.error("Gagal memulai permainan", error);
+      setErrorMessage("Terjadi kesalahan saat memulai permainan. Coba lagi.");
+      setConfirming(false);
+    }
   };
 
   if (confirming) {
@@ -34,8 +48,14 @@ export default function StartScreen({ onStartGame }) {
           className="w-[360px] rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-white shadow-2xl"
         >
           <h2 className="text-2xl font-bold">Take your seat?</h2>
-          <p className="text-sm text-white/60">We'll lock in your profile and shuffle the deck.</p>
-          <img src={avatar} alt={name} className="mx-auto my-4 h-24 w-24 rounded-full border-4 border-white/20 object-cover" />
+          <p className="text-sm text-white/60">
+            We'll lock in your profile and shuffle the deck.
+          </p>
+          <img
+            src={avatar}
+            alt={name}
+            className="mx-auto my-4 h-24 w-24 rounded-full border-4 border-white/20 object-cover"
+          />
           <p className="text-lg font-semibold">{name}</p>
           <p className="text-sm text-white/60">{tagline}</p>
           <div className="mt-6 flex gap-3">
@@ -64,9 +84,13 @@ export default function StartScreen({ onStartGame }) {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md rounded-[40px] border border-white/10 bg-white/5 p-6 shadow-2xl"
       >
-        <p className="text-xs uppercase tracking-[0.4em] text-white/60">Texas Hold'em</p>
+        <p className="text-xs uppercase tracking-[0.4em] text-white/60">
+          Texas Hold'em
+        </p>
         <h1 className="text-4xl font-black text-yellow-300">PokeReact</h1>
-        <p className="text-sm text-white/70">Build your legend and conquer the felt.</p>
+        <p className="text-sm text-white/70">
+          Build your legend and conquer the felt.
+        </p>
 
         <div className="mt-6 space-y-4 text-sm">
           <label className="flex flex-col gap-2">
@@ -100,7 +124,11 @@ export default function StartScreen({ onStartGame }) {
                     avatar === option ? "border-yellow-300" : "border-white/20"
                   } p-1`}
                 >
-                  <img src={option} alt="avatar" className="h-14 w-14 rounded-full object-cover" />
+                  <img
+                    src={option}
+                    alt="avatar"
+                    className="h-14 w-14 rounded-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -120,6 +148,12 @@ export default function StartScreen({ onStartGame }) {
             </div>
           </div>
         </div>
+
+        {errorMessage && (
+          <p className="mt-4 rounded-2xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            {errorMessage}
+          </p>
+        )}
 
         <button
           onClick={handleBegin}

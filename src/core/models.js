@@ -183,7 +183,9 @@ function awardPots(state) {
     const contenders = pot.players.filter((i) => !state.players[i].folded);
     if (contenders.length === 0) continue;
     const evalPlayers = contenders.map((i) => ({ ...state.players[i], i }));
-    const potWinners = evaluateWinners(evalPlayers, state.community).map((w) => w.i);
+    const potWinners = evaluateWinners(evalPlayers, state.community).map(
+      (w) => w.i,
+    );
     potWinners.forEach((w) => winners.add(w));
     const share = Math.floor(pot.amount / potWinners.length);
     const remainder = pot.amount % potWinners.length;
@@ -226,11 +228,11 @@ export default class Game {
     let dealerIndex = this.dealerIndex;
 
     if (!prevState) {
-        players = this.templatePlayers.map((p) => buildPlayer(p, deck));
-        dealerIndex = 0;
+      players = this.templatePlayers.map((p) => buildPlayer(p, deck));
+      dealerIndex = 0;
     } else {
-        players = prevState.players.map((p) => buildPlayer(p, deck));
-        dealerIndex = (prevState.dealerIndex + 1) % players.length;
+      players = prevState.players.map((p) => buildPlayer(p, deck));
+      dealerIndex = (prevState.dealerIndex + 1) % players.length;
     }
 
     const smallBlind = 10;
@@ -381,7 +383,7 @@ export default class Game {
       const pay = Math.min(total, p.chips);
       p.chips -= pay;
       p.bet += pay;
-       p.totalBet += pay;
+      p.totalBet += pay;
       p.lastAction = toCallBefore > 0 ? "raise" : "bet";
       p.lastActionAmount = pay;
     }
@@ -423,7 +425,7 @@ export default class Game {
       }
     }
     const activeWithChips = s.players.filter(
-      (pl) => !pl.folded && pl.chips > 0
+      (pl) => !pl.folded && pl.chips > 0,
     );
 
     if (!s.endgame && s.round !== "Showdown" && activeWithChips.length <= 1) {

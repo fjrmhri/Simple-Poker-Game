@@ -3,20 +3,39 @@ import { motion } from "framer-motion";
 import CardImg from "./CardImg";
 import PlayerSeat from "./PlayerSeat";
 
-export default function PokerTable({ state, pot, winners, accentColor = "#facc15" }) {
-  const { players = [], currentPlayer, community = [], round, dealerIndex } = state;
+export default function PokerTable({
+  state,
+  pot,
+  winners,
+  accentColor = "#facc15",
+}) {
+  const {
+    players = [],
+    currentPlayer,
+    community = [],
+    round,
+    dealerIndex,
+  } = state;
   if (!players.length) return null;
   const reveal = round === "Showdown";
-  const leftOpponents = players.slice(1, 1 + Math.ceil((players.length - 1) / 2));
+  const leftOpponents = players.slice(
+    1,
+    1 + Math.ceil((players.length - 1) / 2),
+  );
   const rightOpponents = players.slice(1 + leftOpponents.length);
 
   return (
     <div className="relative rounded-[70px] border border-white/10 bg-gradient-to-b from-emerald-900/80 via-emerald-950/70 to-black p-5 shadow-2xl">
-      <div className="absolute inset-0 rounded-[70px] border border-emerald-300/10" style={{ boxShadow: `inset 0 0 80px rgba(0,0,0,0.7)` }} />
+      <div
+        className="absolute inset-0 rounded-[70px] border border-emerald-300/10"
+        style={{ boxShadow: `inset 0 0 80px rgba(0,0,0,0.7)` }}
+      />
       <div className="relative space-y-5">
         <div className="flex flex-wrap items-center justify-between text-sm text-white/70">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Round</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              Round
+            </p>
             <p className="text-2xl font-black text-white">{round}</p>
           </div>
           <motion.div
@@ -25,7 +44,9 @@ export default function PokerTable({ state, pot, winners, accentColor = "#facc15
             animate={{ scale: 1, opacity: 1 }}
             className="text-right"
           >
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Pot</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              Pot
+            </p>
             <p className="text-3xl font-black text-yellow-300">{pot}</p>
           </motion.div>
         </div>
@@ -50,7 +71,9 @@ export default function PokerTable({ state, pot, winners, accentColor = "#facc15
               community={community}
               isYou
               isTurn={
-                0 === currentPlayer && round !== "Showdown" && !players[0]?.folded
+                0 === currentPlayer &&
+                round !== "Showdown" &&
+                !players[0]?.folded
               }
               reveal={reveal}
               round={round}
@@ -69,7 +92,9 @@ export default function PokerTable({ state, pot, winners, accentColor = "#facc15
                   player={player}
                   community={community}
                   isTurn={
-                    seatIndex === currentPlayer && round !== "Showdown" && !player.folded
+                    seatIndex === currentPlayer &&
+                    round !== "Showdown" &&
+                    !player.folded
                   }
                   reveal={reveal}
                   round={round}
@@ -91,7 +116,9 @@ export default function PokerTable({ state, pot, winners, accentColor = "#facc15
                   player={player}
                   community={community}
                   isTurn={
-                    seatIndex === currentPlayer && round !== "Showdown" && !player.folded
+                    seatIndex === currentPlayer &&
+                    round !== "Showdown" &&
+                    !player.folded
                   }
                   reveal={reveal}
                   round={round}

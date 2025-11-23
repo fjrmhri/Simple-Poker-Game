@@ -59,7 +59,7 @@ function estimateWinRate(state, playerIndex, simulations = 200) {
 
   const hero = state.players[playerIndex];
   const opponents = state.players.filter(
-    (_, i) => i !== playerIndex && !state.players[i].folded
+    (_, i) => i !== playerIndex && !state.players[i].folded,
   );
   if (opponents.length === 0) return 1;
 
@@ -85,12 +85,12 @@ function estimateWinRate(state, playerIndex, simulations = 200) {
 
 export class AIBot {
   /**
-    * Create a new AI bot instance.
-    * @param {object} game - Poker game engine.
-    * @param {object} state - Current game state.
-    * @param {object} queue - Queue for pushing bot actions.
-    * @param {"easy"|"normal"|"hard"} level - Bot difficulty level.
-    */
+   * Create a new AI bot instance.
+   * @param {object} game - Poker game engine.
+   * @param {object} state - Current game state.
+   * @param {object} queue - Queue for pushing bot actions.
+   * @param {"easy"|"normal"|"hard"} level - Bot difficulty level.
+   */
   constructor(game, state, queue = { push: () => {} }, level = "easy") {
     if (!game || !state) {
       throw new Error("Game and state are required to initialize AIBot");
@@ -128,11 +128,15 @@ export class AIBot {
     const winRate = estimateWinRate(
       this.state,
       this.state.currentPlayer,
-      this.level === "hard" ? 600 : 300
+      this.level === "hard" ? 600 : 300,
     );
     const potSize = this.game.calculatePot(this.state);
-    const toCallAmount = this.game.toCallOf(this.state, this.state.currentPlayer);
-    const potOdds = toCallAmount > 0 ? calculatePotOdds(potSize, toCallAmount) : 0;
+    const toCallAmount = this.game.toCallOf(
+      this.state,
+      this.state.currentPlayer,
+    );
+    const potOdds =
+      toCallAmount > 0 ? calculatePotOdds(potSize, toCallAmount) : 0;
 
     if (this.level === "normal") {
       if (bet && (winRate > potOdds + 0.15 || Math.random() < 0.05)) {
@@ -149,7 +153,8 @@ export class AIBot {
         const amount = chooseBetAmount(bet, potSize, winRate + 0.1);
         return this.queue.push({ action: "bet", amount });
       }
-      if (call && winRate > potOdds * 0.9) return this.queue.push({ action: "call" });
+      if (call && winRate > potOdds * 0.9)
+        return this.queue.push({ action: "call" });
       if (check) return this.queue.push({ action: "check" });
       return this.queue.push({ action: "fold" });
     }

@@ -1,6 +1,11 @@
 import { useCallback, useRef } from "react";
 
-export default function useTone({ frequency = 440, duration = 0.15, type = "sine", volume = 0.2 } = {}) {
+export default function useTone({
+  frequency = 440,
+  duration = 0.15,
+  type = "sine",
+  volume = 0.2,
+} = {}) {
   const contextRef = useRef(null);
 
   return useCallback(() => {

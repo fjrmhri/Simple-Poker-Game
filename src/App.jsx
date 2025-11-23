@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import PokerTable from "./components/PokerTable";
 import ActionBar from "./components/ActionBar";
 import WinnerModal from "./components/WinnerModal";
@@ -27,7 +33,8 @@ const BOT_PROFILES = [
   },
 ];
 
-const randomChoice = (options) => options[Math.floor(Math.random() * options.length)];
+const randomChoice = (options) =>
+  options[Math.floor(Math.random() * options.length)];
 
 const describeCards = (cards = []) =>
   cards
@@ -45,7 +52,8 @@ const actionTemplates = {
     (player) => `${player.name} checks and keeps the pace slow.`,
   ],
   call: [
-    (player) => `${player.name} calls ${player.lastActionAmount} to stay in the pot.`,
+    (player) =>
+      `${player.name} calls ${player.lastActionAmount} to stay in the pot.`,
     (player) => `${player.name} makes the call for ${player.lastActionAmount}.`,
   ],
   bet: [
@@ -103,7 +111,7 @@ export default function App() {
   const [missions, setMissions] = useState(createMissions);
   const [dailyBonusState, setDailyBonusState] = usePersistentState(
     DAILY_BONUS_KEY,
-    { lastClaimed: null }
+    { lastClaimed: null },
   );
   const [leaderboard, setLeaderboard] = usePersistentState(LEADERBOARD_KEY, []);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -123,6 +131,7 @@ export default function App() {
   ]);
   const [handHistory, setHandHistory] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [appError, setAppError] = useState("");
   const roundRef = useRef(null);
   const handCounterRef = useRef(0);
 
@@ -135,7 +144,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const checkSize = () => setIsMobile(window.innerWidth < 768 || window.innerHeight < 600);
+    const checkSize = () =>
+      setIsMobile(window.innerWidth < 768 || window.innerHeight < 600);
     checkSize();
     window.addEventListener("resize", checkSize);
     return () => window.removeEventListener("resize", checkSize);
@@ -166,8 +176,18 @@ export default function App() {
   const player = state.players?.[0];
 
   const playWinnerSound = useSound("/sounds/minecraft_level_up.mp3");
-  const playCardFlip = useTone({ frequency: 520, duration: 0.18, type: "triangle", volume: 0.15 });
-  const playChipStack = useTone({ frequency: 240, duration: 0.25, type: "sawtooth", volume: 0.12 });
+  const playCardFlip = useTone({
+    frequency: 520,
+    duration: 0.18,
+    type: "triangle",
+    volume: 0.15,
+  });
+  const playChipStack = useTone({
+    frequency: 240,
+    duration: 0.25,
+    type: "sawtooth",
+    volume: 0.12,
+  });
 
   useEffect(() => {
     if (!soundEnabled || winners.length === 0) return;
@@ -196,10 +216,11 @@ export default function App() {
       }
       handleAction(action, amount);
     },
-    [handleAction, playChipStack, soundEnabled]
+    [handleAction, playChipStack, soundEnabled],
   );
 
   const toCall = useMemo(() => {
+    // Hitung kewajiban call terkini untuk pemain utama
     if (!state.players?.length) return 0;
     const highest = Math.max(...state.players.map((p) => p.bet));
     return Math.max(0, highest - (player?.bet ?? 0));
@@ -211,6 +232,7 @@ export default function App() {
   }, [player?.hand, state.community]);
 
   const hints = useMemo(() => {
+    // Ringkasan rekomendasi aksi agar UI tetap informatif tanpa logika baru
     const base = {
       strength: handStrength || "Waiting for cards",
       recommendation: "Stay patient",
@@ -239,18 +261,20 @@ export default function App() {
       return {
         strength: handStrength,
         recommendation: toCall === 0 ? "Value bet" : "Controlled call",
-        tip: toCall === 0
-          ? "Take the lead with a confident bet to extract value."
-          : "The price is affordable—calling keeps your showdown value intact.",
+        tip:
+          toCall === 0
+            ? "Take the lead with a confident bet to extract value."
+            : "The price is affordable—calling keeps your showdown value intact.",
       };
     }
     if (handStrength) {
       return {
         strength: handStrength,
         recommendation: toCall === 0 ? "Check" : "Fold carefully",
-        tip: toCall === 0
-          ? "Free cards can improve marginal holdings."
-          : "Save chips for a better spot unless pot odds are compelling.",
+        tip:
+          toCall === 0
+            ? "Free cards can improve marginal holdings."
+            : "Save chips for a better spot unless pot odds are compelling.",
       };
     }
     return base;
@@ -269,7 +293,12 @@ export default function App() {
 
   const buildBotReply = useCallback((actionType) => {
     if (!actionType) return null;
-    const category = actionType === "fold" ? "fold" : ["check", "call"].includes(actionType) ? "passive" : "aggressive";
+    const category =
+      actionType === "fold"
+        ? "fold"
+        : ["check", "call"].includes(actionType)
+          ? "passive"
+          : "aggressive";
     const replies = botReplies[category];
     return replies ? randomChoice(replies) : null;
   }, []);
@@ -277,7 +306,9 @@ export default function App() {
   const showdownSignatureRef = useRef("initial");
   const lastActionsRef = useRef({});
   useEffect(() => {
-    if (!winners.length || status === "playing" || !state.players?.length) return;
+    // Efek pasca-showdown: catat histori, misi, dan papan skor tanpa mengulang ringkasan yang sama
+    if (!winners.length || status === "playing" || !state.players?.length)
+      return;
     const signature = `${state.community?.map((c) => `${c.rank}${c.suit}`).join("")}-${state.players
       .map((p) => p.hand?.map((card) => `${card.rank}${card.suit}`).join(""))
       .join("|")}`;
@@ -294,30 +325,41 @@ export default function App() {
       bestHand: heroWon ? heroHand || prev.bestHand : prev.bestHand,
     }));
 
-    setHandHistory((prev) => [
-      {
-        id: signature,
-        pot,
-        winners: winners.map((idx) => state.players[idx].name),
-        heroHand,
-        community: state.community,
-      },
-      ...prev,
-    ].slice(0, 5));
+    setHandHistory((prev) =>
+      [
+        {
+          id: signature,
+          pot,
+          winners: winners.map((idx) => state.players[idx].name),
+          heroHand,
+          community: state.community,
+        },
+        ...prev,
+      ].slice(0, 5),
+    );
 
     setMissions((prev) =>
       prev.map((mission) => {
         if (mission.id === "win-3" && heroWon) {
-          return { ...mission, progress: Math.min(mission.goal, mission.progress + 1) };
+          return {
+            ...mission,
+            progress: Math.min(mission.goal, mission.progress + 1),
+          };
         }
         if (mission.id === "see-flop" && state.community.length >= 3) {
-          return { ...mission, progress: Math.min(mission.goal, mission.progress + 1) };
+          return {
+            ...mission,
+            progress: Math.min(mission.goal, mission.progress + 1),
+          };
         }
         if (mission.id === "big-pot" && heroWon && pot >= 250) {
-          return { ...mission, progress: Math.min(mission.goal, mission.progress + 1) };
+          return {
+            ...mission,
+            progress: Math.min(mission.goal, mission.progress + 1),
+          };
         }
         return mission;
-      })
+      }),
     );
 
     setLeaderboard((prev) => {
@@ -325,7 +367,11 @@ export default function App() {
       const filtered = prev.filter((entry) => entry.name !== leaderboardLabel);
       return [
         ...filtered,
-        { name: leaderboardLabel, score: bestScore, avatar: profile?.avatar || "/assets/others/avatar2.jpg" },
+        {
+          name: leaderboardLabel,
+          score: bestScore,
+          avatar: profile?.avatar || "/assets/others/avatar2.jpg",
+        },
       ]
         .sort((a, b) => b.score - a.score)
         .slice(0, 5);
@@ -359,7 +405,9 @@ export default function App() {
   ]);
 
   const now = new Date();
-  const lastClaimed = dailyBonusState.lastClaimed ? new Date(dailyBonusState.lastClaimed) : null;
+  const lastClaimed = dailyBonusState.lastClaimed
+    ? new Date(dailyBonusState.lastClaimed)
+    : null;
   const sameDay =
     lastClaimed &&
     lastClaimed.getFullYear() === now.getFullYear() &&
@@ -372,18 +420,32 @@ export default function App() {
     awardChips(0, 250);
     setDailyBonusState({ lastClaimed: new Date().toISOString() });
     appendChatMessages([
-      { id: Date.now(), author: "Dealer", message: "Daily bonus credited!", type: "dealer" },
+      {
+        id: Date.now(),
+        author: "Dealer",
+        message: "Daily bonus credited!",
+        type: "dealer",
+      },
     ]);
   };
 
   const handleStartGame = (config) => {
-    setProfile({
-      name: config.name,
-      isBot: false,
-      avatar: config.avatar,
-      favoriteColor: config.color,
-    });
-    setGameStarted(true);
+    // Lindungi proses start agar tidak gagal diam-diam ketika prop belum siap
+    try {
+      setProfile({
+        name: config.name,
+        isBot: false,
+        avatar: config.avatar,
+        favoriteColor: config.color,
+      });
+      setGameStarted(true);
+      setAppError("");
+    } catch (error) {
+      console.error("Konfigurasi awal tidak valid", error);
+      setAppError(
+        "Terjadi kendala saat mempersiapkan meja. Muat ulang bila masalah berlanjut.",
+      );
+    }
   };
 
   const handleExit = () => {
@@ -412,7 +474,12 @@ export default function App() {
 
   const sendReaction = (emoji) => {
     appendChatMessages([
-      { id: Date.now(), author: profile?.name || "You", message: emoji, type: "player" },
+      {
+        id: Date.now(),
+        author: profile?.name || "You",
+        message: emoji,
+        type: "player",
+      },
     ]);
   };
 
@@ -471,7 +538,9 @@ export default function App() {
     if (!state.players?.length) return;
     const updates = [];
     state.players.forEach((p, idx) => {
-      const signature = p.lastAction ? `${p.lastAction}-${p.lastActionAmount}-${p.folded}` : null;
+      const signature = p.lastAction
+        ? `${p.lastAction}-${p.lastActionAmount}-${p.folded}`
+        : null;
       const prevSignature = lastActionsRef.current[idx];
 
       if (signature && signature !== prevSignature) {
@@ -522,14 +591,20 @@ export default function App() {
       <div className="mx-auto max-w-7xl px-4 py-4 space-y-5">
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-4 shadow-xl">
           <div>
-            <p className="text-sm uppercase tracking-widest text-white/60">Neon Hold'em</p>
+            <p className="text-sm uppercase tracking-widest text-white/60">
+              Neon Hold'em
+            </p>
             <h1 className="text-3xl font-black text-yellow-300">PokeReact</h1>
-            <p className="text-xs text-white/60">Status: <span className="text-white font-semibold">{status}</span></p>
+            <p className="text-xs text-white/60">
+              Status: <span className="text-white font-semibold">{status}</span>
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <div className="rounded-full border border-white/10 bg-black/40 px-4 py-2">
               <span className="text-white/70">Stack</span>
-              <p className="text-xl font-bold text-green-300">{player?.chips ?? 0}</p>
+              <p className="text-xl font-bold text-green-300">
+                {player?.chips ?? 0}
+              </p>
             </div>
             <button
               onClick={() => setSoundEnabled((prev) => !prev)}
@@ -565,23 +640,38 @@ export default function App() {
             />
 
             <div className="sticky top-4 z-10">
-              <ActionBar actions={availableActions} onAction={executeAction} hints={hints} />
+              <ActionBar
+                actions={availableActions}
+                onAction={executeAction}
+                hints={hints}
+              />
             </div>
 
             {handHistory.length > 0 && (
               <div className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Recent hands</h3>
-                  <span className="text-xs text-white/60">Last {handHistory.length} rounds</span>
+                  <span className="text-xs text-white/60">
+                    Last {handHistory.length} rounds
+                  </span>
                 </div>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {handHistory.map((hand) => (
-                    <div key={hand.id} className="rounded-2xl border border-white/5 bg-black/30 p-3 text-sm">
+                    <div
+                      key={hand.id}
+                      className="rounded-2xl border border-white/5 bg-black/30 p-3 text-sm"
+                    >
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-semibold text-white/90">Pot {hand.pot}</span>
-                        <span className="text-xs text-white/60">{hand.heroHand}</span>
+                        <span className="font-semibold text-white/90">
+                          Pot {hand.pot}
+                        </span>
+                        <span className="text-xs text-white/60">
+                          {hand.heroHand}
+                        </span>
                       </div>
-                      <p className="text-xs text-white/60">Winner: {hand.winners.join(", ")}</p>
+                      <p className="text-xs text-white/60">
+                        Winner: {hand.winners.join(", ")}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -598,25 +688,43 @@ export default function App() {
           />
         </main>
 
-        <footer className="flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70 shadow-xl">
-          <a
-            href="https://github.com/fjrmhri"
-            target="_blank"
-            rel="noreferrer"
+      <footer className="flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70 shadow-xl">
+        <a
+          href="https://github.com/fjrmhri"
+          target="_blank"
+          rel="noreferrer"
             className="flex items-center gap-2 transition hover:text-yellow-300"
           >
             <span className="font-semibold text-white/90">github.com</span>
-            <span className="text-white/80">/fjrmhri</span>
-          </a>
-        </footer>
-      </div>
+          <span className="text-white/80">/fjrmhri</span>
+        </a>
+      </footer>
+    </div>
 
-      {status !== "playing" && winners.length > 0 && !playerOutOfChips && !playerWonGame && (
-        <WinnerModal
-          winners={winners.map((idx) => state.players[idx].name)}
-          onRestart={startNewHand}
-        />
-      )}
+    {appError && (
+      <div className="fixed bottom-4 right-4 z-50 max-w-md rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 shadow-xl backdrop-blur">
+        <div className="flex items-start justify-between gap-3">
+          <p>{appError}</p>
+          <button
+            type="button"
+            onClick={() => setAppError("")}
+            className="rounded-lg border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    )}
+
+    {status !== "playing" &&
+      winners.length > 0 &&
+      !playerOutOfChips &&
+        !playerWonGame && (
+          <WinnerModal
+            winners={winners.map((idx) => state.players[idx].name)}
+            onRestart={startNewHand}
+          />
+        )}
 
       {(playerOutOfChips || playerWonGame) && (
         <GameOverModal
