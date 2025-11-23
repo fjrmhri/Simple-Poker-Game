@@ -470,6 +470,18 @@ export default function App() {
             onClaimBonus={handleClaimBonus}
           />
         </main>
+
+        <footer className="flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70 shadow-xl">
+          <a
+            href="https://github.com/gamersjenius8"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 transition hover:text-yellow-300"
+          >
+            <span className="font-semibold text-white/90">github.com</span>
+            <span className="text-white/80">/gamersjenius8</span>
+          </a>
+        </footer>
       </div>
 
       {status !== "playing" && winners.length > 0 && !playerOutOfChips && !playerWonGame && (
