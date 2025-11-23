@@ -27,6 +27,59 @@ const BOT_PROFILES = [
   },
 ];
 
+const randomChoice = (options) => options[Math.floor(Math.random() * options.length)];
+
+const describeCards = (cards = []) =>
+  cards
+    .filter(Boolean)
+    .map((card) => `${card.rank}${card.suit}`)
+    .join(" ");
+
+const actionTemplates = {
+  fold: [
+    (player) => `${player.name} folds and steps aside.`,
+    (player) => `${player.name} lets it go without a fight.`,
+  ],
+  check: [
+    (player) => `${player.name} taps the table to check.`,
+    (player) => `${player.name} checks and keeps the pace slow.`,
+  ],
+  call: [
+    (player) => `${player.name} calls ${player.lastActionAmount} to stay in the pot.`,
+    (player) => `${player.name} makes the call for ${player.lastActionAmount}.`,
+  ],
+  bet: [
+    (player) => `${player.name} fires a bet of ${player.lastActionAmount}.`,
+    (player) => `${player.name} leads out for ${player.lastActionAmount}.`,
+  ],
+  raise: [
+    (player) => `${player.name} raises to ${player.lastActionAmount}.`,
+    (player) => `${player.name} bumps it up to ${player.lastActionAmount}.`,
+  ],
+  allin: [
+    (player) => `${player.name} moves all-in for the rest of their stack!`,
+    (player) => `${player.name} shoves – every last chip is in play.`,
+  ],
+};
+
+const botReplies = {
+  aggressive: [
+    "Pressure's on now.",
+    "Let's see if you can handle the heat.",
+    "Can't let this one go uncontested.",
+  ],
+  passive: [
+    "Sticking around for a peek.",
+    "Keeping it small for now.",
+    "Just checking the vibes.",
+  ],
+  fold: [
+    "Not my fight this time.",
+    "You can have this one.",
+    "No shame in waiting for a better spot.",
+  ],
+};
+
 const createMissions = () => [
   { id: "win-3", label: "Win three hands", goal: 3, progress: 0 },
   { id: "see-flop", label: "See five flops", goal: 5, progress: 0 },
@@ -70,6 +123,16 @@ export default function App() {
   ]);
   const [handHistory, setHandHistory] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const roundRef = useRef(null);
+  const handCounterRef = useRef(0);
+
+  const appendChatMessages = useCallback((messages) => {
+    if (!messages?.length) return;
+    setChatMessages((prev) => [
+      ...prev.slice(-(10 - messages.length)),
+      ...messages,
+    ]);
+  }, []);
 
   useEffect(() => {
     const checkSize = () => setIsMobile(window.innerWidth < 768 || window.innerHeight < 600);
@@ -195,6 +258,22 @@ export default function App() {
 
   const leaderboardLabel = profile?.name || "You";
 
+  const buildActionMessage = useCallback((playerState) => {
+    if (!playerState?.lastAction) return null;
+    const allIn = playerState.chips === 0 && playerState.lastAction !== "fold";
+    const templateKey = allIn ? "allin" : playerState.lastAction;
+    const templates = actionTemplates[templateKey];
+    if (!templates?.length) return null;
+    return randomChoice(templates)(playerState);
+  }, []);
+
+  const buildBotReply = useCallback((actionType) => {
+    if (!actionType) return null;
+    const category = actionType === "fold" ? "fold" : ["check", "call"].includes(actionType) ? "passive" : "aggressive";
+    const replies = botReplies[category];
+    return replies ? randomChoice(replies) : null;
+  }, []);
+
   const showdownSignatureRef = useRef("initial");
   const lastActionsRef = useRef({});
   useEffect(() => {
@@ -252,17 +331,19 @@ export default function App() {
         .slice(0, 5);
     });
 
-    setChatMessages((prev) =>
-      [
-        ...prev.slice(-8),
-        {
-          id: signature,
-          author: heroWon ? "Dealer" : "Lucy",
-          message: heroWon ? "Nice scoop! That pot is yours." : "Ouch, better luck on the next deal.",
-          type: heroWon ? "dealer" : "bot",
-        },
-      ]
-    );
+    const winnerNames = winners.map((idx) => state.players[idx].name);
+    const summary = heroWon
+      ? `Pot ${pot} shipped your way with ${heroHand || "solid play"}.`
+      : `${winnerNames.join(", ")} claim the ${pot} pot.`;
+
+    appendChatMessages([
+      {
+        id: signature,
+        author: heroWon ? "Dealer" : winnerNames[0] || "Dealer",
+        message: summary,
+        type: heroWon ? "dealer" : "bot",
+      },
+    ]);
   }, [
     winners,
     status,
@@ -273,6 +354,7 @@ export default function App() {
     player?.hand,
     player?.chips,
     profile?.avatar,
+    appendChatMessages,
     setLeaderboard,
   ]);
 
@@ -289,8 +371,7 @@ export default function App() {
     if (!bonusAvailable) return;
     awardChips(0, 250);
     setDailyBonusState({ lastClaimed: new Date().toISOString() });
-    setChatMessages((prev) => [
-      ...prev.slice(-8),
+    appendChatMessages([
       { id: Date.now(), author: "Dealer", message: "Daily bonus credited!", type: "dealer" },
     ]);
   };
@@ -306,6 +387,8 @@ export default function App() {
   };
 
   const handleExit = () => {
+    handCounterRef.current = 0;
+    roundRef.current = null;
     setGameStarted(false);
     setProfile(null);
     setStats(initialStats);
@@ -315,6 +398,8 @@ export default function App() {
   };
 
   const handleRestart = () => {
+    handCounterRef.current = 0;
+    roundRef.current = null;
     resetGame();
     setStats(initialStats);
     setMissions(createMissions());
@@ -326,11 +411,61 @@ export default function App() {
   const playerWonGame = player?.chips > 0 && botsBusted;
 
   const sendReaction = (emoji) => {
-    setChatMessages((prev) => [
-      ...prev.slice(-8),
+    appendChatMessages([
       { id: Date.now(), author: profile?.name || "You", message: emoji, type: "player" },
     ]);
   };
+
+  useEffect(() => {
+    if (!state.round) return;
+    const updates = [];
+
+    if (roundRef.current !== state.round) {
+      if (state.round === "Preflop") {
+        handCounterRef.current += 1;
+        updates.push({
+          id: `hand-${handCounterRef.current}`,
+          author: "Dealer",
+          message: `Hand ${handCounterRef.current} begins. Good luck at the felt!`,
+          type: "dealer",
+        });
+      } else if (state.round === "Flop") {
+        updates.push({
+          id: `flop-${Date.now()}`,
+          author: "Dealer",
+          message: `Flop revealed: ${describeCards(state.community.slice(0, 3))}.`,
+          type: "dealer",
+        });
+      } else if (state.round === "Turn") {
+        updates.push({
+          id: `turn-${Date.now()}`,
+          author: "Dealer",
+          message: `Turn card is the ${describeCards([state.community[3]])}.`,
+          type: "dealer",
+        });
+      } else if (state.round === "River") {
+        updates.push({
+          id: `river-${Date.now()}`,
+          author: "Dealer",
+          message: `River lands: ${describeCards([state.community[4]])}.`,
+          type: "dealer",
+        });
+      } else if (state.round === "Showdown") {
+        updates.push({
+          id: `showdown-${Date.now()}`,
+          author: "Dealer",
+          message: "Cards up! Time to see who takes it.",
+          type: "dealer",
+        });
+      }
+
+      roundRef.current = state.round;
+    }
+
+    if (updates.length) {
+      appendChatMessages(updates);
+    }
+  }, [appendChatMessages, state.community, state.round]);
 
   useEffect(() => {
     if (!state.players?.length) return;
@@ -341,34 +476,26 @@ export default function App() {
 
       if (signature && signature !== prevSignature) {
         lastActionsRef.current[idx] = signature;
-        let actionText = "took an action";
-        if (p.lastAction === "call") actionText = `called ${p.lastActionAmount}`;
-        else if (p.lastAction === "raise") actionText = `raised to ${p.lastActionAmount}`;
-        else if (p.lastAction === "bet") actionText = `bet ${p.lastActionAmount}`;
-        else if (p.lastAction === "check") actionText = "checked";
-        else if (p.lastAction === "fold") actionText = "folded";
-
-        updates.push({
-          id: `${Date.now()}-${idx}`,
-          author: "Dealer",
-          message: `${p.name} ${actionText}.`,
-          type: "dealer",
-        });
-
-        if (idx !== 0 && p.lastAction !== "check") {
-          const botQuips = [
-            "Feeling bold today.",
-            "Can't let you have this one.",
-            "Watch out, big moves coming!",
-            "Playing it cool.",
-          ];
-          const quip = botQuips[Math.floor(Math.random() * botQuips.length)];
+        const dealerLine = buildActionMessage(p);
+        if (dealerLine) {
           updates.push({
-            id: `${Date.now()}-${idx}-quip`,
-            author: p.name,
-            message: quip,
-            type: "bot",
+            id: `${Date.now()}-${idx}`,
+            author: "Dealer",
+            message: dealerLine,
+            type: "dealer",
           });
+        }
+
+        if (idx !== 0) {
+          const reply = buildBotReply(p.lastAction);
+          if (reply && Math.random() > 0.35) {
+            updates.push({
+              id: `${Date.now()}-${idx}-quip`,
+              author: p.name,
+              message: reply,
+              type: "bot",
+            });
+          }
         }
       }
 
@@ -378,9 +505,9 @@ export default function App() {
     });
 
     if (updates.length) {
-      setChatMessages((prev) => [...prev.slice(-(10 - updates.length)), ...updates]);
+      appendChatMessages(updates);
     }
-  }, [state.players]);
+  }, [appendChatMessages, buildActionMessage, buildBotReply, state.players]);
 
   if (isMobile) {
     return <MobileWarning />;
@@ -473,13 +600,13 @@ export default function App() {
 
         <footer className="flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70 shadow-xl">
           <a
-            href="https://github.com/gamersjenius8"
+            href="https://github.com/fjrmhri"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 transition hover:text-yellow-300"
           >
             <span className="font-semibold text-white/90">github.com</span>
-            <span className="text-white/80">/gamersjenius8</span>
+            <span className="text-white/80">/fjrmhri</span>
           </a>
         </footer>
       </div>
