@@ -11,9 +11,9 @@ export default function PokerTable({ state, pot, winners, accentColor = "#facc15
   const rightOpponents = players.slice(1 + leftOpponents.length);
 
   return (
-    <div className="relative rounded-[80px] border border-white/10 bg-gradient-to-b from-emerald-900/80 via-emerald-950/70 to-black p-6 shadow-2xl">
-      <div className="absolute inset-0 rounded-[80px] border border-emerald-300/10" style={{ boxShadow: `inset 0 0 80px rgba(0,0,0,0.7)` }} />
-      <div className="relative space-y-6">
+    <div className="relative rounded-[70px] border border-white/10 bg-gradient-to-b from-emerald-900/80 via-emerald-950/70 to-black p-5 shadow-2xl">
+      <div className="absolute inset-0 rounded-[70px] border border-emerald-300/10" style={{ boxShadow: `inset 0 0 80px rgba(0,0,0,0.7)` }} />
+      <div className="relative space-y-5">
         <div className="flex flex-wrap items-center justify-between text-sm text-white/70">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">Round</p>
@@ -30,7 +30,7 @@ export default function PokerTable({ state, pot, winners, accentColor = "#facc15
           </motion.div>
         </div>
 
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           {[0, 1, 2, 3, 4].map((index) => (
             <motion.div
               key={`${community[index]?.rank ?? "card"}-${index}`}
@@ -43,7 +43,7 @@ export default function PokerTable({ state, pot, winners, accentColor = "#facc15
           ))}
         </div>
 
-        <div className="relative min-h-[320px]">
+        <div className="relative min-h-[300px]">
           <div className="absolute inset-x-0 bottom-0 flex justify-center">
             <PlayerSeat
               player={players[0]}
