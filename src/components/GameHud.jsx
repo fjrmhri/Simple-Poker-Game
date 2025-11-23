@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export default function GameHud({
@@ -18,6 +18,12 @@ export default function GameHud({
     : 0;
 
   const reactionEmojis = ["🔥", "😎", "😬", "🤝", "🃏", "🚀"];
+  const chatContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (!chatContainerRef.current) return;
+    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+  }, [chatMessages]);
 
   if (variant === "left") {
     return (
@@ -36,7 +42,10 @@ export default function GameHud({
           </div>
 
           <div className="mt-3 space-y-3 text-sm">
-            <div className="h-52 overflow-auto rounded-2xl border border-white/5 bg-black/40 p-3">
+            <div
+              ref={chatContainerRef}
+              className="h-52 overflow-auto rounded-2xl border border-white/5 bg-black/40 p-3"
+            >
               {chatMessages.map((msg) => (
                 <div
                   key={msg.id}
