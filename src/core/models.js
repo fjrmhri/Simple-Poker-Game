@@ -19,6 +19,8 @@ const RANKS = [
   "A",
 ];
 const SUITS = ["C", "D", "H", "S"]; // Clubs, Diamonds, Hearts, Spades
+const SMALL_BLIND = 10;
+const BIG_BLIND = 20;
 
 /**
  * Generate a new shuffled deck of cards.
@@ -299,14 +301,14 @@ export default class Game {
       };
     }
 
-    const smallBlind = 10;
-    const bigBlind = 20;
-    const sbIdx = nextSeatedIndex(players, dealerIndex);
+    // Heads-up: dealer memasang small blind dan beraksi pertama sebelum flop
+    const headsUp = players.filter((p) => !p.sittingOut).length === 2;
+    const sbIdx = headsUp ? dealerIndex : nextSeatedIndex(players, dealerIndex);
     const bbIdx = nextSeatedIndex(players, sbIdx);
-    players[sbIdx].bet = Math.min(smallBlind, players[sbIdx].chips);
+    players[sbIdx].bet = Math.min(SMALL_BLIND, players[sbIdx].chips);
     players[sbIdx].chips -= players[sbIdx].bet;
     players[sbIdx].totalBet += players[sbIdx].bet;
-    players[bbIdx].bet = Math.min(bigBlind, players[bbIdx].chips);
+    players[bbIdx].bet = Math.min(BIG_BLIND, players[bbIdx].chips);
     players[bbIdx].chips -= players[bbIdx].bet;
     players[bbIdx].totalBet += players[bbIdx].bet;
 
@@ -320,6 +322,7 @@ export default class Game {
       community: [],
       dealerIndex,
       currentPlayer: nextAliveIndex(players, bbIdx),
+      minRaise: BIG_BLIND,
       round: "Preflop", // Preflop -> Flop -> Turn -> River -> Showdown
       winners: [],
       endgame: false,
@@ -363,16 +366,25 @@ export default class Game {
     if (p.folded || p.chips === 0) return [];
 
     const toCall = this.toCallOf(state, state.currentPlayer);
+    const minRaise = state.minRaise ?? BIG_BLIND;
     const acts = [];
     // urutan tombol: Fold, Check/Call, Bet/Raise
     acts.push({ type: "fold" });
     if (toCall === 0) {
       acts.push({ type: "check" });
-      if (p.chips > 0) acts.push({ type: "bet", min: 10, max: p.chips }); // bet pertama
+      if (p.chips > 0)
+        acts.push({
+          type: "bet",
+          min: Math.min(minRaise, p.chips),
+          max: p.chips,
+        }); // bet pertama
     } else {
       acts.push({ type: "call", amount: Math.min(toCall, p.chips) });
-      if (p.chips > toCall)
-        acts.push({ type: "bet", min: 10, max: p.chips - toCall }); // raise sebagai 'bet'
+      if (p.chips > toCall) {
+        const max = p.chips - toCall;
+        // Raise minimal sebesar raise sebelumnya; stack lebih kecil hanya bisa all-in
+        acts.push({ type: "bet", min: Math.min(minRaise, max), max }); // raise sebagai 'bet'
+      }
     }
     return acts;
   }
@@ -444,13 +456,16 @@ export default class Game {
       p.lastAction = "call";
       p.lastActionAmount = pay;
     } else if (action === "bet") {
-      const total = toCallBefore + (amount || 0);
-      const pay = Math.min(total, p.chips);
+      const minRaise = s.minRaise ?? BIG_BLIND;
+      const raiseBy = Math.max(amount || 0, minRaise);
+      const pay = Math.min(toCallBefore + raiseBy, p.chips);
       p.chips -= pay;
       p.bet += pay;
       p.totalBet += pay;
       p.lastAction = toCallBefore > 0 ? "raise" : "bet";
       p.lastActionAmount = pay;
+      // All-in di bawah raise minimal tidak menaikkan ukuran raise berikutnya
+      if (pay - toCallBefore >= minRaise) s.minRaise = pay - toCallBefore;
     }
 
     if (countActive(s.players) === 1) {
@@ -466,7 +481,10 @@ export default class Game {
       return s;
     }
 
+    let streetAdvanced = false;
     if (allActiveMatchedBet(s.players)) {
+      streetAdvanced = true;
+      s.minRaise = BIG_BLIND;
       s.pot += s.players.reduce((sum, pl) => sum + pl.bet, 0);
       s.players.forEach((pl) => {
         pl.bet = 0;
@@ -494,7 +512,9 @@ export default class Game {
     }
 
     if (!s.endgame && s.round !== "Showdown") {
-      const nextIdx = nextAliveIndex(s.players, s.currentPlayer);
+      // Setelah flop, aksi dimulai dari pemain aktif pertama setelah dealer
+      const from = streetAdvanced ? s.dealerIndex : s.currentPlayer;
+      const nextIdx = nextAliveIndex(s.players, from);
       s.currentPlayer = nextIdx !== -1 ? nextIdx : -1;
     }
 

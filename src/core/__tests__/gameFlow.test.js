@@ -71,7 +71,7 @@ describe("all-in", () => {
       { name: "A", chips: chipsA },
       { name: "B", chips: chipsB },
     ],
-    dealerIndex: 1, // tangan berikutnya: dealer 0, SB 1, BB 0
+    dealerIndex: 1, // tangan berikutnya heads-up: dealer/SB 0, BB 1
   });
 
   it("langsung showdown bila blind membuat semua pemain all-in", () => {
@@ -84,9 +84,10 @@ describe("all-in", () => {
 
   it("pemain yang belum menyamai blind tetap mendapat giliran", () => {
     const game = new Game([{ name: "A" }, { name: "B" }]);
-    const state = game.start(twoPlayers(15, 100));
+    const state = game.start(twoPlayers(100, 15));
+    expect(state.players[1].chips).toBe(0);
     expect(state.endgame).toBe(false);
-    expect(state.currentPlayer).toBe(1);
+    expect(state.currentPlayer).toBe(0);
     expect(game.actions(state).map((a) => a.type)).toContain("call");
   });
 
@@ -94,9 +95,9 @@ describe("all-in", () => {
     const game = new Game([{ name: "A" }, { name: "B" }]);
     const state = game.start();
     const shove = game.applyAction(state, "bet", 5000);
-    expect(shove.players[1].chips).toBe(0);
+    expect(shove.players[0].chips).toBe(0);
     expect(shove.round).toBe("Preflop");
-    expect(shove.currentPlayer).toBe(0);
+    expect(shove.currentPlayer).toBe(1);
     expect(game.actions(shove).map((a) => a.type)).toEqual(["fold", "call"]);
 
     const called = game.applyAction(shove, "call");
