@@ -45,6 +45,21 @@ npm run test:watch # mode watch
 ```
 Test berada di `src/**/__tests__/` dan `*.test.js(x)`: evaluasi tangan, alur taruhan, side pot, aturan heads-up/minimum raise, hook mesin poker, dan timer giliran.
 
+## 🤖 Bot (NPC)
+Setiap keputusan bot memakai estimasi equity Monte Carlo melawan lawan yang masih aktif, lalu dibandingkan dengan equity wajar `1/(lawan+1)` dan pot odds. Profil per level ada di `BOT_PROFILES` (`src/core/ai.js`):
+
+| Level | Gaya | Ciri |
+|---|---|---|
+| easy | loose-passive | Sering call, jarang raise, tidak membaca ukuran bet lawan |
+| normal | tight-aggressive | Call berbasis pot odds, value bet, bluff sesekali |
+| hard | tight-aggressive + adaptif | Simulasi lebih banyak, menghormati bet besar lawan, bluff hanya saat dalam posisi, semi-bluff, sesekali slow-play |
+
+Benchmark duplicate heads-up (setiap deal dimainkan dua kali dengan kursi ditukar):
+```bash
+npm run bench                       # default: hard:normal, hard:easy, normal:easy, hard:maniac
+DEALS=300 DUEL=hard:normal npm run bench
+```
+
 ## 🗂️ Struktur Proyek Singkat
 - `src/App.jsx`: alur utama permainan, misi, bonus, dan integrasi HUD.
 - `src/components/`: ActionBar, meja, kursi pemain, HUD, modal, serta layar awal.
