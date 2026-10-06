@@ -70,7 +70,12 @@ export default function usePokerEngine(initialPlayers) {
   const handleAction = useCallback(
     (action, amount = 0) => {
       try {
-        setState((prev) => game.applyAction(prev, action, amount));
+        setState((prev) => {
+          // Pemain manusia hanya boleh beraksi pada gilirannya sendiri
+          const current = prev.players?.[prev.currentPlayer];
+          if (!current || current.isBot || prev.endgame) return prev;
+          return game.applyAction(prev, action, amount);
+        });
       } catch (err) {
         // Jaga UI tetap responsif ketika aksi pemain tidak valid
         console.error("Invalid player action", err);

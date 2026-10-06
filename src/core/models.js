@@ -81,21 +81,35 @@ export function deepClone(obj) {
   return clone(obj);
 }
 
-// Build a fresh player state from a template or previous player object
+// Build a fresh player state from a template or previous player object.
+// Pemain tanpa chip tidak ikut tangan: tidak dapat kartu dan dianggap fold.
 function buildPlayer(base, deck) {
+  const chips = base.chips ?? 1000;
+  const sittingOut = chips <= 0;
   return {
     name: base.name,
     isBot: !!base.isBot,
     level: base.level || "easy",
     avatar: base.avatar || "/assets/others/dealer.png",
-    chips: base.chips ?? 1000,
+    chips,
     bet: 0,
     totalBet: 0,
-    folded: false,
-    hand: [deck.pop(), deck.pop()],
+    folded: sittingOut,
+    sittingOut,
+    hand: sittingOut ? [] : [deck.pop(), deck.pop()],
     lastAction: null,
     lastActionAmount: 0,
   };
+}
+
+// Indeks pemain berikutnya (setelah `from`) yang ikut tangan ini, atau -1
+function nextSeatedIndex(players, from) {
+  const n = players.length;
+  for (let step = 1; step <= n; step++) {
+    const idx = (from + step) % n;
+    if (!players[idx].sittingOut) return idx;
+  }
+  return -1;
 }
 
 /**
@@ -179,9 +193,16 @@ function distributePot(players) {
 function awardPots(state) {
   const pots = distributePot(state.players);
   const winners = new Set();
+  const refunded = new Set();
   for (const pot of pots) {
     const contenders = pot.players.filter((i) => !state.players[i].folded);
     if (contenders.length === 0) continue;
+    // Pot dengan satu kontributor adalah taruhan yang tidak di-call: dikembalikan, bukan dimenangkan
+    if (pot.players.length === 1) {
+      state.players[contenders[0]].chips += pot.amount;
+      refunded.add(contenders[0]);
+      continue;
+    }
     const evalPlayers = contenders.map((i) => ({ ...state.players[i], i }));
     const potWinners = evaluateWinners(evalPlayers, state.community).map(
       (w) => w.i,
@@ -196,8 +217,34 @@ function awardPots(state) {
       state.players[potWinners[0]].chips += remainder;
     }
   }
+  if (winners.size === 0) refunded.forEach((i) => winners.add(i));
+  state.lastPot = pots.reduce((sum, pot) => sum + pot.amount, 0);
   state.pot = 0;
-  state.winners = Array.from(winners);
+  state.winners = Array.from(winners).sort((a, b) => a - b);
+}
+
+// Taruhan terkunci bila tidak ada lagi pemain yang bisa/perlu beraksi:
+// semua all-in, atau tinggal satu pemain ber-chip yang sudah menyamai taruhan tertinggi.
+function isBettingLocked(players) {
+  const withChips = players.filter((p) => !p.folded && p.chips > 0);
+  if (withChips.length === 0) return true;
+  if (withChips.length > 1) return false;
+  const highest = Math.max(...players.map((p) => p.bet));
+  return withChips[0].bet >= highest;
+}
+
+// Buka sisa kartu komunitas lalu bagikan pot
+function runOutToShowdown(state) {
+  state.pot += state.players.reduce((sum, pl) => sum + pl.bet, 0);
+  state.players.forEach((pl) => {
+    pl.bet = 0;
+  });
+  while (state.community.length < 5) {
+    state.community.push(state.deck.pop());
+  }
+  state.round = "Showdown";
+  awardPots(state);
+  state.endgame = true;
 }
 
 // Super simpel evaluator: high card dari 7 kartu (placeholder, cukup untuk demo UI)
@@ -229,16 +276,33 @@ export default class Game {
 
     if (!prevState) {
       players = this.templatePlayers.map((p) => buildPlayer(p, deck));
-      dealerIndex = 0;
+      dealerIndex = nextSeatedIndex(players, players.length - 1);
     } else {
       players = prevState.players.map((p) => buildPlayer(p, deck));
-      dealerIndex = (prevState.dealerIndex + 1) % players.length;
+      dealerIndex = nextSeatedIndex(players, prevState.dealerIndex);
+    }
+
+    // Kurang dari dua pemain ber-chip: permainan selesai, jangan bagikan tangan baru
+    if (players.filter((p) => !p.sittingOut).length < 2) {
+      this.dealerIndex = Math.max(dealerIndex, 0);
+      return {
+        players,
+        pot: 0,
+        lastPot: 0,
+        deck,
+        community: [],
+        dealerIndex: this.dealerIndex,
+        currentPlayer: -1,
+        round: "Showdown",
+        winners: [],
+        endgame: true,
+      };
     }
 
     const smallBlind = 10;
     const bigBlind = 20;
-    const sbIdx = (dealerIndex + 1) % players.length;
-    const bbIdx = (dealerIndex + 2) % players.length;
+    const sbIdx = nextSeatedIndex(players, dealerIndex);
+    const bbIdx = nextSeatedIndex(players, sbIdx);
     players[sbIdx].bet = Math.min(smallBlind, players[sbIdx].chips);
     players[sbIdx].chips -= players[sbIdx].bet;
     players[sbIdx].totalBet += players[sbIdx].bet;
@@ -248,17 +312,21 @@ export default class Game {
 
     this.dealerIndex = dealerIndex;
 
-    return {
+    const state = {
       players,
       pot: 0,
+      lastPot: 0,
       deck,
       community: [],
       dealerIndex,
-      currentPlayer: (bbIdx + 1) % players.length,
+      currentPlayer: nextAliveIndex(players, bbIdx),
       round: "Preflop", // Preflop -> Flop -> Turn -> River -> Showdown
       winners: [],
       endgame: false,
     };
+    // Blind membuat semua pemain all-in: tidak ada yang bisa beraksi
+    if (isBettingLocked(players)) runOutToShowdown(state);
+    return state;
   }
 
   // Derivations
@@ -316,6 +384,8 @@ export default class Game {
     if (!state?.players) {
       throw new Error("calculatePot requires valid state");
     }
+    // Setelah tangan selesai pot sudah dibagikan; tampilkan jumlah yang diperebutkan
+    if (state.endgame) return state.lastPot ?? 0;
     return state.pot + state.players.reduce((s, p) => s + p.bet, 0);
   }
 
@@ -339,13 +409,8 @@ export default class Game {
       throw new Error("checkWinners requires valid state");
     }
     if (state.round !== "Showdown") return [];
-    const alive = state.players
-      .map((p, i) => ({ ...p, i }))
-      .filter((p) => !p.folded);
-    if (alive.length === 1) return [alive[0].i];
-
-    const winners = evaluateWinners(alive, state.community);
-    return winners.map((w) => w.i);
+    // Sumber kebenaran: pemenang yang benar-benar menerima pot (termasuk side pot)
+    return Array.isArray(state.winners) ? [...state.winners] : [];
   }
 
   /**
@@ -424,17 +489,8 @@ export default class Game {
         s.endgame = true;
       }
     }
-    const activeWithChips = s.players.filter(
-      (pl) => !pl.folded && pl.chips > 0,
-    );
-
-    if (!s.endgame && s.round !== "Showdown" && activeWithChips.length <= 1) {
-      while (s.community.length < 5) {
-        s.community.push(s.deck.pop());
-      }
-      s.round = "Showdown";
-      awardPots(s);
-      s.endgame = true;
+    if (!s.endgame && s.round !== "Showdown" && isBettingLocked(s.players)) {
+      runOutToShowdown(s);
     }
 
     if (!s.endgame && s.round !== "Showdown") {

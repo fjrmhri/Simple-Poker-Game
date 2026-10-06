@@ -35,9 +35,10 @@ export default function PlayerSeat({
 
   if (!player) return null;
 
-  const comboName = showFace
-    ? getHandName(player.hand || [], community || [])
-    : "";
+  const comboName =
+    showFace && player.hand?.length === 2
+      ? getHandName(player.hand || [], community || [])
+      : "";
 
   const handleAvatarChange = (event) => {
     if (!isYou) return;

@@ -17,6 +17,7 @@ import usePersistentState from "./hooks/usePersistentState";
 import useSound from "./hooks/useSound";
 import useTone from "./hooks/useTone";
 import { getHandName } from "./core/handEvaluator";
+import { getGameOverState } from "./core/gameOver";
 
 const BOT_PROFILES = [
   {
@@ -174,6 +175,7 @@ export default function App() {
   } = usePokerEngine(playersConfig);
 
   const player = state.players?.[0];
+  const isHeroTurn = status === "playing" && state.currentPlayer === 0;
 
   const playWinnerSound = useSound("/sounds/minecraft_level_up.mp3");
   const playCardFlip = useTone({
@@ -468,9 +470,10 @@ export default function App() {
     setHandHistory([]);
   };
 
-  const playerOutOfChips = player?.chips <= 0;
-  const botsBusted = state.players?.slice(1).every((p) => p.chips <= 0);
-  const playerWonGame = player?.chips > 0 && botsBusted;
+  const { playerOutOfChips, playerWonGame } = getGameOverState(
+    status,
+    state.players,
+  );
 
   const sendReaction = (emoji) => {
     appendChatMessages([
@@ -641,7 +644,7 @@ export default function App() {
 
             <div className="sticky top-4 z-10">
               <ActionBar
-                actions={availableActions}
+                actions={isHeroTurn ? availableActions : []}
                 onAction={executeAction}
                 hints={hints}
               />
