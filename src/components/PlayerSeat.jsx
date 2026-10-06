@@ -59,6 +59,13 @@ export default function PlayerSeat({
     }
   };
 
+  const allIn = player.chips === 0 && !player.folded && !player.sittingOut;
+  const actionLabel = player.folded
+    ? "FOLD"
+    : allIn
+      ? "ALL-IN"
+      : player.lastAction?.toUpperCase();
+
   const seatAlignment =
     position === "left"
       ? "items-start"
@@ -68,7 +75,12 @@ export default function PlayerSeat({
 
   return (
     <motion.div
-      className={`flex w-[190px] flex-col items-center gap-2 rounded-3xl border border-white/10 bg-black/50 p-3 text-xs text-white shadow-xl backdrop-blur ${seatAlignment}`}
+      className={`flex w-[190px] flex-col items-center gap-2 rounded-3xl border bg-black/50 p-3 text-xs text-white shadow-xl backdrop-blur ${seatAlignment} ${isTurn ? "" : "border-white/10"}`}
+      style={
+        isTurn
+          ? { borderColor: accentColor, boxShadow: `0 0 24px ${accentColor}55` }
+          : undefined
+      }
       animate={{
         scale: isTurn ? 1.05 : 1,
         opacity: player.folded && !isYou ? 0.5 : 1,
@@ -101,18 +113,27 @@ export default function PlayerSeat({
           <p className="text-[11px] text-white/60">{player.chips} chips</p>
         </div>
         {isWinner && <span className="text-lg">🏆</span>}
-        {player.lastAction && (
-          <span
-            className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] text-white/80"
-            style={{
-              boxShadow: isTurn ? `0 0 0 1px ${accentColor}` : undefined,
-            }}
-          >
-            {player.lastActionAmount > 0
-              ? `${player.lastAction.toUpperCase()} ${player.lastActionAmount}`
-              : player.lastAction.toUpperCase()}
-          </span>
-        )}
+        <div className="flex min-h-[26px] flex-wrap items-center justify-center gap-1.5">
+          {player.sittingOut ? (
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/50">
+              OUT
+            </span>
+          ) : (
+            actionLabel && (
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] text-white/80">
+                {actionLabel}
+              </span>
+            )
+          )}
+          {player.bet > 0 && (
+            <span
+              className="rounded-full bg-yellow-400/90 px-2.5 py-1 text-[11px] font-bold text-black"
+              title="Taruhan di street ini"
+            >
+              {player.bet}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-center gap-2">
@@ -124,7 +145,10 @@ export default function PlayerSeat({
         <p className="text-center text-[11px] text-emerald-200">{comboName}</p>
       )}
 
-      <div className="flex items-center gap-2 text-[11px] text-white/70 w-full">
+      <div
+        className={`flex w-full items-center gap-2 text-[11px] text-white/70 ${isTurn ? "" : "invisible"}`}
+        aria-hidden={!isTurn}
+      >
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
           <div
             className="h-full rounded-full"

@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import CardImg from "./CardImg";
+import CardImg, { CardSlot } from "./CardImg";
 import PlayerSeat from "./PlayerSeat";
 
 export default function PokerTable({
@@ -60,7 +60,11 @@ export default function PokerTable({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: index * 0.08 }}
             >
-              <CardImg card={community[index]} w={80} />
+              {community[index] ? (
+                <CardImg card={community[index]} w={80} />
+              ) : (
+                <CardSlot w={80} />
+              )}
             </motion.div>
           ))}
         </div>

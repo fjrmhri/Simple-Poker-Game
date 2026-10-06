@@ -64,8 +64,8 @@ const actionTemplates = {
     (player) => `${player.name} leads out for ${player.lastActionAmount}.`,
   ],
   raise: [
-    (player) => `${player.name} raises to ${player.lastActionAmount}.`,
-    (player) => `${player.name} bumps it up to ${player.lastActionAmount}.`,
+    (player) => `${player.name} raises to ${player.bet}.`,
+    (player) => `${player.name} bumps it up to ${player.bet}.`,
   ],
   allin: [
     (player) => `${player.name} moves all-in for the rest of their stack!`,
@@ -175,6 +175,16 @@ export default function App() {
 
   const player = state.players?.[0];
   const isHeroTurn = status === "playing" && state.currentPlayer === 0;
+  const actingPlayerName =
+    status === "playing" && !isHeroTurn
+      ? state.players?.[state.currentPlayer]?.name
+      : null;
+  const statusLabel =
+    status !== "playing"
+      ? "Hand complete"
+      : isHeroTurn
+        ? "Your turn"
+        : `${actingPlayerName ?? "Opponent"} is thinking…`;
 
   const playWinnerSound = useSound("/sounds/minecraft_level_up.mp3");
   const playCardFlip = useTone({
@@ -581,7 +591,12 @@ export default function App() {
             </p>
             <h1 className="text-3xl font-black text-yellow-300">PokeReact</h1>
             <p className="text-xs text-white/60">
-              Status: <span className="text-white font-semibold">{status}</span>
+              {state.round} ·{" "}
+              <span
+                className={`font-semibold ${isHeroTurn ? "text-emerald-300" : "text-white"}`}
+              >
+                {statusLabel}
+              </span>
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm">
@@ -630,6 +645,8 @@ export default function App() {
                 actions={isHeroTurn ? availableActions : []}
                 onAction={executeAction}
                 hints={hints}
+                heroBet={player?.bet ?? 0}
+                waitingFor={actingPlayerName}
               />
             </div>
 
