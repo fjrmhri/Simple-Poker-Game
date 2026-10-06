@@ -16,7 +16,10 @@ import usePokerEngine from "./hooks/usePokerEngine";
 import usePersistentState from "./hooks/usePersistentState";
 import useSound from "./hooks/useSound";
 import useTone from "./hooks/useTone";
+import { useCardFlipSound, useHandEndSound } from "./hooks/useGameSounds";
 import { getHandName } from "./core/handEvaluator";
+import { getGameOverState } from "./core/gameOver";
+import { appendLimited, upsertBestScore } from "./core/hud";
 
 const BOT_PROFILES = [
   {
@@ -61,8 +64,8 @@ const actionTemplates = {
     (player) => `${player.name} leads out for ${player.lastActionAmount}.`,
   ],
   raise: [
-    (player) => `${player.name} raises to ${player.lastActionAmount}.`,
-    (player) => `${player.name} bumps it up to ${player.lastActionAmount}.`,
+    (player) => `${player.name} raises to ${player.bet}.`,
+    (player) => `${player.name} bumps it up to ${player.bet}.`,
   ],
   allin: [
     (player) => `${player.name} moves all-in for the rest of their stack!`,
@@ -137,10 +140,7 @@ export default function App() {
 
   const appendChatMessages = useCallback((messages) => {
     if (!messages?.length) return;
-    setChatMessages((prev) => [
-      ...prev.slice(-(10 - messages.length)),
-      ...messages,
-    ]);
+    setChatMessages((prev) => appendLimited(prev, messages));
   }, []);
 
   useEffect(() => {
@@ -174,6 +174,17 @@ export default function App() {
   } = usePokerEngine(playersConfig);
 
   const player = state.players?.[0];
+  const isHeroTurn = status === "playing" && state.currentPlayer === 0;
+  const actingPlayerName =
+    status === "playing" && !isHeroTurn
+      ? state.players?.[state.currentPlayer]?.name
+      : null;
+  const statusLabel =
+    status !== "playing"
+      ? "Hand complete"
+      : isHeroTurn
+        ? "Your turn"
+        : `${actingPlayerName ?? "Opponent"} is thinking…`;
 
   const playWinnerSound = useSound("/sounds/minecraft_level_up.mp3");
   const playCardFlip = useTone({
@@ -189,25 +200,8 @@ export default function App() {
     volume: 0.12,
   });
 
-  useEffect(() => {
-    if (!soundEnabled || winners.length === 0) return;
-    if (status !== "playing") {
-      playWinnerSound();
-    }
-  }, [winners, status, playWinnerSound, soundEnabled]);
-
-  const prevCommunityRef = useRef(0);
-  useEffect(() => {
-    const communityLength = state.community?.length ?? 0;
-    if (!soundEnabled) {
-      prevCommunityRef.current = communityLength;
-      return;
-    }
-    if (communityLength > prevCommunityRef.current) {
-      playCardFlip();
-      prevCommunityRef.current = communityLength;
-    }
-  }, [state.community, soundEnabled, playCardFlip]);
+  useHandEndSound(status, winners.length > 0, soundEnabled, playWinnerSound);
+  useCardFlipSound(state.community?.length ?? 0, soundEnabled, playCardFlip);
 
   const executeAction = useCallback(
     (action, amount) => {
@@ -218,6 +212,13 @@ export default function App() {
     },
     [handleAction, playChipStack, soundEnabled],
   );
+
+  // Waktu habis: check bila gratis, selain itu fold
+  const handleHeroTimeout = useCallback(() => {
+    if (!isHeroTurn) return;
+    const canCheck = availableActions.some((a) => a.type === "check");
+    executeAction(canCheck ? "check" : "fold");
+  }, [availableActions, executeAction, isHeroTurn]);
 
   const toCall = useMemo(() => {
     // Hitung kewajiban call terkini untuk pemain utama
@@ -362,20 +363,13 @@ export default function App() {
       }),
     );
 
-    setLeaderboard((prev) => {
-      const bestScore = player?.chips ?? 0;
-      const filtered = prev.filter((entry) => entry.name !== leaderboardLabel);
-      return [
-        ...filtered,
-        {
-          name: leaderboardLabel,
-          score: bestScore,
-          avatar: profile?.avatar || "/assets/others/avatar2.jpg",
-        },
-      ]
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5);
-    });
+    setLeaderboard((prev) =>
+      upsertBestScore(prev, {
+        name: leaderboardLabel,
+        score: player?.chips ?? 0,
+        avatar: profile?.avatar || "/assets/others/avatar2.jpg",
+      }),
+    );
 
     const winnerNames = winners.map((idx) => state.players[idx].name);
     const summary = heroWon
@@ -423,7 +417,7 @@ export default function App() {
       {
         id: Date.now(),
         author: "Dealer",
-        message: "Daily bonus credited!",
+        message: "Daily bonus +250 will be added at the next hand.",
         type: "dealer",
       },
     ]);
@@ -468,9 +462,10 @@ export default function App() {
     setHandHistory([]);
   };
 
-  const playerOutOfChips = player?.chips <= 0;
-  const botsBusted = state.players?.slice(1).every((p) => p.chips <= 0);
-  const playerWonGame = player?.chips > 0 && botsBusted;
+  const { playerOutOfChips, playerWonGame } = getGameOverState(
+    status,
+    state.players,
+  );
 
   const sendReaction = (emoji) => {
     appendChatMessages([
@@ -596,7 +591,12 @@ export default function App() {
             </p>
             <h1 className="text-3xl font-black text-yellow-300">PokeReact</h1>
             <p className="text-xs text-white/60">
-              Status: <span className="text-white font-semibold">{status}</span>
+              {state.round} ·{" "}
+              <span
+                className={`font-semibold ${isHeroTurn ? "text-emerald-300" : "text-white"}`}
+              >
+                {statusLabel}
+              </span>
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm">
@@ -637,13 +637,16 @@ export default function App() {
               pot={pot}
               winners={winners}
               accentColor={profile?.favoriteColor}
+              onHeroTimeout={handleHeroTimeout}
             />
 
             <div className="sticky top-4 z-10">
               <ActionBar
-                actions={availableActions}
+                actions={isHeroTurn ? availableActions : []}
                 onAction={executeAction}
                 hints={hints}
+                heroBet={player?.bet ?? 0}
+                waitingFor={actingPlayerName}
               />
             </div>
 

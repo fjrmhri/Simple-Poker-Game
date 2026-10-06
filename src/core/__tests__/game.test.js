@@ -19,9 +19,10 @@ describe("Game.start", () => {
       { rank: "A", suit: "H" },
       { rank: "A", suit: "D" },
     ]);
-    expect(state.players[1].bet).toBe(10); // small blind
-    expect(state.players[0].bet).toBe(20); // big blind
-    expect(state.currentPlayer).toBe(1);
+    // Heads-up: dealer (0) adalah small blind dan beraksi pertama
+    expect(state.players[0].bet).toBe(10); // small blind
+    expect(state.players[1].bet).toBe(20); // big blind
+    expect(state.currentPlayer).toBe(0);
   });
 });
 
@@ -43,8 +44,8 @@ describe("Game.applyAction", () => {
   it("handles fold and ends the game", () => {
     const next = game.applyAction(state, "fold");
     expect(next.endgame).toBe(true);
-    expect(next.winners).toEqual([0]);
-    expect(next.players[0].chips).toBe(1010);
+    expect(next.winners).toEqual([1]);
+    expect(next.players[1].chips).toBe(1010);
   });
 
   it("handles call and advances to flop", () => {
@@ -55,6 +56,7 @@ describe("Game.applyAction", () => {
     expect(next.round).toBe("Flop");
     expect(next.pot).toBe(80);
     expect(next.community).toHaveLength(3);
+    // Setelah flop heads-up, big blind (bukan dealer) beraksi pertama
     expect(next.currentPlayer).toBe(1);
     expect(next.players[0].chips).toBe(960);
     expect(next.players[1].chips).toBe(960);
@@ -62,9 +64,9 @@ describe("Game.applyAction", () => {
 
   it("handles raise and switches turn", () => {
     const next = game.applyAction(state, "bet", 20);
-    expect(next.players[1].bet).toBe(40);
-    expect(next.players[1].lastAction).toBe("raise");
-    expect(next.currentPlayer).toBe(0);
+    expect(next.players[0].bet).toBe(40);
+    expect(next.players[0].lastAction).toBe("raise");
+    expect(next.currentPlayer).toBe(1);
     expect(next.round).toBe("Preflop");
   });
 });

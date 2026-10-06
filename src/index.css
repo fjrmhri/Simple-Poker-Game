@@ -6,8 +6,8 @@
 @font-face {
   font-family: "Monocraft";
   src:
-    url("/public/fonts/Monocraft.ttf") format("truetype"),
-    url("/public/fonts/Monocraft.otf") format("opentype");
+    url("/fonts/Monocraft.ttf") format("truetype"),
+    url("/fonts/Monocraft.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
 }

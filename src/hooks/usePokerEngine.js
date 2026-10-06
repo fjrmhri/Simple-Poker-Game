@@ -1,5 +1,5 @@
 // src/hooks/usePokerEngine.js
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Game, { deepClone } from "../core/models";
 import { AIBot } from "../core/ai";
 
@@ -17,10 +17,13 @@ export default function usePokerEngine(initialPlayers) {
 
   // state game
   const [state, setState] = useState(() => game.start());
-  const [availableActions, setAvailableActions] = useState([]);
 
   // reinitialize game and state when player configuration changes
+  // (dilewati saat mount karena state awal sudah dibuat di atas)
+  const playersRef = useRef(initialPlayers);
   useEffect(() => {
+    if (playersRef.current === initialPlayers) return;
+    playersRef.current = initialPlayers;
     const newGame = new Game(initialPlayers);
     setGame(newGame);
     setState(newGame.start());
@@ -31,10 +34,7 @@ export default function usePokerEngine(initialPlayers) {
   const status = useMemo(() => game.checkGameStatus(state), [state, game]);
   const winners = useMemo(() => game.checkWinners(state), [state, game]);
 
-  // update actions saat state berubah
-  useEffect(() => {
-    setAvailableActions(game.actions(state));
-  }, [state, game]);
+  const availableActions = useMemo(() => game.actions(state), [state, game]);
 
   // bot jalan kalau gilirannya bot
   useEffect(() => {
@@ -70,7 +70,12 @@ export default function usePokerEngine(initialPlayers) {
   const handleAction = useCallback(
     (action, amount = 0) => {
       try {
-        setState((prev) => game.applyAction(prev, action, amount));
+        setState((prev) => {
+          // Pemain manusia hanya boleh beraksi pada gilirannya sendiri
+          const current = prev.players?.[prev.currentPlayer];
+          if (!current || current.isBot || prev.endgame) return prev;
+          return game.applyAction(prev, action, amount);
+        });
       } catch (err) {
         // Jaga UI tetap responsif ketika aksi pemain tidak valid
         console.error("Invalid player action", err);
@@ -103,11 +108,11 @@ export default function usePokerEngine(initialPlayers) {
     if (!Number.isFinite(amount) || amount === 0) return;
     setState((prev) => {
       if (!prev?.players?.[playerIndex]) return prev;
+      // Chip tidak diubah di tengah tangan agar pot dan status all-in tetap konsisten;
+      // bonus diterapkan saat tangan berikutnya dibagikan
       const next = deepClone(prev);
-      next.players[playerIndex].chips = Math.max(
-        0,
-        next.players[playerIndex].chips + amount,
-      );
+      const target = next.players[playerIndex];
+      target.pendingChips = (target.pendingChips ?? 0) + amount;
       return next;
     });
   }, []);

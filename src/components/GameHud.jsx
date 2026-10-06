@@ -45,9 +45,6 @@ export default function GameHud({
               </p>
               <h3 className="text-xl font-semibold">Table chat</h3>
             </div>
-            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-white/70">
-              Quick reactions
-            </span>
           </div>
 
           <div className="mt-3 space-y-3 text-sm">
@@ -102,9 +99,6 @@ export default function GameHud({
               </p>
               <h3 className="text-xl font-semibold">Leaderboard</h3>
             </div>
-            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] text-white/70">
-              Live standings
-            </span>
           </div>
           <div className="mt-3 space-y-2 text-sm">
             {leaderboard.length === 0 && (
@@ -144,27 +138,26 @@ export default function GameHud({
         animate={{ opacity: 1, y: 0 }}
         className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-xl"
       >
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-xs uppercase tracking-widest text-white/60">
-              Player intel
-            </p>
-            <h2 className="text-2xl font-bold">Stats</h2>
-          </div>
-          {onClaimBonus && dailyBonus && (
-            <button
-              onClick={onClaimBonus}
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                dailyBonus.available
-                  ? "bg-amber-400 text-black"
-                  : "bg-white/10 text-white/50"
-              }`}
-              disabled={!dailyBonus.available}
-            >
-              {dailyBonus.available ? "Claim daily 250" : "Bonus claimed"}
-            </button>
-          )}
+        <div>
+          <p className="text-xs uppercase tracking-widest text-white/60">
+            Player intel
+          </p>
+          <h2 className="text-2xl font-bold">Stats</h2>
         </div>
+        {onClaimBonus && dailyBonus && (
+          <button
+            type="button"
+            onClick={onClaimBonus}
+            className={`mt-3 w-full rounded-full px-3 py-1.5 text-xs font-semibold ${
+              dailyBonus.available
+                ? "bg-amber-400 text-black"
+                : "bg-white/10 text-white/50"
+            }`}
+            disabled={!dailyBonus.available}
+          >
+            {dailyBonus.available ? "Claim daily 250" : "Bonus claimed"}
+          </button>
+        )}
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <StatTile label="Hands played" value={safeStats.handsPlayed} />
           <StatTile label="Hands won" value={safeStats.handsWon} />
@@ -186,9 +179,6 @@ export default function GameHud({
       >
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-lg font-semibold">Daily missions</h3>
-          <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] text-white/70">
-            Track progress
-          </span>
         </div>
         <div className="mt-3 space-y-3">
           {safeMissions.map((mission) => (

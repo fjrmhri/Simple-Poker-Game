@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-export default function ActionBar({ actions = [], onAction, hints }) {
+export default function ActionBar({
+  actions = [],
+  onAction,
+  hints,
+  heroBet = 0,
+  waitingFor = null,
+}) {
   const betAction = actions.find((a) => a.type === "bet");
   const callAction = actions.find((a) => a.type === "call");
   const checkAction = actions.find((a) => a.type === "check");
@@ -21,7 +27,6 @@ export default function ActionBar({ actions = [], onAction, hints }) {
     return { min: betAction.min, max: Math.max(betAction.min, betAction.max) };
   }, [betAction]);
 
-  const disabled = actions.length === 0;
   const formattedAmount = Number.isFinite(amount)
     ? amount
     : (betAction?.min ?? 0);
@@ -29,60 +34,89 @@ export default function ActionBar({ actions = [], onAction, hints }) {
   const quickAmounts = useMemo(() => {
     if (!betAction) return [];
     const mid = Math.round((betAction.min + betAction.max) / 2);
-    return [betAction.min, mid, betAction.max].filter(
-      (value, index, arr) => value && arr.indexOf(value) === index,
+    const options = [
+      { label: "Min", value: betAction.min },
+      { label: "Mid", value: mid },
+      { label: "All-in", value: betAction.max },
+    ];
+    return options.filter(
+      (option, index) =>
+        option.value &&
+        options.findIndex((o) => o.value === option.value) === index,
     );
   }, [betAction]);
 
-  const renderPrimaryLabel = () => {
-    if (callAction) return `Call ${callAction.amount}`;
-    if (checkAction) return "Check";
-    return "Waiting";
-  };
+  const callAmount = callAction?.amount ?? 0;
+  // Jumlah di input adalah kenaikan di atas call; tampilkan total taruhan street ini
+  const totalBet = heroBet + callAmount + formattedAmount;
+  const isAllIn = betAction && formattedAmount >= betAction.max;
+  const betLabel = isAllIn
+    ? `All-in (${totalBet})`
+    : checkAction
+      ? `Bet ${formattedAmount}`
+      : `Raise to ${totalBet}`;
+
+  const primaryLabel = callAction
+    ? `Call ${callAction.amount}`
+    : checkAction
+      ? "Check"
+      : "Check / Call";
+
+  const buttonBase =
+    "min-w-[120px] rounded-full px-5 py-2 text-sm font-semibold shadow transition disabled:cursor-not-allowed";
 
   return (
     <div className="rounded-3xl border border-white/10 bg-black/40 p-4 shadow-2xl backdrop-blur">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <p className="text-xs uppercase tracking-widest text-white/60">
             Action console
           </p>
           <h3 className="text-xl font-semibold leading-tight">
-            {hints?.recommendation || "Your move"}
+            {actions.length ? hints?.recommendation || "Your move" : "Waiting"}
           </h3>
-          <p className="text-xs text-white/60">{hints?.tip}</p>
+          <p className="text-xs text-white/60">
+            {actions.length
+              ? hints?.tip
+              : waitingFor
+                ? `${waitingFor} is deciding…`
+                : "Waiting for the next hand…"}
+          </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex shrink-0 gap-2">
           <button
-            onClick={() => foldAction && onAction("fold")}
+            type="button"
+            onClick={() => onAction("fold")}
             disabled={!foldAction}
-            className={`rounded-full px-4 py-2 text-sm font-semibold shadow ${
+            className={`${buttonBase} ${
               foldAction
                 ? "bg-red-500/80 hover:bg-red-500"
-                : "bg-white/10 text-white/50"
+                : "bg-white/5 text-white/30"
             }`}
           >
             Fold
           </button>
           <button
+            type="button"
             onClick={() => onAction(callAction ? "call" : "check")}
             disabled={!callAction && !checkAction}
-            className={`rounded-full px-4 py-2 text-sm font-semibold shadow ${
+            className={`${buttonBase} ${
               callAction || checkAction
                 ? "bg-emerald-500/80 hover:bg-emerald-500"
-                : "bg-white/10 text-white/50"
+                : "bg-white/5 text-white/30"
             }`}
           >
-            {renderPrimaryLabel()}
+            {primaryLabel}
           </button>
         </div>
       </div>
 
-      {betAction ? (
+      {betAction && (
         <div className="mt-4 space-y-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               type="range"
+              aria-label="Jumlah bet atau raise"
               min={sliderRange.min}
               max={sliderRange.max}
               value={formattedAmount}
@@ -91,40 +125,46 @@ export default function ActionBar({ actions = [], onAction, hints }) {
             />
             <input
               type="number"
+              aria-label="Jumlah bet atau raise"
               min={sliderRange.min}
               max={sliderRange.max}
               value={formattedAmount}
               onChange={(event) => setAmount(Number(event.target.value))}
-              className="w-20 rounded-2xl border border-white/10 bg-black/40 px-2 py-1 text-right text-sm"
+              onBlur={() =>
+                setAmount((prev) =>
+                  Math.min(
+                    Math.max(Number(prev) || 0, sliderRange.min),
+                    sliderRange.max,
+                  ),
+                )
+              }
+              className="w-24 rounded-2xl border border-white/10 bg-black/40 px-2 py-1 text-right text-sm"
             />
           </div>
-          <div className="flex flex-wrap gap-2 text-xs text-white/60">
-            {quickAmounts.map((value) => (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
+            {quickAmounts.map((option) => (
               <button
-                key={value}
-                onClick={() => setAmount(value)}
-                className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10"
+                type="button"
+                key={option.label}
+                onClick={() => setAmount(option.value)}
+                className={`rounded-full border px-3 py-1 hover:bg-white/10 ${
+                  formattedAmount === option.value
+                    ? "border-yellow-300/60 text-yellow-200"
+                    : "border-white/10"
+                }`}
               >
-                {value}
+                {option.label} · {option.value}
               </button>
             ))}
           </div>
           <button
+            type="button"
             onClick={() => onAction("bet", formattedAmount)}
-            disabled={!betAction || disabled}
-            className={`w-full rounded-2xl px-4 py-2 text-sm font-semibold shadow ${
-              betAction
-                ? "bg-yellow-400 text-black hover:bg-yellow-300"
-                : "bg-white/10 text-white/50"
-            }`}
+            className="w-full rounded-2xl bg-yellow-400 px-4 py-2 text-sm font-semibold text-black shadow hover:bg-yellow-300"
           >
-            {checkAction ? "Bet" : "Raise"}
+            {betLabel}
           </button>
         </div>
-      ) : (
-        <p className="mt-3 text-sm text-white/60">
-          Waiting for opponent actions…
-        </p>
       )}
     </div>
   );

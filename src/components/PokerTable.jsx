@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import CardImg from "./CardImg";
+import CardImg, { CardSlot } from "./CardImg";
 import PlayerSeat from "./PlayerSeat";
 
 export default function PokerTable({
@@ -8,6 +8,7 @@ export default function PokerTable({
   pot,
   winners,
   accentColor = "#facc15",
+  onHeroTimeout,
 }) {
   const {
     players = [],
@@ -59,7 +60,11 @@ export default function PokerTable({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: index * 0.08 }}
             >
-              <CardImg card={community[index]} w={80} />
+              {community[index] ? (
+                <CardImg card={community[index]} w={80} />
+              ) : (
+                <CardSlot w={80} />
+              )}
             </motion.div>
           ))}
         </div>
@@ -70,6 +75,7 @@ export default function PokerTable({
               player={players[0]}
               community={community}
               isYou
+              onTimeout={onHeroTimeout}
               isTurn={
                 0 === currentPlayer &&
                 round !== "Showdown" &&

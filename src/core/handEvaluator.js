@@ -40,10 +40,11 @@ function handRank(cards) {
 
   const counts = {};
   for (const rank of ranks) counts[rank] = (counts[rank] || 0) + 1;
+  // Urut berdasarkan jumlah kemunculan, lalu rank, agar pasangan/trips dibandingkan sebelum kicker
   const uniqueRanks = Object.keys(counts)
     .map(Number)
-    .sort((a, b) => b - a);
-  const countValues = Object.values(counts).sort((a, b) => b - a);
+    .sort((a, b) => counts[b] - counts[a] || b - a);
+  const countValues = uniqueRanks.map((rank) => counts[rank]);
 
   const isFlush = suits.every((suit) => suit === suits[0]);
 
@@ -65,8 +66,8 @@ function handRank(cards) {
     return null;
   })();
 
-  let rankValue = 0;
-  let kickers = [];
+  let rankValue;
+  let kickers;
 
   if (isStraight && isFlush) {
     rankValue = 8;
@@ -85,13 +86,13 @@ function handRank(cards) {
     kickers = [isStraight];
   } else if (countValues[0] === 3) {
     rankValue = 3;
-    kickers = [uniqueRanks[0], ...uniqueRanks.slice(1)];
+    kickers = uniqueRanks;
   } else if (countValues[0] === 2 && countValues[1] === 2) {
     rankValue = 2;
-    kickers = [uniqueRanks[0], uniqueRanks[1], uniqueRanks[2]];
+    kickers = uniqueRanks;
   } else if (countValues[0] === 2) {
     rankValue = 1;
-    kickers = [uniqueRanks[0], ...uniqueRanks.slice(1)];
+    kickers = uniqueRanks;
   } else {
     rankValue = 0;
     kickers = ranks;

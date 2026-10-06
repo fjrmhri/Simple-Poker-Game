@@ -2,14 +2,14 @@
   <img src="https://img.shields.io/github/stars/fjrmhri/Simple-Poker-Game?style=for-the-badge&logo=github&color=8b5cf6" alt="Stars"/>
   <img src="https://img.shields.io/github/license/fjrmhri/Simple-Poker-Game?style=for-the-badge&color=10b981" alt="License"/>
   <img src="https://img.shields.io/badge/React-19.1.1-61dafb?style=for-the-badge&logo=react&logoColor=61dafb" alt="React"/>
-  <img src="https://img.shields.io/badge/React_Router-7.8.2-ca4245?style=for-the-badge&logo=reactrouter&logoColor=white" alt="React Router"/>
+  <img src="https://img.shields.io/badge/Vite-8.3.3-646cff?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"/>
   <img src="https://img.shields.io/badge/TailwindCSS-3.4.17-38bdf8?style=for-the-badge&logo=tailwind-css" alt="Tailwind"/>
   <img src="https://img.shields.io/badge/Framer_Motion-12.23.12-ff4088?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion"/>
 </p>
 
 # ♠️ PokeReact – Neon Texas Hold'em
 
-PokeReact adalah pengalaman Texas Hold'em tunggal yang dibangun dengan React, Tailwind CSS, dan Framer Motion. Fokusnya adalah alur meja yang sinematik, bot yang responsif, serta progresi misi dan leaderboard lokal tanpa mengubah UI/UX yang sudah stabil.
+PokeReact adalah pengalaman Texas Hold'em tunggal yang dibangun dengan React, Vite, Tailwind CSS, dan Framer Motion. Fokusnya adalah alur meja yang sinematik, bot yang responsif, serta progresi misi dan leaderboard lokal tanpa mengubah UI/UX yang sudah stabil.
 
 ## ✨ Fitur Utama
 - **Meja modern** dengan animasi komunitas dan tata letak kursi responsif.
@@ -23,20 +23,42 @@ PokeReact adalah pengalaman Texas Hold'em tunggal yang dibangun dengan React, Ta
 git clone https://github.com/fjrmhri/Simple-Poker-Game.git
 cd Simple-Poker-Game
 npm install
-npm start
+npm run dev
 ```
-Buka `http://localhost:3000` untuk mulai bermain.
+Buka `http://localhost:3000` untuk mulai bermain. Membutuhkan Node.js 20.19+ atau 22.12+.
+
+Perintah lain:
+- `npm run build`: build produksi ke folder `dist/`.
+- `npm run preview`: menjalankan hasil build secara lokal.
+- `npm run lint`: memeriksa kode dengan ESLint.
 
 ## 🔧 Konfigurasi
 - Aset suara berada di `public/sounds/`; ganti file bila ingin efek berbeda.
 - Penyimpanan lokal (`localStorage`) dipakai untuk profil, misi, leaderboard, dan status bonus harian.
 - Tidak ada variabel lingkungan wajib; pastikan port 3000 bebas saat menjalankan aplikasi.
+- Bila kelak butuh variabel lingkungan, simpan di `.env` lokal (sudah di-ignore Git) dengan awalan `VITE_` dan baca lewat `import.meta.env.VITE_NAMA`.
 
 ## 🧪 Testing
 ```bash
-npm test
+npm test           # sekali jalan (Vitest)
+npm run test:watch # mode watch
 ```
-Tes bawaan memastikan komponen utama dapat dirender. Tambahkan skenario lain bila dibutuhkan.
+Test berada di `src/**/__tests__/` dan `*.test.js(x)`: evaluasi tangan, alur taruhan, side pot, aturan heads-up/minimum raise, hook mesin poker, dan timer giliran.
+
+## 🤖 Bot (NPC)
+Setiap keputusan bot memakai estimasi equity Monte Carlo melawan lawan yang masih aktif, lalu dibandingkan dengan equity wajar `1/(lawan+1)` dan pot odds. Profil per level ada di `BOT_PROFILES` (`src/core/ai.js`):
+
+| Level | Gaya | Ciri |
+|---|---|---|
+| easy | loose-passive | Sering call, jarang raise, tidak membaca ukuran bet lawan |
+| normal | tight-aggressive | Call berbasis pot odds, value bet, bluff sesekali |
+| hard | tight-aggressive + adaptif | Simulasi lebih banyak, menghormati bet besar lawan, bluff hanya saat dalam posisi, semi-bluff, sesekali slow-play |
+
+Benchmark duplicate heads-up (setiap deal dimainkan dua kali dengan kursi ditukar):
+```bash
+npm run bench                       # default: hard:normal, hard:easy, normal:easy, hard:maniac
+DEALS=300 DUEL=hard:normal npm run bench
+```
 
 ## 🗂️ Struktur Proyek Singkat
 - `src/App.jsx`: alur utama permainan, misi, bonus, dan integrasi HUD.

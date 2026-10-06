@@ -58,7 +58,9 @@ test("handles side pots with multiple all-ins", () => {
 
   expect(state.players[0].chips).toBe(150); // main pot
   expect(state.players[1].chips).toBe(100); // side pot
-  expect(state.players[2].chips).toBe(100); // final side pot
+  expect(state.players[2].chips).toBe(100); // taruhan tak ter-call dikembalikan
   expect(state.pot).toBe(0);
-  expect(new Set(state.winners)).toEqual(new Set([0, 1, 2]));
+  expect(state.lastPot).toBe(350);
+  // P3 hanya menerima pengembalian, bukan memenangkan pot
+  expect(state.winners).toEqual([0, 1]);
 });

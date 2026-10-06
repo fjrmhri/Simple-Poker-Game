@@ -25,7 +25,19 @@ export default function CardImg({ card, w = 72 }) {
         boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
         background:
           "radial-gradient(circle, rgba(255,255,255,0.2), transparent)",
+        imageRendering: "pixelated",
       }}
+    />
+  );
+}
+
+// Slot kosong untuk kartu komunitas yang belum dibuka
+export function CardSlot({ w = 72 }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="rounded-[18px] border-2 border-dashed border-white/15 bg-white/[0.03]"
+      style={{ width: w, aspectRatio: "35 / 47" }}
     />
   );
 }
