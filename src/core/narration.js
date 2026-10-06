@@ -86,12 +86,13 @@ export function describeTransition(prev, next, options = {}) {
   const { heroIndex = 0, random = Math.random } = options;
   const messages = [];
   const idBase = `h${next.handNumber}-a${next.actionSeq ?? 0}`;
-  const push = (author, message, type) =>
+  const push = (author, message, type, extra = {}) =>
     messages.push({
       id: `${idBase}-${messages.length}`,
       author,
       message,
       type,
+      ...extra,
     });
 
   const newHand = !prev || prev.handNumber !== next.handNumber;
@@ -155,12 +156,14 @@ export function describeTransition(prev, next, options = {}) {
         "Dealer",
         `Pot ${pot} shipped your way with ${heroHand || "solid play"}.`,
         "dealer",
+        { summary: true },
       );
     } else {
       push(
         winnerNames[0] || "Dealer",
         `${winnerNames.join(", ")} claim the ${pot} pot.`,
         "bot",
+        { summary: true },
       );
     }
   }
