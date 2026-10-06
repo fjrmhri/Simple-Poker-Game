@@ -15,6 +15,8 @@ PokeReact adalah pengalaman Texas Hold'em tunggal yang dibangun dengan React, Vi
 - **Meja modern** dengan animasi komunitas dan tata letak responsif: bisa dimainkan di HP (mulai 360px), tablet, dan desktop.
 - **Profil pemain**: pilih avatar, warna aksen, dan tagline sebelum duduk di meja.
 - **HUD dinamis**: statistik, misi, leaderboard, bonus harian, serta obrolan dealer/bot.
+- **Peluang tangan**: peluang menang melawan lawan aktif dan distribusi kombinasi akhir di river (persis di flop/turn, simulasi di preflop), hanya dari kartu yang terlihat.
+- **Tempo pengungkapan**: saat all-in, turn dan river dibuka bertahap sebelum pemenang diumumkan.
 - **Logika game lengkap**: ronde taruhan, side pot, evaluasi pemenang, dan aksi bot.
 - **Audio imersif**: suara kartu, chip, dan fanfare kemenangan yang bisa dimute.
 

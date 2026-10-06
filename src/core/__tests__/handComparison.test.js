@@ -68,3 +68,59 @@ describe("perbandingan tangan dengan kategori sama", () => {
     expect(getWinners(players, board)).toEqual([players[0]]);
   });
 });
+
+describe("fastCategory", () => {
+  it("sama dengan bestRankValue untuk 20.000 tangan 7 kartu acak", async () => {
+    const { bestRankValue, fastCategory } = await import("../handEvaluator");
+    const ranks = [
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "J",
+      "Q",
+      "K",
+      "A",
+    ];
+    const deck = ranks.flatMap((rank) =>
+      ["C", "D", "H", "S"].map((suit) => ({ rank, suit })),
+    );
+    let seed = 42;
+    const random = () => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      return seed / 4294967296;
+    };
+    const mismatches = [];
+    const seen = new Set();
+    for (let n = 0; n < 20000; n++) {
+      const pool = [...deck];
+      for (let i = 0; i < 7; i++) {
+        const j = i + Math.floor(random() * (pool.length - i));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      const hand = pool.slice(0, 7);
+      const expected = bestRankValue(hand);
+      seen.add(expected);
+      if (fastCategory(hand) !== expected) mismatches.push(hand);
+    }
+    expect(mismatches).toEqual([]);
+    expect(seen.size).toBeGreaterThanOrEqual(8); // hampir semua kategori teruji
+  });
+
+  it.each([
+    [["AS", "2S", "3S", "4S", "5S", "KD", "KH"], 8], // wheel straight flush
+    [["AS", "KD", "QH", "JC", "10S", "2D", "3H"], 4], // broadway
+    [["AS", "2D", "3H", "4C", "5S", "9D", "KH"], 4], // wheel
+    [["KS", "KD", "KH", "QC", "QS", "QD", "2H"], 6], // dua trips = full house
+    [["2S", "4S", "6S", "8S", "10S", "3D", "5H"], 5], // flush, bukan straight flush
+  ])("kasus khusus %#", (codes, expected) => {
+    return import("../handEvaluator").then(({ fastCategory }) =>
+      expect(fastCategory(cards(...codes))).toBe(expected),
+    );
+  });
+});

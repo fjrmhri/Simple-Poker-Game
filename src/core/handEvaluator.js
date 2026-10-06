@@ -114,7 +114,7 @@ export function evaluateHandPublic(cards) {
   return handRank(cards.map(toInternal));
 }
 
-const handNames = [
+export const HAND_NAMES = [
   "High Card",
   "One Pair",
   "Two Pair",
@@ -135,7 +135,87 @@ export function getHandName(hand, community) {
     const rank = handRank(combo.map(toInternal));
     if (!best || compareHands(rank, best) > 0) best = rank;
   }
-  return handNames[best.rankValue];
+  return HAND_NAMES[best.rankValue];
+}
+
+/**
+ * Kategori terbaik (0 = High Card ... 8 = Straight Flush) dari 5–7 kartu.
+ * @param {Array} cards - Kartu {rank, suit}.
+ * @returns {number} rankValue kategori terbaik.
+ */
+export function bestRankValue(cards) {
+  let best = 0;
+  for (const combo of combinations(cards.map(toInternal), 5)) {
+    const { rankValue } = handRank(combo);
+    if (rankValue > best) best = rankValue;
+    if (best === 8) break;
+  }
+  return best;
+}
+
+const RANK_VALUE = {
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 5,
+  6: 6,
+  7: 7,
+  8: 8,
+  9: 9,
+  10: 10,
+  J: 11,
+  Q: 12,
+  K: 13,
+  A: 14,
+};
+
+// Bit mask rank (bit 1 = As rendah untuk wheel) -> kartu tertinggi straight, atau 0
+function straightHigh(mask) {
+  for (let high = 14; high >= 5; high--) {
+    const run = 0b11111 << (high - 4);
+    if ((mask & run) === run) return high;
+  }
+  return 0;
+}
+
+/**
+ * Kategori terbaik dari 5–7 kartu tanpa mencoba setiap kombinasi 5 kartu.
+ * Setara dengan bestRankValue, tetapi jauh lebih cepat untuk simulasi.
+ * @param {Array} cards - Kartu {rank, suit}.
+ * @returns {number} rankValue kategori terbaik (0..8).
+ */
+export function fastCategory(cards) {
+  const counts = new Array(15).fill(0);
+  const suitMasks = { C: 0, D: 0, H: 0, S: 0 };
+  const suitCounts = { C: 0, D: 0, H: 0, S: 0 };
+  let mask = 0;
+  for (const card of cards) {
+    const v = RANK_VALUE[card.rank];
+    counts[v]++;
+    const bit = (1 << v) | (v === 14 ? 1 << 1 : 0);
+    mask |= bit;
+    suitMasks[card.suit] |= bit;
+    suitCounts[card.suit]++;
+  }
+  const flushSuit = Object.keys(suitCounts).find((s) => suitCounts[s] >= 5);
+  if (flushSuit && straightHigh(suitMasks[flushSuit])) return 8;
+
+  let quads = 0;
+  let trips = 0;
+  let pairs = 0;
+  for (let v = 2; v <= 14; v++) {
+    if (counts[v] === 4) quads++;
+    else if (counts[v] === 3) trips++;
+    else if (counts[v] === 2) pairs++;
+  }
+  if (quads) return 7;
+  if (trips && (pairs || trips > 1)) return 6;
+  if (flushSuit) return 5;
+  if (straightHigh(mask)) return 4;
+  if (trips) return 3;
+  if (pairs >= 2) return 2;
+  if (pairs) return 1;
+  return 0;
 }
 
 export function getWinners(players, community) {

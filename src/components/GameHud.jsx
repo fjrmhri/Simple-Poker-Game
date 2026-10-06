@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 
 export default function GameHud({
   stats,
+  odds,
   missions,
   leaderboard,
   dailyBonus,
@@ -170,6 +171,7 @@ export default function GameHud({
             className="col-span-2"
           />
         </div>
+        <HandOdds odds={odds} />
       </motion.div>
 
       <motion.div
@@ -213,6 +215,83 @@ function StatTile({ label, value, className = "" }) {
     >
       <p className="text-white/60">{label}</p>
       <p className="text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
+const formatPercent = (p) => {
+  if (p <= 0) return "0%";
+  if (p < 0.001) return "<0.1%";
+  return `${(p * 100).toFixed(p < 0.1 ? 1 : 0)}%`;
+};
+
+// Peluang menang dan distribusi kombinasi akhir dari sudut pandang pemain
+function HandOdds({ odds }) {
+  if (!odds) {
+    return (
+      <p className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-3 text-xs text-white/50">
+        Hand odds appear while you are holding cards.
+      </p>
+    );
+  }
+  const categories = odds.categories
+    .filter((c) => c.probability > 0)
+    .sort((a, b) => b.rankValue - a.rankValue);
+  return (
+    <div className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-black/30 p-3 text-xs">
+      <div>
+        <div className="flex items-center justify-between">
+          <span className="text-white/60">
+            {odds.revealed
+              ? "Win chance vs revealed hands"
+              : `Win chance vs ${odds.opponents} ${odds.opponents === 1 ? "opponent" : "opponents"}`}
+          </span>
+          <span className="text-lg font-semibold text-emerald-300">
+            {formatPercent(odds.win)}
+          </span>
+        </div>
+        <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-emerald-400"
+            style={{ width: `${Math.round(odds.win * 100)}%` }}
+          />
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-white/60">
+          Final hand by the river{" "}
+          <span className="text-white/40">
+            ({odds.exact ? "exact" : "simulated"})
+          </span>
+        </p>
+        <ul className="space-y-1.5">
+          {categories.map((c) => (
+            <li key={c.name}>
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className={
+                    c.name === odds.current
+                      ? "font-semibold text-yellow-200"
+                      : "text-white/80"
+                  }
+                >
+                  {c.name}
+                  {c.name === odds.current ? " (now)" : ""}
+                </span>
+                <span className="tabular-nums text-white/70">
+                  {formatPercent(c.probability)}
+                </span>
+              </div>
+              <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-300 to-yellow-400"
+                  style={{ width: `${Math.max(1, c.probability * 100)}%` }}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

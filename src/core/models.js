@@ -20,6 +20,7 @@ const RANKS = [
 ];
 const SUITS = ["C", "D", "H", "S"]; // Clubs, Diamonds, Hearts, Spades
 const SMALL_BLIND = 10;
+let gameCounter = 0;
 const BIG_BLIND = 20;
 
 /**
@@ -300,6 +301,7 @@ export default class Game {
         round: "Showdown",
         winners: [],
         endgame: true,
+        gameId: prevState?.gameId ?? ++gameCounter,
         handNumber: (prevState?.handNumber ?? 0) + 1,
         actionSeq: 0,
         lastEvent: null,
@@ -331,6 +333,7 @@ export default class Game {
       round: "Preflop", // Preflop -> Flop -> Turn -> River -> Showdown
       winners: [],
       endgame: false,
+      gameId: prevState?.gameId ?? ++gameCounter,
       handNumber: (prevState?.handNumber ?? 0) + 1,
       actionSeq: 0,
       lastEvent: null,

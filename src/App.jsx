@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import PokerTable from "./components/PokerTable";
 import ActionBar from "./components/ActionBar";
 import WinnerModal from "./components/WinnerModal";
@@ -14,6 +14,9 @@ import { getHandName } from "./core/handEvaluator";
 import { getGameOverState } from "./core/gameOver";
 import { appendLimited, upsertBestScore } from "./core/hud";
 import { describeTransition } from "./core/narration";
+import { resultDelayMs } from "./core/reveal";
+import { finalHandOdds, revealedWinChance, winChance } from "./core/odds";
+import useRevealPacing from "./hooks/useRevealPacing";
 
 const BOT_PROFILES = [
   {
@@ -99,17 +102,11 @@ export default function App() {
   const leaderboardLabel = profile?.name || "You";
   const profileAvatar = profile?.avatar || "/assets/others/avatar2.jpg";
 
-  // Narasi chat, statistik, misi, dan leaderboard diturunkan dari transisi state
-  // mesin; dipanggil dari event/timer sehingga tidak perlu efek render
-  const handleTransition = useCallback(
-    (prev, next) => {
-      const { messages, handResult } = describeTransition(prev, next, {
-        heroIndex: 0,
-      });
-      if (!prev) setChatMessages([...WELCOME_MESSAGES, ...messages]);
-      else appendChatMessages(messages);
-      if (!handResult) return;
-
+  // Hasil tangan (ringkasan chat, statistik, misi, leaderboard). Dipanggil
+  // setelah kartu selesai dibuka di layar agar hasil tidak "bocor" lebih dulu.
+  const applyHandResult = useCallback(
+    (handResult, summary) => {
+      appendChatMessages(summary);
       const { heroWon, heroHand, pot } = handResult;
       setStats((current) => ({
         handsPlayed: current.handsPlayed + 1,
@@ -152,6 +149,32 @@ export default function App() {
     [appendChatMessages, leaderboardLabel, profileAvatar, setLeaderboard],
   );
 
+  const resultTimerRef = useRef(null);
+
+  // Narasi chat diturunkan dari transisi state mesin; dipanggil dari event/timer
+  // sehingga tidak perlu efek render
+  const handleTransition = useCallback(
+    (prev, next) => {
+      const { messages, handResult } = describeTransition(prev, next, {
+        heroIndex: 0,
+      });
+      const immediate = messages.filter((m) => !m.summary);
+      const summary = messages.filter((m) => m.summary);
+      if (!prev) {
+        clearTimeout(resultTimerRef.current);
+        setChatMessages([...WELCOME_MESSAGES, ...immediate]);
+      } else {
+        appendChatMessages(immediate);
+      }
+      if (!handResult) return;
+      resultTimerRef.current = setTimeout(
+        () => applyHandResult(handResult, summary),
+        resultDelayMs(prev?.community.length ?? 0, next),
+      );
+    },
+    [appendChatMessages, applyHandResult],
+  );
+
   const {
     state,
     pot,
@@ -164,6 +187,22 @@ export default function App() {
     awardChips,
   } = usePokerEngine(playersConfig, { onTransition: handleTransition });
 
+  // Kartu meja dibuka bertahap; hasil tangan baru tampil setelah semua terlihat
+  const { visibleCount, resultReady } = useRevealPacing(state);
+  const visibleCommunity = useMemo(
+    () => (state.community || []).slice(0, visibleCount),
+    [state.community, visibleCount],
+  );
+  const tableState = useMemo(
+    () =>
+      visibleCount === (state.community?.length ?? 0)
+        ? state
+        : { ...state, community: visibleCommunity },
+    [state, visibleCount, visibleCommunity],
+  );
+  // Status untuk UI: tangan dianggap masih berjalan sampai hasil siap ditampilkan
+  const shownStatus = status === "playing" || resultReady ? status : "playing";
+
   const player = state.players?.[0];
   const isHeroTurn = status === "playing" && state.currentPlayer === 0;
   const actingPlayerName =
@@ -172,7 +211,9 @@ export default function App() {
       : null;
   const statusLabel =
     status !== "playing"
-      ? "Hand complete"
+      ? resultReady
+        ? "Hand complete"
+        : "Revealing cards…"
       : isHeroTurn
         ? "Your turn"
         : `${actingPlayerName ?? "Opponent"} is thinking…`;
@@ -191,8 +232,13 @@ export default function App() {
     volume: 0.12,
   });
 
-  useHandEndSound(status, winners.length > 0, soundEnabled, playWinnerSound);
-  useCardFlipSound(state.community?.length ?? 0, soundEnabled, playCardFlip);
+  useHandEndSound(
+    shownStatus,
+    winners.length > 0,
+    soundEnabled,
+    playWinnerSound,
+  );
+  useCardFlipSound(visibleCount, soundEnabled, playCardFlip);
 
   const executeAction = useCallback(
     (action, amount) => {
@@ -222,8 +268,36 @@ export default function App() {
   const heroHand = player?.hand;
   const handStrength = useMemo(() => {
     if (!heroHand?.length) return "";
-    return getHandName(heroHand, state.community || []);
-  }, [heroHand, state.community]);
+    return getHandName(heroHand, visibleCommunity);
+  }, [heroHand, visibleCommunity]);
+
+  // Peluang dari sudut pandang pemain: hanya kartu yang terlihat yang dipakai
+  const heroInHand =
+    Boolean(player) &&
+    !player.folded &&
+    !player.sittingOut &&
+    heroHand?.length === 2;
+  const opponentsLeft =
+    state.players?.filter((p, i) => i !== 0 && !p.folded).length ?? 0;
+  // Distribusi kombinasi hanya bergantung pada kartu yang terlihat
+  const handOutcome = useMemo(
+    () =>
+      gameStarted && heroInHand && !resultReady
+        ? finalHandOdds(heroHand, visibleCommunity)
+        : null,
+    [gameStarted, heroInHand, resultReady, heroHand, visibleCommunity],
+  );
+  const odds = useMemo(() => {
+    if (!handOutcome) return null;
+    // Saat showdown kartu lawan sudah terbuka, jadi hitung melawan kartu itu
+    const revealed = Boolean(state.endgame);
+    const win = revealed
+      ? revealedWinChance(state, 0, visibleCount)
+      : opponentsLeft > 0
+        ? winChance(state, 0, visibleCount)
+        : 1;
+    return { ...handOutcome, win, revealed, opponents: opponentsLeft };
+  }, [handOutcome, state, visibleCount, opponentsLeft]);
 
   const hints = useMemo(() => {
     // Ringkasan rekomendasi aksi agar UI tetap informatif tanpa logika baru
@@ -335,7 +409,7 @@ export default function App() {
   };
 
   const { playerOutOfChips, playerWonGame } = getGameOverState(
-    status,
+    shownStatus,
     state.players,
   );
 
@@ -409,9 +483,9 @@ export default function App() {
 
           <section className="order-1 space-y-4 @[920px]:order-none @[920px]:col-start-1 @[920px]:row-span-2 @[920px]:row-start-1 @[1200px]:col-start-2 @[1200px]:row-span-1">
             <PokerTable
-              state={state}
+              state={tableState}
               pot={pot}
-              winners={winners}
+              winners={resultReady ? winners : []}
               accentColor={profile?.favoriteColor}
               onHeroTimeout={handleHeroTimeout}
             />
@@ -461,6 +535,7 @@ export default function App() {
           <GameHud
             className="order-2 @[920px]:order-none @[920px]:col-start-2 @[920px]:row-start-1 @[1200px]:col-start-3"
             stats={stats}
+            odds={odds}
             missions={missions}
             leaderboard={leaderboard}
             dailyBonus={{ available: bonusAvailable, lastClaimed }}
@@ -496,7 +571,7 @@ export default function App() {
         </div>
       )}
 
-      {status !== "playing" &&
+      {resultReady &&
         winners.length > 0 &&
         !playerOutOfChips &&
         !playerWonGame && (
