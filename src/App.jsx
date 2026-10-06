@@ -356,7 +356,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
-      <div className="mx-auto max-w-7xl space-y-5 px-4 py-4">
+      <div className="@container mx-auto max-w-7xl space-y-5 px-4 py-4">
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 px-4 py-4 shadow-xl md:px-6">
           <div>
             <p className="text-sm uppercase tracking-widest text-white/60">
@@ -396,17 +396,18 @@ export default function App() {
           </div>
         </header>
 
-        {/* HP: meja, statistik, chat; lg: meja + sidebar; xl: tiga kolom */}
-        <main className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[280px_minmax(0,1fr)_280px]">
+        {/* Layout mengikuti lebar container (bukan viewport) agar tetap benar
+            pada ukuran font/zoom apa pun: 1 kolom, meja + sidebar, tiga kolom */}
+        <main className="grid items-start gap-4 @[920px]:grid-cols-[minmax(0,1fr)_300px] @[1200px]:grid-cols-[280px_minmax(0,1fr)_280px]">
           <GameHud
             variant="left"
-            className="order-3 lg:order-none lg:col-start-2 lg:row-start-2 xl:col-start-1 xl:row-start-1"
+            className="order-3 @[920px]:order-none @[920px]:col-start-2 @[920px]:row-start-2 @[1200px]:col-start-1 @[1200px]:row-start-1"
             leaderboard={leaderboard}
             chatMessages={chatMessages}
             onSendReaction={sendReaction}
           />
 
-          <section className="order-1 space-y-4 lg:order-none lg:col-start-1 lg:row-span-2 lg:row-start-1 xl:col-start-2 xl:row-span-1">
+          <section className="order-1 space-y-4 @[920px]:order-none @[920px]:col-start-1 @[920px]:row-span-2 @[920px]:row-start-1 @[1200px]:col-start-2 @[1200px]:row-span-1">
             <PokerTable
               state={state}
               pot={pot}
@@ -458,7 +459,7 @@ export default function App() {
           </section>
 
           <GameHud
-            className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 xl:col-start-3"
+            className="order-2 @[920px]:order-none @[920px]:col-start-2 @[920px]:row-start-1 @[1200px]:col-start-3"
             stats={stats}
             missions={missions}
             leaderboard={leaderboard}
