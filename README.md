@@ -2,7 +2,6 @@
   <img src="https://img.shields.io/github/stars/fjrmhri/Simple-Poker-Game?style=for-the-badge&logo=github&color=8b5cf6" alt="Stars"/>
   <img src="https://img.shields.io/github/license/fjrmhri/Simple-Poker-Game?style=for-the-badge&color=10b981" alt="License"/>
   <img src="https://img.shields.io/badge/React-19.1.1-61dafb?style=for-the-badge&logo=react&logoColor=61dafb" alt="React"/>
-  <img src="https://img.shields.io/badge/React_Router-7.8.2-ca4245?style=for-the-badge&logo=reactrouter&logoColor=white" alt="React Router"/>
   <img src="https://img.shields.io/badge/TailwindCSS-3.4.17-38bdf8?style=for-the-badge&logo=tailwind-css" alt="Tailwind"/>
   <img src="https://img.shields.io/badge/Framer_Motion-12.23.12-ff4088?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion"/>
 </p>
@@ -31,6 +30,7 @@ Buka `http://localhost:3000` untuk mulai bermain.
 - Aset suara berada di `public/sounds/`; ganti file bila ingin efek berbeda.
 - Penyimpanan lokal (`localStorage`) dipakai untuk profil, misi, leaderboard, dan status bonus harian.
 - Tidak ada variabel lingkungan wajib; pastikan port 3000 bebas saat menjalankan aplikasi.
+- Bila kelak butuh variabel lingkungan, simpan di `.env` lokal (sudah di-ignore Git) dengan awalan `REACT_APP_` agar terbaca oleh Create React App.
 
 ## 🧪 Testing
 ```bash
