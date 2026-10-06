@@ -86,7 +86,8 @@ export function deepClone(obj) {
 // Build a fresh player state from a template or previous player object.
 // Pemain tanpa chip tidak ikut tangan: tidak dapat kartu dan dianggap fold.
 function buildPlayer(base, deck) {
-  const chips = base.chips ?? 1000;
+  // Bonus yang diklaim di tengah tangan baru masuk di tangan berikutnya
+  const chips = Math.max(0, (base.chips ?? 1000) + (base.pendingChips ?? 0));
   const sittingOut = chips <= 0;
   return {
     name: base.name,
@@ -98,6 +99,7 @@ function buildPlayer(base, deck) {
     totalBet: 0,
     folded: sittingOut,
     sittingOut,
+    pendingChips: 0,
     hand: sittingOut ? [] : [deck.pop(), deck.pop()],
     lastAction: null,
     lastActionAmount: 0,

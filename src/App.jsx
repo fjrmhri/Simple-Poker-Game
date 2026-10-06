@@ -18,6 +18,7 @@ import useSound from "./hooks/useSound";
 import useTone from "./hooks/useTone";
 import { getHandName } from "./core/handEvaluator";
 import { getGameOverState } from "./core/gameOver";
+import { appendLimited, upsertBestScore } from "./core/hud";
 
 const BOT_PROFILES = [
   {
@@ -138,10 +139,7 @@ export default function App() {
 
   const appendChatMessages = useCallback((messages) => {
     if (!messages?.length) return;
-    setChatMessages((prev) => [
-      ...prev.slice(-(10 - messages.length)),
-      ...messages,
-    ]);
+    setChatMessages((prev) => appendLimited(prev, messages));
   }, []);
 
   useEffect(() => {
@@ -220,6 +218,13 @@ export default function App() {
     },
     [handleAction, playChipStack, soundEnabled],
   );
+
+  // Waktu habis: check bila gratis, selain itu fold
+  const handleHeroTimeout = useCallback(() => {
+    if (!isHeroTurn) return;
+    const canCheck = availableActions.some((a) => a.type === "check");
+    executeAction(canCheck ? "check" : "fold");
+  }, [availableActions, executeAction, isHeroTurn]);
 
   const toCall = useMemo(() => {
     // Hitung kewajiban call terkini untuk pemain utama
@@ -364,20 +369,13 @@ export default function App() {
       }),
     );
 
-    setLeaderboard((prev) => {
-      const bestScore = player?.chips ?? 0;
-      const filtered = prev.filter((entry) => entry.name !== leaderboardLabel);
-      return [
-        ...filtered,
-        {
-          name: leaderboardLabel,
-          score: bestScore,
-          avatar: profile?.avatar || "/assets/others/avatar2.jpg",
-        },
-      ]
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5);
-    });
+    setLeaderboard((prev) =>
+      upsertBestScore(prev, {
+        name: leaderboardLabel,
+        score: player?.chips ?? 0,
+        avatar: profile?.avatar || "/assets/others/avatar2.jpg",
+      }),
+    );
 
     const winnerNames = winners.map((idx) => state.players[idx].name);
     const summary = heroWon
@@ -425,7 +423,7 @@ export default function App() {
       {
         id: Date.now(),
         author: "Dealer",
-        message: "Daily bonus credited!",
+        message: "Daily bonus +250 will be added at the next hand.",
         type: "dealer",
       },
     ]);
@@ -640,6 +638,7 @@ export default function App() {
               pot={pot}
               winners={winners}
               accentColor={profile?.favoriteColor}
+              onHeroTimeout={handleHeroTimeout}
             />
 
             <div className="sticky top-4 z-10">

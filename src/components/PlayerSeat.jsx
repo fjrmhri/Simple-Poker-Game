@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import CardImg from "./CardImg";
 import { getHandName } from "../core/handEvaluator";
 
+export const TURN_SECONDS = 30;
+
 export default function PlayerSeat({
   player,
   community = [],
@@ -14,24 +16,33 @@ export default function PlayerSeat({
   isDealer = false,
   isWinner = false,
   position = "center",
+  onTimeout,
 }) {
   const showFace = isYou || reveal;
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [avatar, setAvatar] = useState(
-    player?.avatar || "/assets/others/dealer.png",
-  );
+  const [timeLeft, setTimeLeft] = useState(TURN_SECONDS);
+  const [uploadedAvatar, setUploadedAvatar] = useState(null);
+  const avatar =
+    uploadedAvatar || player?.avatar || "/assets/others/dealer.png";
 
+  // Reset timer setiap giliran baru, termasuk giliran berturut-turut di street berbeda
   useEffect(() => {
-    if (!isTurn) {
-      setTimeLeft(30);
-      return;
-    }
-    setTimeLeft(30);
+    setTimeLeft(TURN_SECONDS);
+    if (!isTurn) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
-  }, [isTurn]);
+  }, [isTurn, round]);
+
+  useEffect(() => {
+    if (isTurn && timeLeft === 0) onTimeout?.();
+  }, [isTurn, timeLeft, onTimeout]);
+
+  // Lepas object URL lama agar tidak bocor memori
+  useEffect(() => {
+    if (!uploadedAvatar) return;
+    return () => URL.revokeObjectURL(uploadedAvatar);
+  }, [uploadedAvatar]);
 
   if (!player) return null;
 
@@ -44,7 +55,7 @@ export default function PlayerSeat({
     if (!isYou) return;
     const file = event.target.files?.[0];
     if (file) {
-      setAvatar(URL.createObjectURL(file));
+      setUploadedAvatar(URL.createObjectURL(file));
     }
   };
 
@@ -118,7 +129,7 @@ export default function PlayerSeat({
           <div
             className="h-full rounded-full"
             style={{
-              width: `${(timeLeft / 30) * 100}%`,
+              width: `${(timeLeft / TURN_SECONDS) * 100}%`,
               background: accentColor,
             }}
           />

@@ -8,6 +8,7 @@ export default function PokerTable({
   pot,
   winners,
   accentColor = "#facc15",
+  onHeroTimeout,
 }) {
   const {
     players = [],
@@ -70,6 +71,7 @@ export default function PokerTable({
               player={players[0]}
               community={community}
               isYou
+              onTimeout={onHeroTimeout}
               isTurn={
                 0 === currentPlayer &&
                 round !== "Showdown" &&

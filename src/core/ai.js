@@ -43,6 +43,20 @@ function chooseBetAmount(bet, potSize, winRate) {
 }
 
 /**
+ * Kartu yang tidak diketahui oleh pemain: sisa dek ditambah kartu tertutup lawan.
+ * Bot tidak boleh tahu kartu lawan, jadi kartu itu harus tetap bisa muncul di simulasi.
+ * @param {object} state - Current game state.
+ * @param {number} playerIndex - Index of hero player.
+ * @returns {Array} Unknown cards.
+ */
+export function unknownCards(state, playerIndex) {
+  const hidden = state.players.flatMap((p, i) =>
+    i === playerIndex ? [] : p.hand || [],
+  );
+  return [...state.deck, ...hidden];
+}
+
+/**
  * Estimate the win rate of the current hand via Monte Carlo simulation.
  * @param {object} state - Current game state.
  * @param {number} playerIndex - Index of hero player in state.players.
@@ -67,7 +81,7 @@ function estimateWinRate(state, playerIndex, simulations = 200) {
   let ties = 0;
 
   for (let s = 0; s < simulations; s++) {
-    const deck = [...state.deck];
+    const deck = unknownCards(state, playerIndex);
     const community = [...state.community];
     shuffle(deck);
     while (community.length < 5) community.push(deck.pop());
