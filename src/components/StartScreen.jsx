@@ -41,11 +41,11 @@ export default function StartScreen({ onStartGame }) {
 
   if (confirming) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black/80">
+      <div className="fixed inset-0 flex items-center justify-center overflow-y-auto bg-black/80 p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-[360px] rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-white shadow-2xl"
+          className="w-full max-w-[360px] rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-white shadow-2xl"
         >
           <h2 className="text-2xl font-bold">Take your seat?</h2>
           <p className="text-sm text-white/60">
@@ -78,7 +78,7 @@ export default function StartScreen({ onStartGame }) {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 via-black to-slate-900 p-4 text-white">
+    <div className="fixed inset-0 flex items-center justify-center overflow-y-auto bg-gradient-to-br from-slate-900 via-black to-slate-900 p-4 text-white">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

@@ -1,9 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import CardImg from "./CardImg";
 import { getHandName } from "../core/handEvaluator";
 
 export const TURN_SECONDS = 30;
+const SEAT_CARD_WIDTH = "clamp(40px, 11vw, 60px)";
+
+// Timer satu giliran. Di-remount (lewat key) setiap giliran/street baru,
+// sehingga hitungan mulai ulang tanpa perlu reset di dalam efek.
+function TurnTimer({ active, accentColor, onTimeout }) {
+  const [timeLeft, setTimeLeft] = useState(TURN_SECONDS);
+  const onTimeoutRef = useRef(onTimeout);
+  useEffect(() => {
+    onTimeoutRef.current = onTimeout;
+  }, [onTimeout]);
+
+  useEffect(() => {
+    if (!active) return;
+    let remaining = TURN_SECONDS;
+    const timer = setInterval(() => {
+      remaining -= 1;
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(timer);
+        onTimeoutRef.current?.();
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [active]);
+
+  return (
+    <div
+      className={`flex w-full items-center gap-2 text-[11px] text-white/70 ${active ? "" : "invisible"}`}
+      aria-hidden={!active}
+    >
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${(timeLeft / TURN_SECONDS) * 100}%`,
+            background: accentColor,
+          }}
+        />
+      </div>
+      <span>{timeLeft}s</span>
+    </div>
+  );
+}
 
 export default function PlayerSeat({
   player,
@@ -19,24 +62,9 @@ export default function PlayerSeat({
   onTimeout,
 }) {
   const showFace = isYou || reveal;
-  const [timeLeft, setTimeLeft] = useState(TURN_SECONDS);
   const [uploadedAvatar, setUploadedAvatar] = useState(null);
   const avatar =
     uploadedAvatar || player?.avatar || "/assets/others/dealer.png";
-
-  // Reset timer setiap giliran baru, termasuk giliran berturut-turut di street berbeda
-  useEffect(() => {
-    setTimeLeft(TURN_SECONDS);
-    if (!isTurn) return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isTurn, round]);
-
-  useEffect(() => {
-    if (isTurn && timeLeft === 0) onTimeout?.();
-  }, [isTurn, timeLeft, onTimeout]);
 
   // Lepas object URL lama agar tidak bocor memori
   useEffect(() => {
@@ -75,7 +103,7 @@ export default function PlayerSeat({
 
   return (
     <motion.div
-      className={`flex w-[190px] flex-col items-center gap-2 rounded-3xl border bg-black/50 p-3 text-xs text-white shadow-xl backdrop-blur ${seatAlignment} ${isTurn ? "" : "border-white/10"}`}
+      className={`flex w-full max-w-[190px] flex-col items-center gap-2 rounded-3xl border bg-black/50 p-2 text-xs md:w-[190px] md:p-3 text-white shadow-xl backdrop-blur ${seatAlignment} ${isTurn ? "" : "border-white/10"}`}
       style={
         isTurn
           ? { borderColor: accentColor, boxShadow: `0 0 24px ${accentColor}55` }
@@ -137,29 +165,26 @@ export default function PlayerSeat({
       </div>
 
       <div className="flex items-center justify-center gap-2">
-        <CardImg card={showFace ? player.hand?.[0] : { back: true }} w={60} />
-        <CardImg card={showFace ? player.hand?.[1] : { back: true }} w={60} />
+        <CardImg
+          card={showFace ? player.hand?.[0] : { back: true }}
+          w={SEAT_CARD_WIDTH}
+        />
+        <CardImg
+          card={showFace ? player.hand?.[1] : { back: true }}
+          w={SEAT_CARD_WIDTH}
+        />
       </div>
 
       {comboName && (
         <p className="text-center text-[11px] text-emerald-200">{comboName}</p>
       )}
 
-      <div
-        className={`flex w-full items-center gap-2 text-[11px] text-white/70 ${isTurn ? "" : "invisible"}`}
-        aria-hidden={!isTurn}
-      >
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-          <div
-            className="h-full rounded-full"
-            style={{
-              width: `${(timeLeft / TURN_SECONDS) * 100}%`,
-              background: accentColor,
-            }}
-          />
-        </div>
-        <span>{timeLeft}s</span>
-      </div>
+      <TurnTimer
+        key={`${round}-${isTurn}`}
+        active={isTurn}
+        accentColor={accentColor}
+        onTimeout={onTimeout}
+      />
     </motion.div>
   );
 }

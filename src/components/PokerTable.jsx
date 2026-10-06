@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import CardImg, { CardSlot } from "./CardImg";
 import PlayerSeat from "./PlayerSeat";
 
+// Lebar kartu komunitas mengikuti layar agar 5 kartu muat di HP
+const COMMUNITY_CARD_WIDTH = "clamp(40px, 13vw, 80px)";
+
 export default function PokerTable({
   state,
   pot,
@@ -26,9 +29,9 @@ export default function PokerTable({
   const rightOpponents = players.slice(1 + leftOpponents.length);
 
   return (
-    <div className="relative rounded-[70px] border border-white/10 bg-gradient-to-b from-emerald-900/80 via-emerald-950/70 to-black p-5 shadow-2xl">
+    <div className="relative rounded-[36px] border border-white/10 bg-gradient-to-b from-emerald-900/80 via-emerald-950/70 to-black p-3 shadow-2xl md:rounded-[70px] md:p-5">
       <div
-        className="absolute inset-0 rounded-[70px] border border-emerald-300/10"
+        className="absolute inset-0 rounded-[36px] border border-emerald-300/10 md:rounded-[70px]"
         style={{ boxShadow: `inset 0 0 80px rgba(0,0,0,0.7)` }}
       />
       <div className="relative space-y-5">
@@ -52,7 +55,7 @@ export default function PokerTable({
           </motion.div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-2 md:gap-3">
           {[0, 1, 2, 3, 4].map((index) => (
             <motion.div
               key={`${community[index]?.rank ?? "card"}-${index}`}
@@ -61,16 +64,17 @@ export default function PokerTable({
               transition={{ delay: index * 0.08 }}
             >
               {community[index] ? (
-                <CardImg card={community[index]} w={80} />
+                <CardImg card={community[index]} w={COMMUNITY_CARD_WIDTH} />
               ) : (
-                <CardSlot w={80} />
+                <CardSlot w={COMMUNITY_CARD_WIDTH} />
               )}
             </motion.div>
           ))}
         </div>
 
-        <div className="relative min-h-[300px]">
-          <div className="absolute inset-x-0 bottom-0 flex justify-center">
+        {/* HP: grid 2 kolom (lawan di atas, pemain di bawah); md+: posisi absolut */}
+        <div className="grid grid-cols-2 gap-3 md:relative md:block md:min-h-[300px]">
+          <div className="order-last col-span-2 flex justify-center md:absolute md:inset-x-0 md:bottom-0">
             <PlayerSeat
               player={players[0]}
               community={community}
@@ -89,7 +93,7 @@ export default function PokerTable({
             />
           </div>
 
-          <div className="absolute left-0 top-0 flex h-full flex-col justify-between">
+          <div className="flex flex-col gap-3 md:absolute md:left-0 md:top-0 md:h-full md:justify-between">
             {leftOpponents.map((player, index) => {
               const seatIndex = index + 1;
               return (
@@ -113,7 +117,7 @@ export default function PokerTable({
             })}
           </div>
 
-          <div className="absolute right-0 top-0 flex h-full flex-col justify-between items-end">
+          <div className="flex flex-col items-end gap-3 md:absolute md:right-0 md:top-0 md:h-full md:justify-between">
             {rightOpponents.map((player, index) => {
               const seatIndex = index + 1 + leftOpponents.length;
               return (

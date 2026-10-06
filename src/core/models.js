@@ -300,6 +300,9 @@ export default class Game {
         round: "Showdown",
         winners: [],
         endgame: true,
+        handNumber: (prevState?.handNumber ?? 0) + 1,
+        actionSeq: 0,
+        lastEvent: null,
       };
     }
 
@@ -328,6 +331,9 @@ export default class Game {
       round: "Preflop", // Preflop -> Flop -> Turn -> River -> Showdown
       winners: [],
       endgame: false,
+      handNumber: (prevState?.handNumber ?? 0) + 1,
+      actionSeq: 0,
+      lastEvent: null,
     };
     // Blind membuat semua pemain all-in: tidak ada yang bisa beraksi
     if (isBettingLocked(players)) runOutToShowdown(state);
@@ -469,6 +475,16 @@ export default class Game {
       // All-in di bawah raise minimal tidak menaikkan ukuran raise berikutnya
       if (pay - toCallBefore >= minRaise) s.minRaise = pay - toCallBefore;
     }
+
+    // Catat aksi ini sebelum street berganti (lastAction pemain akan direset)
+    s.actionSeq = (s.actionSeq ?? 0) + 1;
+    s.lastEvent = {
+      player: idx,
+      action: p.lastAction,
+      amount: p.lastActionAmount,
+      toAmount: p.bet,
+      allIn: p.chips === 0 && action !== "fold",
+    };
 
     if (countActive(s.players) === 1) {
       s.pot += s.players.reduce((sum, pl) => sum + pl.bet, 0);

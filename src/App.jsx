@@ -1,16 +1,9 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import PokerTable from "./components/PokerTable";
 import ActionBar from "./components/ActionBar";
 import WinnerModal from "./components/WinnerModal";
 import GameOverModal from "./components/GameOverModal";
 import StartScreen from "./components/StartScreen";
-import MobileWarning from "./components/MobileWarning";
 import GameHud from "./components/GameHud";
 import usePokerEngine from "./hooks/usePokerEngine";
 import usePersistentState from "./hooks/usePersistentState";
@@ -20,6 +13,7 @@ import { useCardFlipSound, useHandEndSound } from "./hooks/useGameSounds";
 import { getHandName } from "./core/handEvaluator";
 import { getGameOverState } from "./core/gameOver";
 import { appendLimited, upsertBestScore } from "./core/hud";
+import { describeTransition } from "./core/narration";
 
 const BOT_PROFILES = [
   {
@@ -36,61 +30,6 @@ const BOT_PROFILES = [
   },
 ];
 
-const randomChoice = (options) =>
-  options[Math.floor(Math.random() * options.length)];
-
-const describeCards = (cards = []) =>
-  cards
-    .filter(Boolean)
-    .map((card) => `${card.rank}${card.suit}`)
-    .join(" ");
-
-const actionTemplates = {
-  fold: [
-    (player) => `${player.name} folds and steps aside.`,
-    (player) => `${player.name} lets it go without a fight.`,
-  ],
-  check: [
-    (player) => `${player.name} taps the table to check.`,
-    (player) => `${player.name} checks and keeps the pace slow.`,
-  ],
-  call: [
-    (player) =>
-      `${player.name} calls ${player.lastActionAmount} to stay in the pot.`,
-    (player) => `${player.name} makes the call for ${player.lastActionAmount}.`,
-  ],
-  bet: [
-    (player) => `${player.name} fires a bet of ${player.lastActionAmount}.`,
-    (player) => `${player.name} leads out for ${player.lastActionAmount}.`,
-  ],
-  raise: [
-    (player) => `${player.name} raises to ${player.bet}.`,
-    (player) => `${player.name} bumps it up to ${player.bet}.`,
-  ],
-  allin: [
-    (player) => `${player.name} moves all-in for the rest of their stack!`,
-    (player) => `${player.name} shoves – every last chip is in play.`,
-  ],
-};
-
-const botReplies = {
-  aggressive: [
-    "Pressure's on now.",
-    "Let's see if you can handle the heat.",
-    "Can't let this one go uncontested.",
-  ],
-  passive: [
-    "Sticking around for a peek.",
-    "Keeping it small for now.",
-    "Just checking the vibes.",
-  ],
-  fold: [
-    "Not my fight this time.",
-    "You can have this one.",
-    "No shame in waiting for a better spot.",
-  ],
-};
-
 const createMissions = () => [
   { id: "win-3", label: "Win three hands", goal: 3, progress: 0 },
   { id: "see-flop", label: "See five flops", goal: 5, progress: 0 },
@@ -103,6 +42,26 @@ const initialStats = {
   biggestPot: 0,
   bestHand: "High Card",
 };
+
+const WELCOME_MESSAGES = [
+  {
+    id: "welcome-0",
+    author: "Dealer",
+    message: "Welcome to the Neon Hold'em table!",
+    type: "dealer",
+  },
+  {
+    id: "welcome-1",
+    author: "Lucy",
+    message: "Bots are warmed up. Let's see your skills!",
+    type: "bot",
+  },
+];
+
+const bumpMission = (mission) => ({
+  ...mission,
+  progress: Math.min(mission.goal, mission.progress + 1),
+});
 
 const DAILY_BONUS_KEY = "pokereact.dailyBonus";
 const LEADERBOARD_KEY = "pokereact.leaderboard";
@@ -118,37 +77,13 @@ export default function App() {
   );
   const [leaderboard, setLeaderboard] = usePersistentState(LEADERBOARD_KEY, []);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [chatMessages, setChatMessages] = useState(() => [
-    {
-      id: 0,
-      author: "Dealer",
-      message: "Welcome to the Neon Hold'em table!",
-      type: "dealer",
-    },
-    {
-      id: 1,
-      author: "Lucy",
-      message: "Bots are warmed up. Let's see your skills!",
-      type: "bot",
-    },
-  ]);
+  const [chatMessages, setChatMessages] = useState(WELCOME_MESSAGES);
   const [handHistory, setHandHistory] = useState([]);
-  const [isMobile, setIsMobile] = useState(false);
   const [appError, setAppError] = useState("");
-  const roundRef = useRef(null);
-  const handCounterRef = useRef(0);
 
   const appendChatMessages = useCallback((messages) => {
     if (!messages?.length) return;
     setChatMessages((prev) => appendLimited(prev, messages));
-  }, []);
-
-  useEffect(() => {
-    const checkSize = () =>
-      setIsMobile(window.innerWidth < 768 || window.innerHeight < 600);
-    checkSize();
-    window.addEventListener("resize", checkSize);
-    return () => window.removeEventListener("resize", checkSize);
   }, []);
 
   const playersConfig = useMemo(() => {
@@ -161,6 +96,62 @@ export default function App() {
     return [hero, ...BOT_PROFILES];
   }, [profile]);
 
+  const leaderboardLabel = profile?.name || "You";
+  const profileAvatar = profile?.avatar || "/assets/others/avatar2.jpg";
+
+  // Narasi chat, statistik, misi, dan leaderboard diturunkan dari transisi state
+  // mesin; dipanggil dari event/timer sehingga tidak perlu efek render
+  const handleTransition = useCallback(
+    (prev, next) => {
+      const { messages, handResult } = describeTransition(prev, next, {
+        heroIndex: 0,
+      });
+      if (!prev) setChatMessages([...WELCOME_MESSAGES, ...messages]);
+      else appendChatMessages(messages);
+      if (!handResult) return;
+
+      const { heroWon, heroHand, pot } = handResult;
+      setStats((current) => ({
+        handsPlayed: current.handsPlayed + 1,
+        handsWon: current.handsWon + (heroWon ? 1 : 0),
+        biggestPot: Math.max(current.biggestPot, pot),
+        bestHand: heroWon ? heroHand || current.bestHand : current.bestHand,
+      }));
+      setHandHistory((current) =>
+        [
+          {
+            id: `${Date.now()}-${handResult.handNumber}`,
+            pot,
+            winners: handResult.winners,
+            heroHand,
+            community: handResult.community,
+          },
+          ...current,
+        ].slice(0, 5),
+      );
+      setMissions((current) =>
+        current.map((mission) => {
+          if (mission.id === "win-3" && heroWon) return bumpMission(mission);
+          if (mission.id === "see-flop" && handResult.sawFlop) {
+            return bumpMission(mission);
+          }
+          if (mission.id === "big-pot" && heroWon && pot >= 250) {
+            return bumpMission(mission);
+          }
+          return mission;
+        }),
+      );
+      setLeaderboard((current) =>
+        upsertBestScore(current, {
+          name: leaderboardLabel,
+          score: handResult.heroChips,
+          avatar: profileAvatar,
+        }),
+      );
+    },
+    [appendChatMessages, leaderboardLabel, profileAvatar, setLeaderboard],
+  );
+
   const {
     state,
     pot,
@@ -171,7 +162,7 @@ export default function App() {
     startNewHand,
     resetGame,
     awardChips,
-  } = usePokerEngine(playersConfig);
+  } = usePokerEngine(playersConfig, { onTransition: handleTransition });
 
   const player = state.players?.[0];
   const isHeroTurn = status === "playing" && state.currentPlayer === 0;
@@ -220,17 +211,19 @@ export default function App() {
     executeAction(canCheck ? "check" : "fold");
   }, [availableActions, executeAction, isHeroTurn]);
 
-  const toCall = useMemo(() => {
-    // Hitung kewajiban call terkini untuk pemain utama
-    if (!state.players?.length) return 0;
-    const highest = Math.max(...state.players.map((p) => p.bet));
-    return Math.max(0, highest - (player?.bet ?? 0));
-  }, [state.players, player?.bet]);
+  // Kewajiban call terkini untuk pemain utama
+  const toCall = state.players?.length
+    ? Math.max(
+        0,
+        Math.max(...state.players.map((p) => p.bet)) - (player?.bet ?? 0),
+      )
+    : 0;
 
+  const heroHand = player?.hand;
   const handStrength = useMemo(() => {
-    if (!player?.hand?.length) return "";
-    return getHandName(player.hand, state.community || []);
-  }, [player?.hand, state.community]);
+    if (!heroHand?.length) return "";
+    return getHandName(heroHand, state.community || []);
+  }, [heroHand, state.community]);
 
   const hints = useMemo(() => {
     // Ringkasan rekomendasi aksi agar UI tetap informatif tanpa logika baru
@@ -281,123 +274,6 @@ export default function App() {
     return base;
   }, [availableActions, handStrength, state.currentPlayer, toCall]);
 
-  const leaderboardLabel = profile?.name || "You";
-
-  const buildActionMessage = useCallback((playerState) => {
-    if (!playerState?.lastAction) return null;
-    const allIn = playerState.chips === 0 && playerState.lastAction !== "fold";
-    const templateKey = allIn ? "allin" : playerState.lastAction;
-    const templates = actionTemplates[templateKey];
-    if (!templates?.length) return null;
-    return randomChoice(templates)(playerState);
-  }, []);
-
-  const buildBotReply = useCallback((actionType) => {
-    if (!actionType) return null;
-    const category =
-      actionType === "fold"
-        ? "fold"
-        : ["check", "call"].includes(actionType)
-          ? "passive"
-          : "aggressive";
-    const replies = botReplies[category];
-    return replies ? randomChoice(replies) : null;
-  }, []);
-
-  const showdownSignatureRef = useRef("initial");
-  const lastActionsRef = useRef({});
-  useEffect(() => {
-    // Efek pasca-showdown: catat histori, misi, dan papan skor tanpa mengulang ringkasan yang sama
-    if (!winners.length || status === "playing" || !state.players?.length)
-      return;
-    const signature = `${state.community?.map((c) => `${c.rank}${c.suit}`).join("")}-${state.players
-      .map((p) => p.hand?.map((card) => `${card.rank}${card.suit}`).join(""))
-      .join("|")}`;
-    if (showdownSignatureRef.current === signature) return;
-    showdownSignatureRef.current = signature;
-
-    const heroWon = winners.includes(0);
-    const heroHand = getHandName(player.hand || [], state.community || []);
-
-    setStats((prev) => ({
-      handsPlayed: prev.handsPlayed + 1,
-      handsWon: prev.handsWon + (heroWon ? 1 : 0),
-      biggestPot: Math.max(prev.biggestPot, pot),
-      bestHand: heroWon ? heroHand || prev.bestHand : prev.bestHand,
-    }));
-
-    setHandHistory((prev) =>
-      [
-        {
-          id: signature,
-          pot,
-          winners: winners.map((idx) => state.players[idx].name),
-          heroHand,
-          community: state.community,
-        },
-        ...prev,
-      ].slice(0, 5),
-    );
-
-    setMissions((prev) =>
-      prev.map((mission) => {
-        if (mission.id === "win-3" && heroWon) {
-          return {
-            ...mission,
-            progress: Math.min(mission.goal, mission.progress + 1),
-          };
-        }
-        if (mission.id === "see-flop" && state.community.length >= 3) {
-          return {
-            ...mission,
-            progress: Math.min(mission.goal, mission.progress + 1),
-          };
-        }
-        if (mission.id === "big-pot" && heroWon && pot >= 250) {
-          return {
-            ...mission,
-            progress: Math.min(mission.goal, mission.progress + 1),
-          };
-        }
-        return mission;
-      }),
-    );
-
-    setLeaderboard((prev) =>
-      upsertBestScore(prev, {
-        name: leaderboardLabel,
-        score: player?.chips ?? 0,
-        avatar: profile?.avatar || "/assets/others/avatar2.jpg",
-      }),
-    );
-
-    const winnerNames = winners.map((idx) => state.players[idx].name);
-    const summary = heroWon
-      ? `Pot ${pot} shipped your way with ${heroHand || "solid play"}.`
-      : `${winnerNames.join(", ")} claim the ${pot} pot.`;
-
-    appendChatMessages([
-      {
-        id: signature,
-        author: heroWon ? "Dealer" : winnerNames[0] || "Dealer",
-        message: summary,
-        type: heroWon ? "dealer" : "bot",
-      },
-    ]);
-  }, [
-    winners,
-    status,
-    state.players,
-    state.community,
-    pot,
-    leaderboardLabel,
-    player?.hand,
-    player?.chips,
-    profile?.avatar,
-    appendChatMessages,
-    setLeaderboard,
-  ]);
-
   const now = new Date();
   const lastClaimed = dailyBonusState.lastClaimed
     ? new Date(dailyBonusState.lastClaimed)
@@ -443,8 +319,6 @@ export default function App() {
   };
 
   const handleExit = () => {
-    handCounterRef.current = 0;
-    roundRef.current = null;
     setGameStarted(false);
     setProfile(null);
     setStats(initialStats);
@@ -454,8 +328,6 @@ export default function App() {
   };
 
   const handleRestart = () => {
-    handCounterRef.current = 0;
-    roundRef.current = null;
     resetGame();
     setStats(initialStats);
     setMissions(createMissions());
@@ -478,113 +350,14 @@ export default function App() {
     ]);
   };
 
-  useEffect(() => {
-    if (!state.round) return;
-    const updates = [];
-
-    if (roundRef.current !== state.round) {
-      if (state.round === "Preflop") {
-        handCounterRef.current += 1;
-        updates.push({
-          id: `hand-${handCounterRef.current}`,
-          author: "Dealer",
-          message: `Hand ${handCounterRef.current} begins. Good luck at the felt!`,
-          type: "dealer",
-        });
-      } else if (state.round === "Flop") {
-        updates.push({
-          id: `flop-${Date.now()}`,
-          author: "Dealer",
-          message: `Flop revealed: ${describeCards(state.community.slice(0, 3))}.`,
-          type: "dealer",
-        });
-      } else if (state.round === "Turn") {
-        updates.push({
-          id: `turn-${Date.now()}`,
-          author: "Dealer",
-          message: `Turn card is the ${describeCards([state.community[3]])}.`,
-          type: "dealer",
-        });
-      } else if (state.round === "River") {
-        updates.push({
-          id: `river-${Date.now()}`,
-          author: "Dealer",
-          message: `River lands: ${describeCards([state.community[4]])}.`,
-          type: "dealer",
-        });
-      } else if (state.round === "Showdown") {
-        updates.push({
-          id: `showdown-${Date.now()}`,
-          author: "Dealer",
-          message: "Cards up! Time to see who takes it.",
-          type: "dealer",
-        });
-      }
-
-      roundRef.current = state.round;
-    }
-
-    if (updates.length) {
-      appendChatMessages(updates);
-    }
-  }, [appendChatMessages, state.community, state.round]);
-
-  useEffect(() => {
-    if (!state.players?.length) return;
-    const updates = [];
-    state.players.forEach((p, idx) => {
-      const signature = p.lastAction
-        ? `${p.lastAction}-${p.lastActionAmount}-${p.folded}`
-        : null;
-      const prevSignature = lastActionsRef.current[idx];
-
-      if (signature && signature !== prevSignature) {
-        lastActionsRef.current[idx] = signature;
-        const dealerLine = buildActionMessage(p);
-        if (dealerLine) {
-          updates.push({
-            id: `${Date.now()}-${idx}`,
-            author: "Dealer",
-            message: dealerLine,
-            type: "dealer",
-          });
-        }
-
-        if (idx !== 0) {
-          const reply = buildBotReply(p.lastAction);
-          if (reply && Math.random() > 0.35) {
-            updates.push({
-              id: `${Date.now()}-${idx}-quip`,
-              author: p.name,
-              message: reply,
-              type: "bot",
-            });
-          }
-        }
-      }
-
-      if (!signature) {
-        lastActionsRef.current[idx] = null;
-      }
-    });
-
-    if (updates.length) {
-      appendChatMessages(updates);
-    }
-  }, [appendChatMessages, buildActionMessage, buildBotReply, state.players]);
-
-  if (isMobile) {
-    return <MobileWarning />;
-  }
-
   if (!gameStarted) {
     return <StartScreen onStartGame={handleStartGame} />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
-      <div className="mx-auto max-w-7xl px-4 py-4 space-y-5">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-4 shadow-xl">
+      <div className="mx-auto max-w-7xl space-y-5 px-4 py-4">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 px-4 py-4 shadow-xl md:px-6">
           <div>
             <p className="text-sm uppercase tracking-widest text-white/60">
               Neon Hold'em
@@ -623,15 +396,17 @@ export default function App() {
           </div>
         </header>
 
-        <main className="grid items-start gap-4 lg:grid-cols-[280px_minmax(0,1fr)_280px]">
+        {/* HP: meja, statistik, chat; lg: meja + sidebar; xl: tiga kolom */}
+        <main className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[280px_minmax(0,1fr)_280px]">
           <GameHud
             variant="left"
+            className="order-3 lg:order-none lg:col-start-2 lg:row-start-2 xl:col-start-1 xl:row-start-1"
             leaderboard={leaderboard}
             chatMessages={chatMessages}
             onSendReaction={sendReaction}
           />
 
-          <section className="space-y-4">
+          <section className="order-1 space-y-4 lg:order-none lg:col-start-1 lg:row-span-2 lg:row-start-1 xl:col-start-2 xl:row-span-1">
             <PokerTable
               state={state}
               pot={pot}
@@ -683,6 +458,7 @@ export default function App() {
           </section>
 
           <GameHud
+            className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 xl:col-start-3"
             stats={stats}
             missions={missions}
             leaderboard={leaderboard}
@@ -691,37 +467,37 @@ export default function App() {
           />
         </main>
 
-      <footer className="flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70 shadow-xl">
-        <a
-          href="https://github.com/fjrmhri"
-          target="_blank"
-          rel="noreferrer"
+        <footer className="flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70 shadow-xl">
+          <a
+            href="https://github.com/fjrmhri"
+            target="_blank"
+            rel="noreferrer"
             className="flex items-center gap-2 transition hover:text-yellow-300"
           >
             <span className="font-semibold text-white/90">github.com</span>
-          <span className="text-white/80">/fjrmhri</span>
-        </a>
-      </footer>
-    </div>
-
-    {appError && (
-      <div className="fixed bottom-4 right-4 z-50 max-w-md rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 shadow-xl backdrop-blur">
-        <div className="flex items-start justify-between gap-3">
-          <p>{appError}</p>
-          <button
-            type="button"
-            onClick={() => setAppError("")}
-            className="rounded-lg border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white"
-          >
-            Tutup
-          </button>
-        </div>
+            <span className="text-white/80">/fjrmhri</span>
+          </a>
+        </footer>
       </div>
-    )}
 
-    {status !== "playing" &&
-      winners.length > 0 &&
-      !playerOutOfChips &&
+      {appError && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-md rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 shadow-xl backdrop-blur">
+          <div className="flex items-start justify-between gap-3">
+            <p>{appError}</p>
+            <button
+              type="button"
+              onClick={() => setAppError("")}
+              className="rounded-lg border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
+      {status !== "playing" &&
+        winners.length > 0 &&
+        !playerOutOfChips &&
         !playerWonGame && (
           <WinnerModal
             winners={winners.map((idx) => state.players[idx].name)}

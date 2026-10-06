@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 export default function ActionBar({
   actions = [],
@@ -13,23 +13,21 @@ export default function ActionBar({
   const foldAction = actions.find((a) => a.type === "fold");
 
   const [amount, setAmount] = useState(betAction?.min ?? 10);
-
-  useEffect(() => {
-    if (betAction) {
-      setAmount((prev) =>
-        Math.min(Math.max(prev, betAction.min), betAction.max),
-      );
-    }
-  }, [betAction]);
+  // Teks mentah selama input angka sedang diketik; null = tampilkan nilai efektif
+  const [draft, setDraft] = useState(null);
 
   const sliderRange = useMemo(() => {
     if (!betAction) return { min: 0, max: 0 };
     return { min: betAction.min, max: Math.max(betAction.min, betAction.max) };
   }, [betAction]);
 
-  const formattedAmount = Number.isFinite(amount)
-    ? amount
-    : (betAction?.min ?? 0);
+  // Nilai efektif selalu dibatasi ke rentang aksi saat ini (dihitung saat render)
+  const formattedAmount = betAction
+    ? Math.min(
+        Math.max(Number.isFinite(amount) ? amount : 0, betAction.min),
+        betAction.max,
+      )
+    : 0;
 
   const quickAmounts = useMemo(() => {
     if (!betAction) return [];
@@ -63,7 +61,7 @@ export default function ActionBar({
       : "Check / Call";
 
   const buttonBase =
-    "min-w-[120px] rounded-full px-5 py-2 text-sm font-semibold shadow transition disabled:cursor-not-allowed";
+    "flex-1 rounded-full md:min-w-[120px] md:flex-none px-5 py-2 text-sm font-semibold shadow transition disabled:cursor-not-allowed";
 
   return (
     <div className="rounded-3xl border border-white/10 bg-black/40 p-4 shadow-2xl backdrop-blur">
@@ -83,7 +81,7 @@ export default function ActionBar({
                 : "Waiting for the next hand…"}
           </p>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex w-full shrink-0 gap-2 md:w-auto">
           <button
             type="button"
             onClick={() => onAction("fold")}
@@ -128,16 +126,16 @@ export default function ActionBar({
               aria-label="Jumlah bet atau raise"
               min={sliderRange.min}
               max={sliderRange.max}
-              value={formattedAmount}
-              onChange={(event) => setAmount(Number(event.target.value))}
-              onBlur={() =>
-                setAmount((prev) =>
-                  Math.min(
-                    Math.max(Number(prev) || 0, sliderRange.min),
-                    sliderRange.max,
-                  ),
-                )
-              }
+              value={draft ?? formattedAmount}
+              onFocus={() => setDraft(String(formattedAmount))}
+              onChange={(event) => {
+                setDraft(event.target.value);
+                setAmount(Number(event.target.value));
+              }}
+              onBlur={() => {
+                setDraft(null);
+                setAmount(formattedAmount);
+              }}
               className="w-24 rounded-2xl border border-white/10 bg-black/40 px-2 py-1 text-right text-sm"
             />
           </div>

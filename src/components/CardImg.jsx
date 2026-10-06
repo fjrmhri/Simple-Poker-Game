@@ -20,7 +20,7 @@ export default function CardImg({ card, w = 72 }) {
       style={{
         width: w,
         height: "auto",
-        borderRadius: 18,
+        borderRadius: "clamp(8px, 22%, 18px)",
         border: "2px solid rgba(255,255,255,0.6)",
         boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
         background:
@@ -36,8 +36,12 @@ export function CardSlot({ w = 72 }) {
   return (
     <div
       aria-hidden="true"
-      className="rounded-[18px] border-2 border-dashed border-white/15 bg-white/[0.03]"
-      style={{ width: w, aspectRatio: "35 / 47" }}
+      className="border-2 border-dashed border-white/15 bg-white/[0.03]"
+      style={{
+        width: w,
+        aspectRatio: "35 / 47",
+        borderRadius: "clamp(8px, 22%, 18px)",
+      }}
     />
   );
 }

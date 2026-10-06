@@ -10,6 +10,7 @@ export default function GameHud({
   chatMessages,
   onSendReaction,
   variant = "right",
+  className = "",
 }) {
   const safeStats = stats || {
     handsPlayed: 0,
@@ -32,7 +33,7 @@ export default function GameHud({
 
   if (variant === "left") {
     return (
-      <aside className="space-y-4 self-start">
+      <aside className={`space-y-4 self-start ${className}`}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -132,7 +133,7 @@ export default function GameHud({
   }
 
   return (
-    <aside className="space-y-4 self-start">
+    <aside className={`space-y-4 self-start ${className}`}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
