@@ -9,7 +9,7 @@ export default function useTone({
   const contextRef = useRef(null);
 
   return useCallback(() => {
-    if (process.env.NODE_ENV === "test") return;
+    if (import.meta.env.MODE === "test") return;
     if (typeof window === "undefined") return;
 
     const AudioContext = window.AudioContext || window.webkitAudioContext;

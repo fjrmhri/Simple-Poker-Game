@@ -7,8 +7,8 @@ const BOT_FIRST = [{ name: "Bot", isBot: true }, { name: "Hero" }];
 const HERO_FIRST = [{ name: "Hero" }, { name: "Bot", isBot: true }];
 
 describe("usePokerEngine.handleAction", () => {
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
 
   it("mengabaikan aksi pemain saat giliran bot", () => {
     const { result, unmount } = renderHook(() => usePokerEngine(BOT_FIRST));
@@ -35,14 +35,14 @@ describe("usePokerEngine.handleAction", () => {
 });
 
 describe("usePokerEngine lainnya", () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => vi.useFakeTimers());
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it("hanya membagikan satu tangan saat mount", () => {
-    const spy = jest.spyOn(Game.prototype, "start");
+    const spy = vi.spyOn(Game.prototype, "start");
     const { unmount } = renderHook(() => usePokerEngine(HERO_FIRST));
     expect(spy).toHaveBeenCalledTimes(1);
     unmount();

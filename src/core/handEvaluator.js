@@ -66,8 +66,8 @@ function handRank(cards) {
     return null;
   })();
 
-  let rankValue = 0;
-  let kickers = [];
+  let rankValue;
+  let kickers;
 
   if (isStraight && isFlush) {
     rankValue = 8;

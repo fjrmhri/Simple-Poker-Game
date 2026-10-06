@@ -14,16 +14,16 @@ const player = {
 };
 
 describe("PlayerSeat timer", () => {
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
 
   const tick = (seconds) =>
     act(() => {
-      jest.advanceTimersByTime(seconds * 1000);
+      vi.advanceTimersByTime(seconds * 1000);
     });
 
   it("memanggil onTimeout sekali saat waktu habis", () => {
-    const onTimeout = jest.fn();
+    const onTimeout = vi.fn();
     render(
       <PlayerSeat
         player={player}
@@ -40,7 +40,7 @@ describe("PlayerSeat timer", () => {
   });
 
   it("tidak berjalan bila bukan giliran", () => {
-    const onTimeout = jest.fn();
+    const onTimeout = vi.fn();
     render(
       <PlayerSeat player={player} isYou round="Flop" onTimeout={onTimeout} />,
     );
@@ -49,7 +49,7 @@ describe("PlayerSeat timer", () => {
   });
 
   it("direset saat street berganti walau giliran tetap", () => {
-    const onTimeout = jest.fn();
+    const onTimeout = vi.fn();
     const { rerender } = render(
       <PlayerSeat
         player={player}

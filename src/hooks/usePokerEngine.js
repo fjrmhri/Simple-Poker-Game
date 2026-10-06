@@ -17,7 +17,6 @@ export default function usePokerEngine(initialPlayers) {
 
   // state game
   const [state, setState] = useState(() => game.start());
-  const [availableActions, setAvailableActions] = useState([]);
 
   // reinitialize game and state when player configuration changes
   // (dilewati saat mount karena state awal sudah dibuat di atas)
@@ -35,10 +34,7 @@ export default function usePokerEngine(initialPlayers) {
   const status = useMemo(() => game.checkGameStatus(state), [state, game]);
   const winners = useMemo(() => game.checkWinners(state), [state, game]);
 
-  // update actions saat state berubah
-  useEffect(() => {
-    setAvailableActions(game.actions(state));
-  }, [state, game]);
+  const availableActions = useMemo(() => game.actions(state), [state, game]);
 
   // bot jalan kalau gilirannya bot
   useEffect(() => {

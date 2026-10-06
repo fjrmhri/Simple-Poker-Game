@@ -276,7 +276,7 @@ export default class Game {
   start(prevState = null) {
     const deck = makeDeck();
     let players;
-    let dealerIndex = this.dealerIndex;
+    let dealerIndex;
 
     if (!prevState) {
       players = this.templatePlayers.map((p) => buildPlayer(p, deck));
