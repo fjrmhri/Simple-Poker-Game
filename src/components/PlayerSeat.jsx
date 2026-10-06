@@ -4,7 +4,8 @@ import CardImg from "./CardImg";
 import { getHandName } from "../core/handEvaluator";
 
 export const TURN_SECONDS = 30;
-const SEAT_CARD_WIDTH = "clamp(40px, 11vw, 60px)";
+// Relatif terhadap lebar meja (container terdekat)
+const SEAT_CARD_WIDTH = "clamp(36px, 10cqw, 60px)";
 
 // Timer satu giliran. Di-remount (lewat key) setiap giliran/street baru,
 // sehingga hitungan mulai ulang tanpa perlu reset di dalam efek.
@@ -103,7 +104,7 @@ export default function PlayerSeat({
 
   return (
     <motion.div
-      className={`flex w-full max-w-[190px] flex-col items-center gap-2 rounded-3xl border bg-black/50 p-2 text-xs md:w-[190px] md:p-3 text-white shadow-xl backdrop-blur ${seatAlignment} ${isTurn ? "" : "border-white/10"}`}
+      className={`flex w-full max-w-[190px] flex-col items-center gap-2 rounded-3xl border bg-black/50 p-2 text-xs @[600px]:w-[190px] @[600px]:p-3 text-white shadow-xl backdrop-blur ${seatAlignment} ${isTurn ? "" : "border-white/10"}`}
       style={
         isTurn
           ? { borderColor: accentColor, boxShadow: `0 0 24px ${accentColor}55` }

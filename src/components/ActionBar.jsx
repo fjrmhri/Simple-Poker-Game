@@ -61,11 +61,11 @@ export default function ActionBar({
       : "Check / Call";
 
   const buttonBase =
-    "flex-1 rounded-full md:min-w-[120px] md:flex-none px-5 py-2 text-sm font-semibold shadow transition disabled:cursor-not-allowed";
+    "flex-1 rounded-full @[520px]:min-w-[120px] @[520px]:flex-none px-5 py-2 text-sm font-semibold shadow transition disabled:cursor-not-allowed";
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/40 p-4 shadow-2xl backdrop-blur">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div className="@container rounded-3xl border border-white/10 bg-black/40 p-4 shadow-2xl backdrop-blur">
+      <div className="flex flex-col gap-3 @[520px]:flex-row @[520px]:items-center @[520px]:justify-between">
         <div className="min-w-0 space-y-1">
           <p className="text-xs uppercase tracking-widest text-white/60">
             Action console
@@ -81,7 +81,7 @@ export default function ActionBar({
                 : "Waiting for the next hand…"}
           </p>
         </div>
-        <div className="flex w-full shrink-0 gap-2 md:w-auto">
+        <div className="flex w-full shrink-0 gap-2 @[520px]:w-auto">
           <button
             type="button"
             onClick={() => onAction("fold")}
@@ -111,7 +111,7 @@ export default function ActionBar({
 
       {betAction && (
         <div className="mt-4 space-y-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-2 @[420px]:flex-row @[420px]:items-center">
             <input
               type="range"
               aria-label="Jumlah bet atau raise"

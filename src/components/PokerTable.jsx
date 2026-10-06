@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import CardImg, { CardSlot } from "./CardImg";
 import PlayerSeat from "./PlayerSeat";
 
-// Lebar kartu komunitas mengikuti layar agar 5 kartu muat di HP
-const COMMUNITY_CARD_WIDTH = "clamp(40px, 13vw, 80px)";
+// Lebar kartu komunitas relatif terhadap lebar meja (cqw) agar 5 kartu selalu muat
+const COMMUNITY_CARD_WIDTH = "clamp(36px, 14cqw, 80px)";
 
 export default function PokerTable({
   state,
@@ -29,7 +29,7 @@ export default function PokerTable({
   const rightOpponents = players.slice(1 + leftOpponents.length);
 
   return (
-    <div className="relative rounded-[36px] border border-white/10 bg-gradient-to-b from-emerald-900/80 via-emerald-950/70 to-black p-3 shadow-2xl md:rounded-[70px] md:p-5">
+    <div className="@container relative rounded-[36px] border border-white/10 bg-gradient-to-b from-emerald-900/80 via-emerald-950/70 to-black p-3 shadow-2xl md:rounded-[70px] md:p-5">
       <div
         className="absolute inset-0 rounded-[36px] border border-emerald-300/10 md:rounded-[70px]"
         style={{ boxShadow: `inset 0 0 80px rgba(0,0,0,0.7)` }}
@@ -72,9 +72,9 @@ export default function PokerTable({
           ))}
         </div>
 
-        {/* HP: grid 2 kolom (lawan di atas, pemain di bawah); md+: posisi absolut */}
-        <div className="grid grid-cols-2 gap-3 md:relative md:block md:min-h-[300px]">
-          <div className="order-last col-span-2 flex justify-center md:absolute md:inset-x-0 md:bottom-0">
+        {/* Meja sempit: grid 2 kolom (lawan di atas, pemain di bawah); meja ≥600px: posisi absolut */}
+        <div className="grid grid-cols-2 gap-3 @[600px]:relative @[600px]:block @[600px]:min-h-[300px]">
+          <div className="order-last col-span-2 flex justify-center @[600px]:absolute @[600px]:inset-x-0 @[600px]:bottom-0">
             <PlayerSeat
               player={players[0]}
               community={community}
@@ -93,7 +93,7 @@ export default function PokerTable({
             />
           </div>
 
-          <div className="flex flex-col gap-3 md:absolute md:left-0 md:top-0 md:h-full md:justify-between">
+          <div className="flex flex-col gap-3 @[600px]:absolute @[600px]:left-0 @[600px]:top-0 @[600px]:h-full @[600px]:justify-between">
             {leftOpponents.map((player, index) => {
               const seatIndex = index + 1;
               return (
@@ -117,7 +117,7 @@ export default function PokerTable({
             })}
           </div>
 
-          <div className="flex flex-col items-end gap-3 md:absolute md:right-0 md:top-0 md:h-full md:justify-between">
+          <div className="flex flex-col items-end gap-3 @[600px]:absolute @[600px]:right-0 @[600px]:top-0 @[600px]:h-full @[600px]:justify-between">
             {rightOpponents.map((player, index) => {
               const seatIndex = index + 1 + leftOpponents.length;
               return (
