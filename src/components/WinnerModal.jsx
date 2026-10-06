@@ -14,8 +14,11 @@ export default function WinnerModal({ winners, onRestart }) {
         </p>
         <h2 className="mt-2 text-3xl font-black text-yellow-300">Winner</h2>
         <ul className="mt-4 space-y-1 text-lg">
-          {winners.map((winner) => (
-            <li key={winner} className="font-semibold text-emerald-200">
+          {winners.map((winner, index) => (
+            <li
+              key={`${winner}-${index}`}
+              className="font-semibold text-emerald-200"
+            >
               {winner}
             </li>
           ))}

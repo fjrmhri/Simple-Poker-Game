@@ -16,6 +16,7 @@ import usePokerEngine from "./hooks/usePokerEngine";
 import usePersistentState from "./hooks/usePersistentState";
 import useSound from "./hooks/useSound";
 import useTone from "./hooks/useTone";
+import { useCardFlipSound, useHandEndSound } from "./hooks/useGameSounds";
 import { getHandName } from "./core/handEvaluator";
 import { getGameOverState } from "./core/gameOver";
 import { appendLimited, upsertBestScore } from "./core/hud";
@@ -189,25 +190,8 @@ export default function App() {
     volume: 0.12,
   });
 
-  useEffect(() => {
-    if (!soundEnabled || winners.length === 0) return;
-    if (status !== "playing") {
-      playWinnerSound();
-    }
-  }, [winners, status, playWinnerSound, soundEnabled]);
-
-  const prevCommunityRef = useRef(0);
-  useEffect(() => {
-    const communityLength = state.community?.length ?? 0;
-    if (!soundEnabled) {
-      prevCommunityRef.current = communityLength;
-      return;
-    }
-    if (communityLength > prevCommunityRef.current) {
-      playCardFlip();
-      prevCommunityRef.current = communityLength;
-    }
-  }, [state.community, soundEnabled, playCardFlip]);
+  useHandEndSound(status, winners.length > 0, soundEnabled, playWinnerSound);
+  useCardFlipSound(state.community?.length ?? 0, soundEnabled, playCardFlip);
 
   const executeAction = useCallback(
     (action, amount) => {
