@@ -21,9 +21,6 @@ export default [
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
       "no-unused-vars": ["error", { varsIgnorePattern: "^([A-Z_]|motion$)" }],
-      // Aturan React Compiler: masih ada efek UI lama yang perlu dirombak bertahap
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/preserve-manual-memoization": "warn",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },

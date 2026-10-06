@@ -47,4 +47,24 @@ describe("ActionBar", () => {
     expect(screen.getByText("Carl is deciding…")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Fold" })).toBeDisabled();
   });
+
+  it("tidak memotong angka saat diketik, lalu membatasi saat fokus lepas", () => {
+    const onAction = vi.fn();
+    render(<ActionBar actions={raiseActions} onAction={onAction} />);
+    const input = screen.getByRole("spinbutton");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "2" } });
+    expect(input).toHaveValue(2);
+    fireEvent.change(input, { target: { value: "250" } });
+    expect(input).toHaveValue(250);
+    fireEvent.blur(input);
+    expect(input).toHaveValue(250);
+
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "5" } });
+    fireEvent.blur(input);
+    expect(input).toHaveValue(100);
+    fireEvent.click(screen.getByRole("button", { name: "Raise to 200" }));
+    expect(onAction).toHaveBeenCalledWith("bet", 100);
+  });
 });
